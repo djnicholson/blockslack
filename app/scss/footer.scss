@@ -1,0 +1,5 @@
+.-footer {
+    @extend .-dark-purple-light;
+    color: $color-dark-purple;
+    border-top: $section-border-width solid $color-dark-purple-sub;
+}

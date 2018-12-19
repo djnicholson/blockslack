@@ -1,11 +1,13 @@
 a {
-    color: $color-dark-purple;
+    color: $color-red;
 }
 
 a:hover {
-    color: $color-dark-purple;
+    color: $color-red;
 }
 
 .-small {
     font-size: 0.9em;
 }
+
+$section-border-width: 3px;
