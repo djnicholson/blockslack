@@ -1,0 +1,10 @@
+{
+  "name": "blockslack",
+  "start_url": "https://blockslack.io/",
+  "description": "A decentralized group communication tool",
+  "icons": [{
+    "src": "https://blockslack.io/logo-192x192.png",
+    "sizes": "192x192",
+    "type": "image/png"
+  }]
+}

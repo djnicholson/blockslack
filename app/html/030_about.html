@@ -1,0 +1,29 @@
+<div class="row align-items-center p-5 -only-when-signed-out -orange" style="display: none">
+    <div class="col text-center">
+        <h1 class="display-3 p-5">A decentralized group communication tool</h1>
+        <h1 class="display-5 p-5">Chat for small teams &mdash; encrypted and decentralized</h1>
+        <div class="p-5">
+            <div class="h4">
+                <div class="p-3">
+                    <em>blockslack</em> is built on Blockstack and powered by the Bitcoin Blockchain.
+                </div>
+                <div class="p-3">
+                    <button 
+                        type="button" 
+                        class="btn p-3 -dark-purple" 
+                        onclick="blockslack.authentication.signIn()">
+                        Sign in with Blockstack
+                    </button>
+                </div>
+            </div>
+            <div class="h5 p-4">
+                <div class="p-1">
+                    Don't have a Blockstack account yet? No problem! 
+                </div>
+                <div class="p-1">
+                    <a onclick="blockslack.authentication.signIn()" href="#">Create one here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
