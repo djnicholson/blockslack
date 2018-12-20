@@ -2,6 +2,8 @@ blockslack.authentication = (function(blockstack){
     
     // privates:
 
+    var REQUIRED_PERMISSIONS = ["store_write", "publish_data"];
+
     var currentUserState = { };
 
     var postHandlePendingSignIn = function (newUserData) {
@@ -43,7 +45,11 @@ blockslack.authentication = (function(blockstack){
 
         signIn: function() {
             currentUserState = { };
-            blockstack.redirectToSignIn();
+            var origin = window.location.origin;
+            blockstack.redirectToSignIn(
+                origin,
+                origin + "/manifest.json",
+                REQUIRED_PERMISSIONS);
         },
 
         signOut: function() {
