@@ -19,6 +19,8 @@ blockslack.authentication = (function(blockstack){
             $(".-only-when-signed-in").hide();
             $(".-only-when-signed-out").show();
         }
+
+        blockslack.groups.initialize();
     };
 
     // initialization:

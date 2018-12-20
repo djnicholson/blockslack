@@ -2,7 +2,15 @@
     <div>
         <img src="logo-192x192.png" alt="blockslack" title="blockslack" />
     </div>
-    <div class="-group-button -only-when-signed-in">
+    <div class="-group-buttons">
+
+    </div>
+    <div class="-group-button -only-when-signed-in" onclick="blockslack.groups.addGroup()">
         +
     </div>
 </div>
+
+<script id="template-groupButton" type="text/x-template">
+    <div class="-group-button -only-when-signed-in">
+    </div>
+</script>
