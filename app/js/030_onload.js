@@ -16,6 +16,7 @@ blockslack.onload = (function(){
         go: function() {
 
             blockslack.authentication.initialize();
+            $('[data-toggle="tooltip"]').tooltip();
             
         },
 

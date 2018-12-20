@@ -35,7 +35,9 @@ blockslack.groups = (function(){
         var buttonElement = $($("#template-groupButton").html());
         buttonElement.text(groupData[1].charAt(0).toUpperCase());
         buttonElement.click(function(){ switchGroup(groupData[0], groupData[1]); });
+        buttonElement.attr("title", groupData[1]);
         buttonListElement.append(buttonElement);
+        buttonElement.tooltip();
     };
 
     var switchGroup = function(newGroupId, newGroupName) {

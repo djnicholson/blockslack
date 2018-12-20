@@ -5,12 +5,20 @@
     <div class="-group-buttons">
 
     </div>
-    <div class="-group-button -only-when-signed-in" onclick="blockslack.groups.addGroup()">
+    <div 
+        class="-group-button -only-when-signed-in" 
+        onclick="blockslack.groups.addGroup()"
+        data-toggle="tooltip"
+        data-placement="right"
+        title="Create a new group">
         +
     </div>
 </div>
 
 <script id="template-groupButton" type="text/x-template">
-    <div class="-group-button -only-when-signed-in">
+    <div 
+        class="-group-button -only-when-signed-in"
+        data-toggle="tooltip"
+        data-placement="right">
     </div>
 </script>
