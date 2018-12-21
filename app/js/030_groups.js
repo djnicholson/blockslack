@@ -16,6 +16,10 @@ blockslack.groups = (function(){
         var allGroups = JSON.parse(fileContents) || [];
         blockslack.authentication.state(ALL_GROUPS_DATA_KEY, allGroups);
         renderGroupButtons();
+        if (allGroups[0]) {
+            // TODO: Remember last used group, and switch to that (instead of just picking the first group)
+            switchGroup(allGroups[0][0], allGroups[0][1]);
+        }
     };
 
     var renderGroupButtons = function() {
@@ -41,7 +45,10 @@ blockslack.groups = (function(){
     };
 
     var switchGroup = function(newGroupId, newGroupName) {
-        alert("TODO: Switch to group: " + newGroupName);
+        $(".-current-group-name").text(newGroupName);
+        //
+        // TODO: Start chatstream
+        //
     };
 
     // initialization:

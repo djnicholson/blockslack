@@ -20,6 +20,7 @@ blockslack.authentication = (function(blockstack){
             $(".-only-when-signed-out").show();
         }
 
+        blockslack.keys.initialize();
         blockslack.groups.initialize();
     };
 
