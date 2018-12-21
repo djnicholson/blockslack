@@ -70,11 +70,6 @@ blockslack.keys = (function(){
         }
     };
 
-    // initialization:
-    // (don't depend on other packages, order of package initialization is not guaranteed)
-    // foo = 1;
-    // bar = 2;
-
     return {
 
         // publics:
@@ -121,7 +116,7 @@ blockslack.keys = (function(){
             withMasterPrivateKey(function(masterPrivateKey) { 
                 var derivation = masterPrivateKey + "/" + audienceClone.join();
                 var key = sha256(derivation);
-                var id = sha256(key);
+                var id = sha256(key).substring(0, 10);
                 ensureSymmetricKeyPublished(id, key, audienceClone);
                 action({ id: id, key: key });
             });
