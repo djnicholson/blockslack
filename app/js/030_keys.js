@@ -35,7 +35,10 @@ blockslack.keys = (function(){
 
     var withMasterPrivateKey = function(action) {
         var masterKey = blockslack.authentication.state("masterKey");
-        if (masterKey) {
+        if (!blockslack.authentication.isSignedIn()) {
+            console.log("Warning: Attempting to retrieve master private key when not signed in");
+            action(null);
+        } else if (masterKey) {
             action(masterKey);
         } else {
             blockstack.getFile(MASTER_PRIVATE_KEY_FILE).then(function(existingMasterKey) {
@@ -76,12 +79,14 @@ blockslack.keys = (function(){
         
         initialize: function() {
             withMasterPrivateKey(function(masterPrivateKey) { 
-                var publicKey = blockstack.getPublicKeyFromPrivate(masterPrivateKey);
-                console.log("My public key: " + publicKey);
-                blockstack.putFile(
-                    MASTER_PUBLIC_KEY_FILE,
-                    publicKey,
-                    { encrypt: false }); 
+                if (masterPrivateKey) {
+                    var publicKey = blockstack.getPublicKeyFromPrivate(masterPrivateKey);
+                    console.log("My public key: " + publicKey);
+                    blockstack.putFile(
+                        MASTER_PUBLIC_KEY_FILE,
+                        publicKey,
+                        { encrypt: false }); 
+                }
             });
         },
 
@@ -114,11 +119,15 @@ blockslack.keys = (function(){
             var audienceClone = audience.slice();
             audienceClone.sort(function(a, b){ return a[1] > b[1] ? 1 : -1; });
             withMasterPrivateKey(function(masterPrivateKey) { 
-                var derivation = masterPrivateKey + "/" + audienceClone.join();
-                var key = sha256(derivation);
-                var id = sha256(key).substring(0, 10);
-                ensureSymmetricKeyPublished(id, key, audienceClone);
-                action({ id: id, key: key });
+                if (masterPrivateKey) {
+                    var derivation = masterPrivateKey + "/" + audienceClone.join();
+                    var key = sha256(derivation);
+                    var id = sha256(key).substring(0, 10);
+                    ensureSymmetricKeyPublished(id, key, audienceClone);
+                    action({ id: id, key: key });
+                } else {
+                    action(null);
+                }
             });
         },
 
