@@ -9,15 +9,19 @@ blockslack.keys = (function(){
     var publicKeyCache = {};
 
     var ensureSymmetricKeyPublished = function(symmetricKeyId, symmetricKey, audience) {
+        var publishedSuccessfully = blockslack.authentication.state("publishedSuccessfully") || {};
+        blockslack.authentication.state("publishedSuccessfully", publishedSuccessfully);
         for (var i = 0; i < audience.length; i++) {
             withPublicKeyForUser(audience[i], function(recipient, publicKey) {
                 if (publicKey) {
                     var filename = symmetricKeyFilename(recipient, symmetricKeyId);
-                    console.log("Publishing key " + symmetricKeyId + " for " + recipient + " to " + filename + " (encrypted with public key: " + publicKey + ")");
-                    blockstack.putFile(
-                        filename,
-                        blockstack.encryptContent(symmetricKey, { publicKey: publicKey }),
-                        { encrypt: false });
+                    if (!publishedSuccessfully[filename]) {
+                        console.log("Publishing key " + symmetricKeyId + " for " + recipient + " to " + filename + " (encrypted with public key: " + publicKey + ")");
+                        var content = blockstack.encryptContent(symmetricKey, { publicKey: publicKey });
+                        blockstack.putFile(filename, content, { encrypt: false }).then(function(){ 
+                            publishedSuccessfully[filename] = true; 
+                        });
+                    }
                 } else {
                     console.log(recipient + " does not have a public key, not publishing symmetric key for them");
                 }
