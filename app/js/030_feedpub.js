@@ -88,6 +88,17 @@ blockslack.feedpub = (function(){
             });
         },
 
+        read: function(userId, keyId, action) {
+            blockslack.keys.withSymmetricKeyFromUser(userId, keyId, function(key) {
+                var rootFilename = feedFilename(keyId, 0);
+                var getFileOptions = { decrypt: false, username: userId };
+                blockstack.getFile(rootFilename, getFileOptions).then(function(cipherText) {
+                    var feedRoot = parseExistingFeedRootOrCreateNew(cipherText, key);
+                    action(feedRoot);
+                });
+            });
+        },
+
     };
 
 })();
