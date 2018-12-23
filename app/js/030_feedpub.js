@@ -5,7 +5,7 @@ blockslack.feedpub = (function(){
     var DONT_ENCRYPT = { encrypt: false };
     var DONT_DECRYPT = { decrypt: false };
 
-    var FEED_FILE_FORMAT = "feeds/%1_%2.json";
+    var FEED_FILE_FORMAT = "feeds/feed_%1_%2.json";
 
     var MAX_CHUNK_SIZE = 10000; // (in JSON characters)
 
@@ -13,20 +13,21 @@ blockslack.feedpub = (function(){
         return FEED_FILE_FORMAT.replace("%1", keyId).replace("%2", timestamp);
     };
 
-    var newFeedObject = function(nextFilename) {
+    var newFeedObject = function(audience, nextFilename) {
         return {
+            audience: audience,
             messages: [],
             next: nextFilename,
         };
     };
 
-    var parseExistingFeedRootOrCreateNew = function(existingFeedCipherText, key) {
+    var parseExistingFeedRootOrCreateNew = function(audience, existingFeedCipherText, key) {
         var existingFeedText = undefined;
         if (existingFeedCipherText) {
             existingFeedText = sjcl.decrypt(key, existingFeedCipherText);
         }
 
-        var existingFeed = existingFeedText ? JSON.parse(existingFeedText) : newFeedObject(undefined);
+        var existingFeed = existingFeedText ? JSON.parse(existingFeedText) : newFeedObject(audience, undefined);
         return existingFeed;
     };
 
@@ -39,9 +40,9 @@ blockslack.feedpub = (function(){
             });
     };
 
-    var publishWithRotation = function(keyId, key, rootFilename, latestFeedChunkCipherText) {
+    var publishWithRotation = function(audience, keyId, key, rootFilename, latestFeedChunkCipherText) {
         var nextFilename = feedFilename(keyId, (new Date).getTime());
-        var newRootFeed = newFeedObject(nextFilename);
+        var newRootFeed = newFeedObject(audience, nextFilename);
         var newRootFeedText = JSON.stringify(newRootFeed);
         var newRootFeedCipherText = sjcl.encrypt(key, newRootFeedText);
         
@@ -66,6 +67,7 @@ blockslack.feedpub = (function(){
         // publics:
 
         publish: function(audience, messageObject) {
+            messageObject.ts = (new Date).getTime();
             blockslack.keys.withSymmetricKeyForAudience(audience, function(keyObject) {
                 if (keyObject) {
                     var keyId = keyObject.id;
@@ -73,14 +75,14 @@ blockslack.feedpub = (function(){
                     var rootFilename = feedFilename(keyId, 0);
                     blockslack.discovery.registerFeed(audience, keyId, rootFilename);
                     blockstack.getFile(rootFilename, DONT_DECRYPT).then(function(existingFeedCipherText) {
-                        var feedRoot = parseExistingFeedRootOrCreateNew(existingFeedCipherText, key);
+                        var feedRoot = parseExistingFeedRootOrCreateNew(audience, existingFeedCipherText, key);
                         feedRoot.messages.push(messageObject);
                         var newFeedRootText = JSON.stringify(feedRoot);
                         var newFeedRootCipherText = sjcl.encrypt(key, newFeedRootText);
                         if (newFeedRootText.length <= MAX_CHUNK_SIZE) {
                             publishWithoutRotation(keyId, rootFilename, newFeedRootCipherText);
                         } else {
-                            publishWithRotation(keyId, key, rootFilename, newFeedRootCipherText);
+                            publishWithRotation(audience, keyId, key, rootFilename, newFeedRootCipherText);
                         }
                     });
                 } else {
@@ -89,12 +91,11 @@ blockslack.feedpub = (function(){
             });
         },
 
-        read: function(userId, keyId, action) {
+        read: function(userId, filename, keyId, action) {
             blockslack.keys.withSymmetricKeyFromUser(userId, keyId, function(key) {
-                var rootFilename = feedFilename(keyId, 0);
                 var getFileOptions = { decrypt: false, username: userId };
-                blockstack.getFile(rootFilename, getFileOptions).then(function(cipherText) {
-                    var feedRoot = parseExistingFeedRootOrCreateNew(cipherText, key);
+                blockstack.getFile(filename, getFileOptions).then(function(cipherText) {
+                    var feedRoot = parseExistingFeedRootOrCreateNew([], cipherText, key);
                     action(feedRoot);
                 });
             });

@@ -15,6 +15,7 @@ blockslack.onload = (function(){
         
         go: function() {
             blockslack.authentication.initialize();
+            blockslack.polling.onload();
             $('[data-toggle="tooltip"]').tooltip();
         },
 

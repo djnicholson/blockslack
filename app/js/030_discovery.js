@@ -46,23 +46,25 @@ blockslack.discovery = (function(){
         blockslack.authentication.state("lastPublished", lastPublished);
 
         for (var userId in publishedFeedsByUser) {
-            var feeds = publishedFeedsByUser[userId];
-            var json = JSON.stringify(feeds);
-            var jsonHash = sha256(json);
-            if (lastPublished[userId] != jsonHash) {
-                blockslack.keys.withPublicKeyForUser(userId, function(userId, publicKey) {
+            blockslack.keys.withPublicKeyForUser(userId, function(userId, publicKey) {
+                var feeds = publishedFeedsByUser[userId];
+                var json = JSON.stringify(feeds);
+                var jsonHash = sha256(json);
+                if (lastPublished[userId] != jsonHash) {
+                    console.log("Discovery feed for " + userId + " updated: " + jsonHash);
                     if (publicKey) {
                         var filename = userFeedsFile(blockstack.loadUserData().username, publicKey);
-                        console.log("Publishing discovery feed for " + userId);
+                        console.log("Publishing discovery feed for " + userId, json);
                         var content = blockstack.encryptContent(json, { publicKey: publicKey });
                         blockstack.putFile(filename, content, { encrypt: false }).then(function(){ 
+                            console.log("Discovery feed for " + userId + " published: " + jsonHash);
                             lastPublished[userId] = jsonHash;
                         });
                     } else {
                         console.log(userId + " does not have a public key, not publishing discovery feed");
                     }
-                });
-            }
+                }
+            });
         }
     };
 
