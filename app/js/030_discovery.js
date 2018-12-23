@@ -1,0 +1,148 @@
+blockslack.discovery = (function(){
+    
+    // privates:
+
+    var PERSISTED_STATE_FILE = "discovery.json";
+
+    var USER_FEEDS_FILE = "discovery_%1.json";
+
+    var lastPublishedHash = "";
+
+    var sha256 = function(input) {
+        return sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(input));
+    };
+
+    var tryGetPersistedState = function(then) {
+        if (blockslack.authentication.isSignedIn()) {
+            blockstack.getFile(PERSISTED_STATE_FILE).then(function(fileContents) {
+                var persistedState = JSON.parse(fileContents) || { published: { }, watching: { } };
+                blockslack.authentication.state("persistedState", persistedState);
+                if (then) {
+                    then();
+                }
+            });
+        }
+    };
+
+    var updateState = function(updater) {
+        var existingState = blockslack.authentication.state("persistedState");
+        if (existingState) {
+            updater(existingState);
+            var jsonAfter = JSON.stringify(existingState);
+            updateUserFiles(existingState.published);
+            var newContentHash = sha256(jsonAfter);
+            if (lastPublishedHash !== newContentHash) {
+                blockstack.putFile(PERSISTED_STATE_FILE, jsonAfter).then(function() {
+                    lastPublishedHash = newContentHash;
+                });
+            }
+        } else {
+            tryGetPersistedState(function() { updateState(updater); });
+        }
+    };
+
+    var updateUserFiles = function(publishedFeedsByUser) {
+        var lastPublished = blockslack.authentication.state("lastPublished") || {};
+        blockslack.authentication.state("lastPublished", lastPublished);
+
+        for (var userId in publishedFeedsByUser) {
+            var feeds = publishedFeedsByUser[userId];
+            var json = JSON.stringify(feeds);
+            var jsonHash = sha256(json);
+            if (lastPublished[userId] != jsonHash) {
+                blockslack.keys.withPublicKeyForUser(userId, function(userId, publicKey) {
+                    if (publicKey) {
+                        var filename = userFeedsFile(blockstack.loadUserData().username, publicKey);
+                        console.log("Publishing discovery feed for " + userId);
+                        var content = blockstack.encryptContent(json, { publicKey: publicKey });
+                        blockstack.putFile(filename, content, { encrypt: false }).then(function(){ 
+                            lastPublished[userId] = jsonHash;
+                        });
+                    } else {
+                        console.log(userId + " does not have a public key, not publishing discovery feed");
+                    }
+                });
+            }
+        }
+    };
+
+    var updateWatchList = function(userId, watching) {
+        blockslack.keys.withMasterKey(function(publicKey, privateKey) {
+            var filename = userFeedsFile(userId, publicKey);
+            var getFileOptions = { decrypt: false, username: userId };
+            var onSuccess = function(encryptedContent) {
+                if (encryptedContent) {
+                    var plaintext = blockstack.decryptContent(encryptedContent, { privateKey: privateKey });
+                    watching[userId] = JSON.parse(plaintext);
+                } else {
+                    console.log("Could not update watchlist for feeds from " + userId + " (not published)");    
+                }
+            };
+            var onError = function(error) {
+                console.log("Could not update watchlist for feeds from " + userId, error);
+            };
+            blockstack.getFile(filename, getFileOptions).then(onSuccess).catch(onError);
+        });
+    };
+
+    var userFeedsFile = function(hostUserId, recipientPublicKey) {
+        // Hash the recipients publicKey into the current users ID. This makes it as slow
+        // as possible to enumerate who is talking to who (you need to know every public key
+        // and cannot re-use a rainbow table between different users)
+        return USER_FEEDS_FILE.replace("%1", sha256(hostUserId + "_" + recipientPublicKey));
+    };
+
+    // initialization:
+    // (don't depend on other packages, order of package initialization is not guaranteed)
+    // foo = 1;
+    // bar = 2;
+
+    return {
+
+        // publics:
+
+        addContact: function(userId) {
+            updateState(function(existingState) {
+                if (!existingState.watching[userId]) {
+                    existingState.watching[userId] = { };
+                }
+            });
+        },
+
+        forEachWatchedFeed: function(action) {
+            updateState(function(existingState) {
+                for (var hostUserId in existingState.watching) {
+                    for (var filename in existingState.watching[hostUserId]) {
+                        var keyId = existingState.watching[hostUserId][filename];
+                        action(hostUserId, filename, keyId);
+                    }
+                }
+            });
+        },
+
+        registerFeed: function(audience, keyId, filename) {
+            updateState(function(existingState) {
+                for (var i = 0; i < audience.length; i++) {
+                    var userId = audience[i];
+                    
+                    if (!existingState.watching[userId]) {
+                        existingState.watching[userId] = { };
+                    }
+
+                    existingState.published[userId] || (existingState.published[userId] = {});
+                    existingState.published[userId][filename] = keyId;
+                }
+            });
+        },
+
+        updateWatchLists: function() {
+            updateState(function(existingState) {
+                for (var userId in existingState.watching) {
+                    updateWatchList(userId, existingState.watching);
+                }
+            });
+        },
+
+    };
+
+})();

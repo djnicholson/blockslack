@@ -31,7 +31,7 @@ blockslack.keys = (function(){
 
     var sha256 = function(input) {
         return sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(input));
-    }
+    };
 
     var symmetricKeyFilename = function(userId, keyId) {
         return SYMMETRIC_KEY_FILE_FORMAT.replace("%1", sha256(userId + "_" + keyId));
@@ -92,6 +92,22 @@ blockslack.keys = (function(){
                         { encrypt: false }); 
                 }
             });
+        },
+
+        withMasterKey: function(action) {
+            withMasterPrivateKey(function(masterPrivateKey) { 
+                if (masterPrivateKey) {
+                    var publicKey = blockstack.getPublicKeyFromPrivate(masterPrivateKey);
+                    action(publicKey, masterPrivateKey);
+                } else {
+                    console.log("Warning: Attempting to use current user's public key when it is not available");
+                    action(null, null);
+                }
+            });
+        },
+
+        withPublicKeyForUser: function(userId, action) {
+            withPublicKeyForUser(userId, action);
         },
 
         withSymmetricKeyFromUser: function(keyOwnerUserId, symmetricKeyId, action) {

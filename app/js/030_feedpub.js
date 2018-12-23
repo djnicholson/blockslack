@@ -71,6 +71,7 @@ blockslack.feedpub = (function(){
                     var keyId = keyObject.id;
                     var key = keyObject.key;
                     var rootFilename = feedFilename(keyId, 0);
+                    blockslack.discovery.registerFeed(audience, keyId, rootFilename);
                     blockstack.getFile(rootFilename, DONT_DECRYPT).then(function(existingFeedCipherText) {
                         var feedRoot = parseExistingFeedRootOrCreateNew(existingFeedCipherText, key);
                         feedRoot.messages.push(messageObject);
