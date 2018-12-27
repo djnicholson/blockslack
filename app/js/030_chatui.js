@@ -93,7 +93,7 @@ blockslack.chatui = (function(){
 
     var renderDate = function(date) {
         var element = $($("#template-messageDate").html());
-        element.text(date);
+        element.text(date + ":");
         messageListContentElement.append(element);
     };
 
@@ -129,7 +129,7 @@ blockslack.chatui = (function(){
 
     var renderPerson = function(person) {
         var element = $($("#template-messagePerson").html());
-        element.text(person);
+        element.text(person + ":");
         messageListContentElement.append(element);
     };
 

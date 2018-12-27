@@ -1,3 +1,23 @@
 .-current-channel-name {
     font-weight: bold;
 }
+
+.-message-date {
+    font-size: 0.8em;
+    font-weight: bold;
+    color: $color-purple-light;
+    text-align: center;
+}
+
+.-message-person {
+    font-size: 0.8em;
+    font-weight: bolder;
+    color: $color-dark-purple;
+}
+
+.-message-time {
+    font-size: 0.8em;
+    font-family: monospace;
+    color: $color-purple-light;
+    padding-right: 10px;
+}
