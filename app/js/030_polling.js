@@ -4,6 +4,8 @@ blockslack.polling = (function(){
 
     var WATCHLIST_UPDATE_INTERVAL = 30000;
     var FEED_UPDATE_INTERVAL = 8000;
+
+    var renderedAtLeastOnce = {};
     
     var consumeFeed = function(userId, filename, keyId, feedContents) {
         var rxStatus = blockslack.authentication.state("rxStatus") || {};
@@ -55,6 +57,12 @@ blockslack.polling = (function(){
         var allFeeds = [];
         blockslack.discovery.forEachWatchedFeed(function(userId, filename, keyId) {
             allFeeds.push([ userId, filename, keyId ]);
+
+            var key = userId + "_" + filename + "_" + keyId;
+            if (!renderedAtLeastOnce[key]) {
+                updateFeed(userId, filename, keyId);
+                renderedAtLeastOnce[key] = true;
+            }
         });
 
         if (allFeeds.length > 0) {
@@ -73,6 +81,8 @@ blockslack.polling = (function(){
         // publics:
         
         onload: function() {
+            blockslack.discovery.updateWatchLists();
+            updateRandomFeed();
             setInterval(blockslack.discovery.updateWatchLists, WATCHLIST_UPDATE_INTERVAL);
             setInterval(updateRandomFeed, FEED_UPDATE_INTERVAL);
         },
