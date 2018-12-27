@@ -7,10 +7,12 @@ blockslack.chatui = (function(){
     var currentGroupId = undefined;
     var currentChannelName = undefined;
 
+    var currentChannelElement = $(".-current-channel-name");
     var currentGroupElement = $(".-current-group-name");
     var addChannelButtonElement = $(".-add-channel-button");
     var groupButtonListElement = $(".-group-buttons");
     var channelListElement = $(".-channel-buttons");
+    var messageListHeaderElement = $(".-message-list-header");
 
     var makeId = function() {
         return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -27,6 +29,7 @@ blockslack.chatui = (function(){
         var groupName = "";
         var groupData = allData[currentGroupId];
         channelListElement.empty();
+        messageListHeaderElement.hide();
         if (groupData) {
             var titleData = groupData.title;
             groupName = titleData && titleData.title ? titleData.title : blockslack.strings.FALLBACK_GROUP_NAME;
@@ -34,9 +37,14 @@ blockslack.chatui = (function(){
                 for (var channelName in groupData.channels) {
                     renderChannelButton(channelName);
                 }
+
+                if (groupData.channels[currentChannelName]) {
+                    currentChannelElement.text("#" + currentChannelName);
+                    messageListHeaderElement.show();
+                }
             }
         }
-        
+
         currentGroupElement.text(groupName);
         addChannelButtonElement.toggle(groupName != "");
     };
@@ -70,6 +78,7 @@ blockslack.chatui = (function(){
 
     var switchGroup = function(newGroupId) {
         currentGroupId = newGroupId;
+        currentChannelName = undefined;
     };
 
     var updateUi = function() {
