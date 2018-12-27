@@ -225,6 +225,36 @@ blockslack.chatui = (function(){
             }
         },
 
+        addMember: function() {
+            if (blockslack.authentication.isSignedIn() && currentGroupId && currentChannelName) {
+                var newMember = prompt(blockslack.strings.ENTER_NEW_MEMBER_NAME);
+                if (newMember) {
+                    var allData = blockslack.aggregation.getAllData();
+                    var groupData = allData[currentGroupId];
+                    if (groupData && groupData.channels) {
+                        var channelData = groupData.channels[currentChannelName];
+                        if (channelData && channelData.audience && channelData.audience.members) {
+                            var oldAudience = channelData.audience.members;
+                            var newAudience = oldAudience.slice();
+                            newAudience.push(newMember);
+                            var message = blockslack.aggregation.generateAudienceChangeMessage(
+                                currentGroupId,
+                                currentChannelName,
+                                newAudience);
+                            blockslack.feedpub.publish(oldAudience, message);
+                            blockslack.feedpub.publish(newAudience, message);
+                            if (groupData.title && groupData.title.title) {
+                                var titleMessage = blockslack.aggregation.generateTitleChangeMessage(
+                                    currentGroupId, 
+                                    groupData.title.title);
+                                blockslack.feedpub.publish(newAudience, titleMessage);
+                            }
+                        }
+                    }
+                }
+            }
+        },
+
         onload: function() {
             setInterval(updateUi, UI_UPDATE_INTERVAL);
             newMessageElement.keypress(newMessageKeyPress);

@@ -3,7 +3,7 @@ blockslack.polling = (function(){
     // privates:
 
     var WATCHLIST_UPDATE_INTERVAL = 30000;
-    var FEED_UPDATE_INTERVAL = 8000;
+    var FEED_UPDATE_INTERVAL = 3000;
 
     var renderedAtLeastOnce = {};
     

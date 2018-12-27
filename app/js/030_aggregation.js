@@ -8,6 +8,7 @@ blockslack.aggregation = (function(){
     var FIELD_GROUP_TITLE = "t";
     var FIELD_KIND = "k";
     var FIELD_MESSAGE = "m";
+    var FIELD_MEMBER_LIST = "a";
 
     var KIND_TITLE_CHANGE = "t";
     var KIND_AUDIENCE_CHANGE = "a";
