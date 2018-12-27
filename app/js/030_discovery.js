@@ -46,25 +46,27 @@ blockslack.discovery = (function(){
         blockslack.authentication.state("lastPublished", lastPublished);
 
         for (var userId in publishedFeedsByUser) {
-            blockslack.keys.withPublicKeyForUser(userId, function(userId, publicKey) {
-                var feeds = publishedFeedsByUser[userId];
-                var json = JSON.stringify(feeds);
-                var jsonHash = sha256(json);
-                if (lastPublished[userId] != jsonHash) {
-                    console.log("Discovery feed for " + userId + " updated: " + jsonHash);
-                    if (publicKey) {
-                        var filename = userFeedsFile(blockstack.loadUserData().username, publicKey);
-                        console.log("Publishing discovery feed for " + userId, json);
-                        var content = blockstack.encryptContent(json, { publicKey: publicKey });
-                        blockstack.putFile(filename, content, { encrypt: false }).then(function(){ 
-                            console.log("Discovery feed for " + userId + " published: " + jsonHash);
-                            lastPublished[userId] = jsonHash;
-                        });
-                    } else {
-                        console.log(userId + " does not have a public key, not publishing discovery feed");
+            if (validId(userId)) {
+                blockslack.keys.withPublicKeyForUser(userId, function(userId, publicKey) {
+                    var feeds = publishedFeedsByUser[userId];
+                    var json = JSON.stringify(feeds);
+                    var jsonHash = sha256(json);
+                    if (lastPublished[userId] != jsonHash) {
+                        console.log("Discovery feed for " + userId + " updated: " + jsonHash);
+                        if (publicKey) {
+                            var filename = userFeedsFile(blockstack.loadUserData().username, publicKey);
+                            console.log("Publishing discovery feed for " + userId, json);
+                            var content = blockstack.encryptContent(json, { publicKey: publicKey });
+                            blockstack.putFile(filename, content, { encrypt: false }).then(function(){ 
+                                console.log("Discovery feed for " + userId + " published: " + jsonHash);
+                                lastPublished[userId] = jsonHash;
+                            });
+                        } else {
+                            console.log(userId + " does not have a public key, not publishing discovery feed");
+                        }
                     }
-                }
-            });
+                });
+            }
         }
     };
 
@@ -94,10 +96,9 @@ blockslack.discovery = (function(){
         return USER_FEEDS_FILE.replace("%1", sha256(hostUserId + "_" + recipientPublicKey));
     };
 
-    // initialization:
-    // (don't depend on other packages, order of package initialization is not guaranteed)
-    // foo = 1;
-    // bar = 2;
+    var validId = function(id) {
+        return id && (id != "null");
+    };
 
     return {
 
@@ -114,9 +115,11 @@ blockslack.discovery = (function(){
         forEachWatchedFeed: function(action) {
             updateState(function(existingState) {
                 for (var hostUserId in existingState.watching) {
-                    for (var filename in existingState.watching[hostUserId]) {
-                        var keyId = existingState.watching[hostUserId][filename];
-                        action(hostUserId, filename, keyId);
+                    if (validId(hostUserId)) {
+                        for (var filename in existingState.watching[hostUserId]) {
+                            var keyId = existingState.watching[hostUserId][filename];
+                            action(hostUserId, filename, keyId);
+                        }
                     }
                 }
             });
@@ -140,7 +143,9 @@ blockslack.discovery = (function(){
         updateWatchLists: function() {
             updateState(function(existingState) {
                 for (var userId in existingState.watching) {
-                    updateWatchList(userId, existingState.watching);
+                    if (validId(userId)) {
+                        updateWatchList(userId, existingState.watching);
+                    }
                 }
             });
         },
