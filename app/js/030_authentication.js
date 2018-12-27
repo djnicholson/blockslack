@@ -21,7 +21,6 @@ blockslack.authentication = (function(blockstack){
         }
 
         blockslack.keys.initialize();
-        blockslack.groups.initialize();
     };
 
     // initialization:

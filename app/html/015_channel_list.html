@@ -1,3 +1,24 @@
-<div class="col-2 text-center p-2 -channel-list">
-    <div class="-current-group-name"></div>    
+<div class="col-2 p-2 -channel-list">
+    <div class="-current-group-name"></div>
+
+    <div class="-channel-buttons">
+
+    </div>
+    <div 
+        class="-add-channel-button" 
+        onclick="blockslack.chatui.addChannel()"
+        data-toggle="tooltip"
+        data-placement="right"
+        title="Create a new channel"
+        style="display: none">
+        New channel
+    </div>
 </div>
+
+<script id="template-channelButton" type="text/x-template">
+    <div 
+        class="-channel-button"
+        data-toggle="tooltip"
+        data-placement="right">
+    </div>
+</script>

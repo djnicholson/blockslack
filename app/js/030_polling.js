@@ -18,8 +18,8 @@ blockslack.polling = (function(){
             if (item.ts && item.ts > lastRead) {
                 newMessage(userId, feedContents.audience, item);
                 rxStatus[key] = item.ts;
-                if (item.t === "rx") {
-                    var foreignKey = item.u + "_" + item.f + "_" + item.k;
+                if (item.k === "rx") {
+                    var foreignKey = item.u + "_" + item.f + "_" + item.sk;
                     if (!rxStatus[foreignKey] || (rxStatus[foreignKey] < item.max)) {
                         updateQueue[foreignKey] = item;
                     }
@@ -32,7 +32,7 @@ blockslack.polling = (function(){
         if (feedContents.audience && lastConsumed) {
             blockslack.feedpub.publish(
                 feedContents.audience,
-                { t: "rx", max: lastConsumed, u: userId, f: filename, k: keyId });
+                { k: "rx", max: lastConsumed, u: userId, f: filename, sk: keyId });
         }
 
         for (var foreignKey in updateQueue) {

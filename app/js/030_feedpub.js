@@ -23,7 +23,7 @@ blockslack.feedpub = (function(){
 
     var parseExistingFeedRootOrCreateNew = function(audience, existingFeedCipherText, key) {
         var existingFeedText = undefined;
-        if (existingFeedCipherText) {
+        if (existingFeedCipherText && key) {
             existingFeedText = sjcl.decrypt(key, existingFeedCipherText);
         }
 

@@ -8,3 +8,25 @@
         color: $color-yellow;
     }
 }
+
+.-channel-button {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: $color-yellow;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.-channel-button:hover {
+    color: $color-yellow-sub; 
+}
+
+.-add-channel-button {
+    color: $color-yellow;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.-add-channel-button:hover {
+    color: $color-yellow-sub;
+}
