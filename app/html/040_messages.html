@@ -1,7 +1,13 @@
 <div class="row align-items-bottom m-0 p-2 -only-when-signed-in -white" style="display: none">
     <div class="col text-left -message-list" style="display: none">
         <div>
-            Messages from <span class="-current-channel-name"></span>:
+            You are in channel <span class="-current-channel-name"></span>.
+        </div>
+        <div>
+            People in this channel:
+            <span class="-channel-member-list">
+
+            </span>
         </div>
         <div class="-message-list-content">
         </div>
@@ -22,4 +28,8 @@
         <span class="-message-time"></span>
         <span class="-message-text"></span>
     </div>
+</script>
+
+<script id="template-channelMember" type="text/x-template">
+    <span class="-message-person -comma-separated"></span>
 </script>

@@ -15,6 +15,7 @@ blockslack.chatui = (function(){
     var messageListElement = $(".-message-list");
     var messageListContentElement = $(".-message-list-content");
     var newMessageElement = $(".-new-message");
+    var channelMemberListElement = $(".-channel-member-list");
 
     var formatDate = function(ts) {
         return (new Date(ts)).toLocaleDateString();
@@ -84,6 +85,15 @@ blockslack.chatui = (function(){
                     }
 
                     renderMessage(time, message.text);
+                }
+
+                channelMemberListElement.empty();
+                if (audience.members) {
+                    for (var member in audience.members) {
+                        var memberElement = $($("#template-channelMember").html());
+                        memberElement.text(audience.members[member]);
+                        channelMemberListElement.append(memberElement);
+                    }
                 }
             }
         }
