@@ -16,7 +16,7 @@ blockslack.polling = (function(){
         for (var i = 0; i < feedContents.messages.length; i++) {
             var item = feedContents.messages[i];
             if (item.ts && item.ts > lastRead) {
-                newMessage(userId, item);
+                newMessage(userId, feedContents.audience, item);
                 rxStatus[key] = item.ts;
                 if (item.t === "rx") {
                     var foreignKey = item.u + "_" + item.f + "_" + item.k;
@@ -41,11 +41,8 @@ blockslack.polling = (function(){
         }
     };
 
-    var newMessage = function(senderUserId, message) {
-        console.log("New message from " + senderUserId + ": " + JSON.stringify(message));
-        //
-        // TODO
-        //
+    var newMessage = function(senderUserId, audience, message) {
+        blockslack.aggregation.newMessage(senderUserId, audience, message);
     };
 
     var updateFeed = function(userId, filename, keyId) {
