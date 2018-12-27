@@ -14,6 +14,7 @@ blockslack.chatui = (function(){
     var channelListElement = $(".-channel-buttons");
     var messageListElement = $(".-message-list");
     var messageListContentElement = $(".-message-list-content");
+    var newMessageElement = $(".-new-message");
 
     var formatDate = function(ts) {
         return (new Date(ts)).toLocaleDateString();
@@ -25,7 +26,28 @@ blockslack.chatui = (function(){
 
     var makeId = function() {
         return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    }
+    };
+
+    var newMessageKeyPress = function(e) {
+        e = e || window.event;
+        var keyCode = e.keyCode || e.which;
+        if (keyCode == '13' && currentGroupId && currentChannelName) {
+            var message = blockslack.aggregation.generateTextMessage(
+                currentGroupId, 
+                currentChannelName, 
+                newMessageElement.val());
+            var allData = blockslack.aggregation.getAllData();
+            var groupData = allData[currentGroupId];
+            if (groupData && groupData.channels) {
+                var channelData = groupData.channels[currentChannelName];
+                if (channelData && channelData.audience && channelData.audience.members) {
+                    var audience = channelData.audience.members;
+                    blockslack.feedpub.publish(audience, message);
+                    newMessageElement.val("");
+                }
+            }
+        }
+    };
 
     var renderChannelButton = function(channelName) {
         var buttonElement = $($("#template-channelButton").html());
@@ -135,11 +157,13 @@ blockslack.chatui = (function(){
 
     var switchChannel = function(newChannelName) {
         currentChannelName = newChannelName;
+        newMessageElement.val("");
     };
 
     var switchGroup = function(newGroupId) {
         currentGroupId = newGroupId;
         currentChannelName = undefined;
+        newMessageElement.val("");
     };
 
     var updateUi = function() {
@@ -193,6 +217,7 @@ blockslack.chatui = (function(){
 
         onload: function() {
             setInterval(updateUi, UI_UPDATE_INTERVAL);
+            newMessageElement.keypress(newMessageKeyPress);
         },
 
     };
