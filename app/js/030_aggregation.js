@@ -71,6 +71,7 @@ blockslack.aggregation = (function(){
                 allMessages[messageKey] = {
                     text: message[FIELD_MESSAGE],
                     from: senderUserId,
+                    ts: message[FIELD_TIMESTAMP],
                 };
             }
         }

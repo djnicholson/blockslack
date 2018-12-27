@@ -1,5 +1,25 @@
 <div class="row align-items-bottom m-0 p-2 -only-when-signed-in -white" style="display: none">
-    <div class="-message-list-header" style="display: none">
-        Messages from <span class="-current-channel-name"></span>:
+    <div class="col -message-list" style="display: none">
+        <div>
+            Messages from <span class="-current-channel-name"></span>:
+        </div>
+        <div class="-message-list-content">
+
+        </div>
     </div>
 </div>
+
+<script id="template-messageDate" type="text/x-template">
+    <div class="-message-date"></div>
+</script>
+
+<script id="template-messagePerson" type="text/x-template">
+    <div class="-message-person"></div>
+</script>
+
+<script id="template-messageText" type="text/x-template">
+    <div>
+        <span class="-message-time"></span>
+        <span class="-message-text"></span>
+    </div>
+</script>

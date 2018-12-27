@@ -12,7 +12,16 @@ blockslack.chatui = (function(){
     var addChannelButtonElement = $(".-add-channel-button");
     var groupButtonListElement = $(".-group-buttons");
     var channelListElement = $(".-channel-buttons");
-    var messageListHeaderElement = $(".-message-list-header");
+    var messageListElement = $(".-message-list");
+    var messageListContentElement = $(".-message-list-content");
+
+    var formatDate = function(ts) {
+        return (new Date(ts)).toLocaleDateString();
+    };
+
+    var formatTime = function(ts) {
+        return (new Date(ts)).toLocaleTimeString();
+    };
 
     var makeId = function() {
         return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -25,11 +34,44 @@ blockslack.chatui = (function(){
         channelListElement.append(buttonElement);
     };
 
+    var renderCurrentChannel = function(allData) {
+        messageListContentElement.empty();
+        var groupData = allData[currentGroupId];
+        if (groupData && groupData.channels) {
+            var channelData = groupData.channels[currentChannelName];
+            if (channelData) {
+                var messages = channelData.messages;
+                var audience = channelData.audience;
+                var lastPerson = undefined;
+                var lastDate = undefined;
+                for (var messageId in messages) {
+                    var message = messages[messageId];
+                    var person = message.from;
+                    var date = formatDate(message.ts);
+                    var time = formatTime(message.ts);
+                    
+                    if (date != lastDate) {
+                        renderDate(date);
+                        lastDate = date;
+                        lastPerson = undefined;
+                    }
+
+                    if (person != lastPerson) {
+                        renderPerson(person);
+                        lastPerson = person;
+                    }
+
+                    renderMessage(time, message.text);
+                }
+            }
+        }
+    };
+
     var renderCurrentGroupChannelList = function(allData) {
         var groupName = "";
         var groupData = allData[currentGroupId];
         channelListElement.empty();
-        messageListHeaderElement.hide();
+        messageListElement.hide();
         if (groupData) {
             var titleData = groupData.title;
             groupName = titleData && titleData.title ? titleData.title : blockslack.strings.FALLBACK_GROUP_NAME;
@@ -40,13 +82,19 @@ blockslack.chatui = (function(){
 
                 if (groupData.channels[currentChannelName]) {
                     currentChannelElement.text("#" + currentChannelName);
-                    messageListHeaderElement.show();
+                    messageListElement.show();
                 }
             }
         }
 
         currentGroupElement.text(groupName);
         addChannelButtonElement.toggle(groupName != "");
+    };
+
+    var renderDate = function(date) {
+        var element = $($("#template-messageDate").html());
+        element.text(date);
+        messageListContentElement.append(element);
     };
 
     var renderGroupButtons = function(allData) {
@@ -72,6 +120,19 @@ blockslack.chatui = (function(){
         groupButtonListElement.append(buttonElement);
     };
 
+    var renderMessage = function(time, message) {
+        var element = $($("#template-messageText").html());
+        element.find(".-message-time").text(time);
+        element.find(".-message-text").text(message);
+        messageListContentElement.append(element);
+    };
+
+    var renderPerson = function(person) {
+        var element = $($("#template-messagePerson").html());
+        element.text(person);
+        messageListContentElement.append(element);
+    };
+
     var switchChannel = function(newChannelName) {
         currentChannelName = newChannelName;
     };
@@ -86,6 +147,7 @@ blockslack.chatui = (function(){
         var allData = blockslack.aggregation.getAllData();
         renderGroupButtons(allData);
         renderCurrentGroupChannelList(allData);
+        renderCurrentChannel(allData);
         $('[data-toggle="tooltip"]').tooltip();
     };
 
