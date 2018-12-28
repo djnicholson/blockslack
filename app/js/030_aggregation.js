@@ -16,14 +16,9 @@ blockslack.aggregation = (function(){
     var KIND_RX = "rx";
 
     var getChannelData = function(groupData, channelName) {
-        var channelData = groupData.channels[channelName] || { messages: {} };
+        var channelData = groupData.channels[channelName] || { messages: [] };
         groupData.channels[channelName] = channelData;
         return channelData;
-    };
-
-    var padTime = function(ts) {
-        var s = "0000000000000000" + ts;
-        return s.substr(s.length - 16);
     };
 
     var updateGroupTitle = function(groupData, message) {
@@ -68,12 +63,12 @@ blockslack.aggregation = (function(){
                 console.log(senderUserId + " tried to send a message to a channel they are not a member of");
             } else {
                 var allMessages = channelData.messages;
-                var messageKey = padTime(message[FIELD_TIMESTAMP]) + "_" + senderUserId;
-                allMessages[messageKey] = {
-                    text: message[FIELD_MESSAGE],
-                    from: senderUserId,
+                allMessages.push({
                     ts: message[FIELD_TIMESTAMP],
-                };
+                    from: senderUserId,
+                    text: message[FIELD_MESSAGE],
+                });
+                allMessages.sort(function(a, b) { return a.ts - b.ts; });
             }
         }
     };

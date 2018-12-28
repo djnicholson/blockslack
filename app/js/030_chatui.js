@@ -67,8 +67,8 @@ blockslack.chatui = (function(){
                 var audience = channelData.audience;
                 var lastPerson = undefined;
                 var lastDate = undefined;
-                for (var messageId in messages) {
-                    var message = messages[messageId];
+                for (var i = 0; i < messages.length; i++) {
+                    var message = messages[i];
                     var person = message.from;
                     var date = formatDate(message.ts);
                     var time = formatTime(message.ts);
