@@ -3,7 +3,10 @@ blockslack.polling = (function(){
     // privates:
 
     var WATCHLIST_UPDATE_INTERVAL = 30000;
-    var FEED_UPDATE_INTERVAL = 3000;
+    var FEED_UPDATE_INTERVAL_MIN = 1500;
+    var FEED_UPDATE_INTERVAL_MAX = 15000;
+
+    var currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN;
 
     var renderedAtLeastOnce = {};
     
@@ -69,12 +72,13 @@ blockslack.polling = (function(){
             var selected = allFeeds[Math.floor(Math.random() * allFeeds.length)];
             updateFeed(selected[0], selected[1], selected[2]);
         }
-    };
 
-    // initialization:
-    // (don't depend on other packages, order of package initialization is not guaranteed)
-    // foo = 1;
-    // bar = 2;
+        if (currentFeedUpdateInterval < FEED_UPDATE_INTERVAL_MAX) {
+            currentFeedUpdateInterval += 1000;
+        }
+
+        setTimeout(updateRandomFeed, currentFeedUpdateInterval);
+    };
 
     return {
 
@@ -84,7 +88,10 @@ blockslack.polling = (function(){
             blockslack.discovery.updateWatchLists();
             updateRandomFeed();
             setInterval(blockslack.discovery.updateWatchLists, WATCHLIST_UPDATE_INTERVAL);
-            setInterval(updateRandomFeed, FEED_UPDATE_INTERVAL);
+            setTimeout(updateRandomFeed, currentFeedUpdateInterval);
+            $(document).mousemove(function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });
+            $(document).keypress(function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });
+            $(document).click(function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });
         },
 
     };
