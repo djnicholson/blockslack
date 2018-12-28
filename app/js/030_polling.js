@@ -84,6 +84,10 @@ blockslack.polling = (function(){
 
         // publics:
         
+        forceReadFeed: function(userId, filename, keyId) {
+            updateFeed(userId, filename, keyId);
+        },
+
         onload: function() {
             blockslack.discovery.updateWatchLists();
             updateRandomFeed();

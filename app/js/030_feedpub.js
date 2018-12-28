@@ -35,7 +35,12 @@ blockslack.feedpub = (function(){
         blockstack.putFile(
             rootFilename,
             newFeedRootCipherText,
-            DONT_ENCRYPT).catch(function(e) {
+            DONT_ENCRYPT).then(function() {
+                blockslack.polling.forceReadFeed(
+                    blockstack.loadUserData().username,
+                    rootFilename,
+                    keyId);
+            }).catch(function(e) {
                 console.log("Could not publish message, failed to rewrite feed file. Feed: ", keyId);
             });
     };
@@ -51,7 +56,12 @@ blockslack.feedpub = (function(){
             latestFeedChunkCipherText,
             DONT_ENCRYPT).then(function() {
 
-                blockstack.putFile(rootFilename, newRootFeedCipherText, DONT_ENCRYPT).catch(function(e) {
+                blockstack.putFile(rootFilename, newRootFeedCipherText, DONT_ENCRYPT).then(function() {
+                    blockslack.polling.forceReadFeed(
+                        blockstack.loadUserData().username,
+                        rootFilename,
+                        keyId);
+                }).catch(function(e) {
                     console.log("Could not publish message, failed to write new feed head after rotation. Feed: ", keyId);
                 });
 
