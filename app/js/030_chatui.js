@@ -221,6 +221,11 @@ blockslack.chatui = (function(){
                     var message2 = blockslack.aggregation.generateTextMessage(groupId, "general", blockslack.strings.CHANNEL_WELCOME_PREFIX + "general");
                     blockslack.feedpub.publish(audience, message1);
                     blockslack.feedpub.publish(audience, message2);
+                    //
+                    // TODO: This doesn't work, there is a race condition where the second publish will append
+                    //       itself to a file that does not include the first message. Probably need to thread
+                    //       promises all the way through.
+                    //
                 }
             }
         },
