@@ -112,8 +112,10 @@ blockslack.chatui = (function(){
             var titleData = groupData.title;
             groupName = titleData && titleData.title ? titleData.title : blockslack.strings.FALLBACK_GROUP_NAME;
             if (groupData.channels) {
-                for (var channelName in groupData.channels) {
-                    renderChannelButton(channelName);
+                var sortedChannelNames = sortChannelNames(groupData.channels);
+                for (var i = 0; i < sortedChannelNames.length; i++) {
+                    currentChannelName = currentChannelName || sortedChannelNames[i];
+                    renderChannelButton(sortedChannelNames[i]);
                 }
 
                 if (groupData.channels[currentChannelName]) {
@@ -171,6 +173,27 @@ blockslack.chatui = (function(){
 
     var renderWelcomeArea = function() {
         welcomeAreaElement.toggle(currentGroupId == undefined);
+    };
+
+    var sortChannelNames = function(channelData) {
+        var toSort = [];
+        for (var channelName in channelData) {
+            var ts = 0;
+            var messages = channelData[channelName].messages;
+            if (messages.length) {
+                ts = messages[messages.length - 1].ts;
+            }
+
+            toSort.push([ channelName, ts]);
+        }
+
+        toSort.sort(function(a, b) { return b[1] - a[1] });
+        var toReturn = [];
+        for (var i = 0; i < toSort.length; i++) {
+            toReturn.push(toSort[i][0]);
+        }
+
+        return toReturn;
     };
 
     var switchChannel = function(newChannelName) {
