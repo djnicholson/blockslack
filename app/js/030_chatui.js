@@ -203,7 +203,9 @@ blockslack.chatui = (function(){
                     if (channelName.length) {
                         var audience = [ blockstack.loadUserData().username ];
                         var message = blockslack.aggregation.generateTextMessage(currentGroupId, channelName, blockslack.strings.CHANNEL_WELCOME_PREFIX + channelName);
-                        blockslack.feedpub.publish(audience, message);
+                        blockslack.feedpub.publish(audience, message).then(function() {
+                            switchChannel(channelName);
+                        });
                     }
                 }
             }
@@ -217,13 +219,11 @@ blockslack.chatui = (function(){
                     var audience = [ blockstack.loadUserData().username ];
                     var message1 = blockslack.aggregation.generateTitleChangeMessage(groupId, groupName);
                     var message2 = blockslack.aggregation.generateTextMessage(groupId, "general", blockslack.strings.CHANNEL_WELCOME_PREFIX + "general");
-                    blockslack.feedpub.publish(audience, message1);
-                    blockslack.feedpub.publish(audience, message2);
-                    //
-                    // TODO: This doesn't work, there is a race condition where the second publish will append
-                    //       itself to a file that does not include the first message. Probably need to thread
-                    //       promises all the way through.
-                    //
+                    blockslack.feedpub.publish(audience, message1).then(function() {
+                        return blockslack.feedpub.publish(audience, message2);    
+                    }).then(function() {
+                        switchGroup(groupId);
+                    });
                 }
             }
         },
@@ -244,14 +244,16 @@ blockslack.chatui = (function(){
                                 currentGroupId,
                                 currentChannelName,
                                 newAudience);
-                            blockslack.feedpub.publish(oldAudience, message);
-                            blockslack.feedpub.publish(newAudience, message);
-                            if (groupData.title && groupData.title.title) {
-                                var titleMessage = blockslack.aggregation.generateTitleChangeMessage(
-                                    currentGroupId, 
-                                    groupData.title.title);
-                                blockslack.feedpub.publish(newAudience, titleMessage);
-                            }
+                            blockslack.feedpub.publish(oldAudience, message).then(function() {
+                                return blockslack.feedpub.publish(newAudience, message);    
+                            }).then(function() {
+                                if (groupData.title && groupData.title.title) {
+                                    var titleMessage = blockslack.aggregation.generateTitleChangeMessage(
+                                        currentGroupId, 
+                                        groupData.title.title);
+                                    blockslack.feedpub.publish(newAudience, titleMessage);
+                                }
+                            });
                         }
                     }
                 }
