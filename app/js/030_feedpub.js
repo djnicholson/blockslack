@@ -7,8 +7,6 @@ blockslack.feedpub = (function(){
 
     var FEED_FILE_FORMAT = "feeds/feed_%1_%2.json";
 
-    var MAX_CHUNK_SIZE = 10000; // (in JSON characters)
-
     var feedFilename = function(keyId, timestamp) {
         return FEED_FILE_FORMAT.replace("%1", keyId).replace("%2", timestamp);
     };
@@ -45,33 +43,6 @@ blockslack.feedpub = (function(){
             });
     };
 
-    var publishWithRotation = function(audience, keyId, key, rootFilename, latestFeedChunkCipherText) {
-        var nextFilename = feedFilename(keyId, (new Date).getTime());
-        var newRootFeed = newFeedObject(audience, nextFilename);
-        var newRootFeedText = JSON.stringify(newRootFeed);
-        var newRootFeedCipherText = sjcl.encrypt(key, newRootFeedText);
-        
-        blockstack.putFile(
-            nextFilename,
-            latestFeedChunkCipherText,
-            DONT_ENCRYPT).then(function() {
-
-                blockstack.putFile(rootFilename, newRootFeedCipherText, DONT_ENCRYPT).then(function() {
-                    blockslack.polling.forceReadFeed(
-                        blockstack.loadUserData().username,
-                        rootFilename,
-                        keyId);
-                }).catch(function(e) {
-                    console.log("Could not publish message, failed to write new feed head after rotation. Feed: ", keyId);
-                });
-
-            }).catch(function(e) {
-              
-                console.log("Could not publish message, failed to rotate feed file. Feed: " + keyId);
-
-            });
-    };
-
     return {
 
         // publics:
@@ -88,11 +59,13 @@ blockslack.feedpub = (function(){
                     feedRoot.messages.push(messageObject);
                     var newFeedRootText = JSON.stringify(feedRoot);
                     var newFeedRootCipherText = sjcl.encrypt(key, newFeedRootText);
-                    if (newFeedRootText.length <= MAX_CHUNK_SIZE) {
-                        publishWithoutRotation(keyId, rootFilename, newFeedRootCipherText);
-                    } else {
-                        publishWithRotation(audience, keyId, key, rootFilename, newFeedRootCipherText);
-                    }
+
+                    // TODO: Only have most recent messages in the "root" feed file, then link to
+                    //       other files that contain older messages (and intelligently follow these
+                    //       links when older chat history needs to be reconstructed).
+                    //       For now, everything goes in one file, but performance will begin to degrade
+                    //       after a set of users have exchanged a lot of messages.
+                    publishWithoutRotation(keyId, rootFilename, newFeedRootCipherText);
                 });
             }).catch(function(e) {
                 console.log("Could not publish message, group key not available", audience, messageObject, e);
