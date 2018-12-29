@@ -6,8 +6,33 @@ blockslack.keysasync = (function(){
     var MASTER_PUBLIC_KEY_FILE = "keys/_public.txt";
     var SYMMETRIC_KEY_FILE_FORMAT = "keys/%1.txt";
 
-    var getAsymmetricKeyForArbitraryUser = function() {
+    var getAsymmetricKeyForArbitraryUser = function(username) {
+        var keyCache = getKeyCache();
+        var fromCache = keyCache.asymmetric[username];
+        if (fromCache) {
+            return Promise.resolve(fromCache);
+        }
 
+        var getFileOptions = { decrypt: false, username: username };
+        var getPublicKey = blockstack.getFile(MASTER_PUBLIC_KEY_FILE, getFileOptions).then(function(publicKey) {
+            if (publicKey) {
+                return Promise.resolve(publicKey);
+            } else {
+                return Promise.reject(Error(username + " has not published their public key"));
+            }
+        }).catch(function(e) {
+            return Promise.reject(Error("Could not retrieve public key for " + username + " (not a user of this app?); error: " + e));
+        });
+
+        return getPublicKey.then(function(publicKey) {
+            var result = { 
+                public: publicKey, 
+                private: undefined,
+            };
+
+            keyCache.asymmetric[username] = result;
+            return Promise.resolve(result);
+        });
     };
 
     var getAsymmetricKeyForCurrentUser = function() {
@@ -71,7 +96,7 @@ blockslack.keysasync = (function(){
             if (username) {
                 return getAsymmetricKeyForArbitraryUser(username);
             } else {
-                return getAsymmetricKeyForCurrentUser(username);
+                return getAsymmetricKeyForCurrentUser();
             }
         },
 
