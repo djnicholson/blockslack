@@ -164,6 +164,7 @@ blockslack.keys = (function(){
                 return Promise.reject(Error("Key " + symmetricKeyId + " has not ben published by " + keyOwnerUsername));
             }
         }).catch(function(e){
+                            debugger;
             return Promise.reject(Error("Could not retrieve key " + symmetricKeyId + " from " + keyOwnerUsername + "; " + e));
         });
 

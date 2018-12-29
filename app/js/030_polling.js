@@ -42,7 +42,7 @@ blockslack.polling = (function(){
 
         for (var foreignKey in updateQueue) {
             var item = updateQueue[foreignKey];
-            updateFeed(item.u, item.f, item.k);
+            updateFeed(item.u, item.f, item.sk);
         }
     };
 
