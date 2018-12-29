@@ -5,7 +5,7 @@ blockslack.feedpub = (function(){
     var DONT_ENCRYPT = { encrypt: false };
     var DONT_DECRYPT = { decrypt: false };
 
-    var FEED_FILE_FORMAT = "feeds/feed_%1_%2.json";
+    var FEED_FILE_FORMAT = "feeds_v2/feed_%1_%2.json";
 
     var feedFilename = function(keyId, timestamp) {
         return FEED_FILE_FORMAT.replace("%1", keyId).replace("%2", timestamp);
