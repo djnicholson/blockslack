@@ -72,13 +72,13 @@ blockslack.feedpub = (function(){
             });
         },
 
-        read: function(userId, filename, keyId, action) {
-            blockslack.keys.getSymmetricKeyFromUser(userId, keyId).then(function(keyObject) {
+        read: function(userId, filename, keyId) {
+            return blockslack.keys.getSymmetricKeyFromUser(userId, keyId).then(function(keyObject) {
                 var key = keyObject.key;
                 var getFileOptions = { decrypt: false, username: userId };
-                blockstack.getFile(filename, getFileOptions).then(function(cipherText) {
+                return blockstack.getFile(filename, getFileOptions).then(function(cipherText) {
                     var feedRoot = parseExistingFeedRootOrCreateNew([], cipherText, key);
-                    action(feedRoot);
+                    return Promise.resolve(feedRoot);
                 });
             });
         },

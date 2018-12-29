@@ -31,7 +31,7 @@ blockslack.polling = (function(){
     };
 
     var updateFeed = function(userId, filename, keyId) {
-        blockslack.feedpub.read(userId, filename, keyId, function(feedContents) {
+        blockslack.feedpub.read(userId, filename, keyId).then(function(feedContents) {
             consumeFeed(userId, filename, keyId, feedContents);
         });
     };
