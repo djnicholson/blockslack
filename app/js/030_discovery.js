@@ -47,7 +47,9 @@ blockslack.discovery = (function(){
 
         for (var userId in publishedFeedsByUser) {
             if (validId(userId)) {
-                blockslack.keys.withPublicKeyForUser(userId, function(userId, publicKey) {
+                blockslack.keysasync.getAsymmetricKey(userId).then(function(keyPair) {
+                    var userId = keyPair.owner;
+                    var publicKey = keyPair.public;
                     var feeds = publishedFeedsByUser[userId];
                     var json = JSON.stringify(feeds);
                     var jsonHash = sha256(json);
@@ -65,13 +67,16 @@ blockslack.discovery = (function(){
                             console.log(userId + " does not have a public key, not publishing discovery feed");
                         }
                     }
+
                 });
             }
         }
     };
 
     var updateWatchList = function(userId, watching) {
-        blockslack.keys.withMasterKey(function(publicKey, privateKey) {
+        blockslack.keysasync.getAsymmetricKey().then(function(keyPair) {
+            var publicKey = keyPair.public;
+            var privateKey = keyPair.private;
             var filename = userFeedsFile(userId, publicKey);
             var getFileOptions = { decrypt: false, username: userId };
             var onSuccess = function(encryptedContent) {

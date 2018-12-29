@@ -78,31 +78,30 @@ blockslack.feedpub = (function(){
 
         publish: function(audience, messageObject) {
             messageObject.ts = (new Date).getTime();
-            blockslack.keys.withSymmetricKeyForAudience(audience, function(keyObject) {
-                if (keyObject) {
-                    var keyId = keyObject.id;
-                    var key = keyObject.key;
-                    var rootFilename = feedFilename(keyId, 0);
-                    blockslack.discovery.registerFeed(audience, keyId, rootFilename);
-                    blockstack.getFile(rootFilename, DONT_DECRYPT).then(function(existingFeedCipherText) {
-                        var feedRoot = parseExistingFeedRootOrCreateNew(audience, existingFeedCipherText, key);
-                        feedRoot.messages.push(messageObject);
-                        var newFeedRootText = JSON.stringify(feedRoot);
-                        var newFeedRootCipherText = sjcl.encrypt(key, newFeedRootText);
-                        if (newFeedRootText.length <= MAX_CHUNK_SIZE) {
-                            publishWithoutRotation(keyId, rootFilename, newFeedRootCipherText);
-                        } else {
-                            publishWithRotation(audience, keyId, key, rootFilename, newFeedRootCipherText);
-                        }
-                    });
-                } else {
-                    console.log("Could not publish message, group key not available", audience, messageObject);
-                }
+            blockslack.keysasync.getSymmetricKeyForAudience(audience).then(function(keyObject) {
+                var keyId = keyObject.id;
+                var key = keyObject.key;
+                var rootFilename = feedFilename(keyId, 0);
+                blockslack.discovery.registerFeed(audience, keyId, rootFilename);
+                blockstack.getFile(rootFilename, DONT_DECRYPT).then(function(existingFeedCipherText) {
+                    var feedRoot = parseExistingFeedRootOrCreateNew(audience, existingFeedCipherText, key);
+                    feedRoot.messages.push(messageObject);
+                    var newFeedRootText = JSON.stringify(feedRoot);
+                    var newFeedRootCipherText = sjcl.encrypt(key, newFeedRootText);
+                    if (newFeedRootText.length <= MAX_CHUNK_SIZE) {
+                        publishWithoutRotation(keyId, rootFilename, newFeedRootCipherText);
+                    } else {
+                        publishWithRotation(audience, keyId, key, rootFilename, newFeedRootCipherText);
+                    }
+                });
+            }).catch(function(e) {
+                console.log("Could not publish message, group key not available", audience, messageObject, e);
             });
         },
 
         read: function(userId, filename, keyId, action) {
-            blockslack.keys.withSymmetricKeyFromUser(userId, keyId, function(key) {
+            blockslack.keysasync.getSymmetricKeyFromUser(userId, keyId).then(function(keyObject) {
+                var key = keyObject.key;
                 var getFileOptions = { decrypt: false, username: userId };
                 blockstack.getFile(filename, getFileOptions).then(function(cipherText) {
                     var feedRoot = parseExistingFeedRootOrCreateNew([], cipherText, key);
