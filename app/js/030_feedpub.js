@@ -30,18 +30,10 @@ blockslack.feedpub = (function(){
     };
 
     var publishWithoutRotation = function(keyId, rootFilename, newFeedRootCipherText) {
-        return blockstack.putFile(
-            rootFilename,
-            newFeedRootCipherText,
-            DONT_ENCRYPT).then(function() {
-                return blockslack.polling.forceReadFeed(
-                    blockstack.loadUserData().username,
-                    rootFilename,
-                    keyId);
-            }).catch(function(e) {
-                console.log("Could not publish message, failed to rewrite feed file. Feed: ", keyId);
-                return Promise.reject(Error("Could not publish message, failed to rewrite feed file"));
-            });
+        return blockstack.putFile(rootFilename, newFeedRootCipherText, DONT_ENCRYPT).catch(function(e) {
+            console.log("Could not publish message, failed to rewrite feed file. Feed: ", keyId);
+            return Promise.reject(Error("Could not publish message, failed to rewrite feed file"));
+        });
     };
 
     return {
@@ -66,7 +58,11 @@ blockslack.feedpub = (function(){
                     //       links when older chat history needs to be reconstructed).
                     //       For now, everything goes in one file, but performance will begin to degrade
                     //       after a set of users have exchanged a lot of messages.
-                    return publishWithoutRotation(keyId, rootFilename, newFeedRootCipherText);
+                    return publishWithoutRotation(keyId, rootFilename, newFeedRootCipherText).then(function() {
+                        var username = blockslack.authentication.getUsername();
+                        blockslack.polling.consumeFeed(username, rootFilename, feedRoot);
+                        return Promise.resolve();
+                    });
                 });
             }).catch(function(e) {
                 console.log("Could not publish message, group key not available", audience, messageObject, e);

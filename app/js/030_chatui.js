@@ -1,8 +1,4 @@
 blockslack.chatui = (function(){
-    
-    // privates:
-
-    var UI_UPDATE_INTERVAL = 2500;
 
     var currentGroupId = undefined;
     var currentChannelName = undefined;
@@ -175,12 +171,14 @@ blockslack.chatui = (function(){
     var switchChannel = function(newChannelName) {
         currentChannelName = newChannelName;
         newMessageElement.val("");
+        updateUi();
     };
 
     var switchGroup = function(newGroupId) {
         currentGroupId = newGroupId;
         currentChannelName = undefined;
         newMessageElement.val("");
+        updateUi();
     };
 
     var updateUi = function() {
@@ -192,15 +190,8 @@ blockslack.chatui = (function(){
         $('[data-toggle="tooltip"]').tooltip();
     };
 
-    // initialization:
-    // (don't depend on other packages, order of package initialization is not guaranteed)
-    // foo = 1;
-    // bar = 2;
-
     return {
 
-        // publics:
-        
         addChannel: function() {
             if (blockslack.authentication.isSignedIn() && currentGroupId) {
                 var channelName = prompt(blockslack.strings.PICK_CHANNEL_NAME);
@@ -267,8 +258,11 @@ blockslack.chatui = (function(){
             }
         },
 
+        updateUi: function() {
+            updateUi();
+        },
+
         onload: function() {
-            setInterval(updateUi, UI_UPDATE_INTERVAL);
             newMessageElement.keypress(newMessageKeyPress);
         },
 
