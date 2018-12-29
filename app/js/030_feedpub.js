@@ -78,7 +78,7 @@ blockslack.feedpub = (function(){
 
         publish: function(audience, messageObject) {
             messageObject.ts = (new Date).getTime();
-            blockslack.keysasync.getSymmetricKeyForAudience(audience).then(function(keyObject) {
+            blockslack.keys.getSymmetricKeyForAudience(audience).then(function(keyObject) {
                 var keyId = keyObject.id;
                 var key = keyObject.key;
                 var rootFilename = feedFilename(keyId, 0);
@@ -100,7 +100,7 @@ blockslack.feedpub = (function(){
         },
 
         read: function(userId, filename, keyId, action) {
-            blockslack.keysasync.getSymmetricKeyFromUser(userId, keyId).then(function(keyObject) {
+            blockslack.keys.getSymmetricKeyFromUser(userId, keyId).then(function(keyObject) {
                 var key = keyObject.key;
                 var getFileOptions = { decrypt: false, username: userId };
                 blockstack.getFile(filename, getFileOptions).then(function(cipherText) {

@@ -47,7 +47,7 @@ blockslack.discovery = (function(){
 
         for (var userId in publishedFeedsByUser) {
             if (validId(userId)) {
-                blockslack.keysasync.getAsymmetricKey(userId).then(function(keyPair) {
+                blockslack.keys.getAsymmetricKey(userId).then(function(keyPair) {
                     var userId = keyPair.owner;
                     var publicKey = keyPair.public;
                     var feeds = publishedFeedsByUser[userId];
@@ -74,7 +74,7 @@ blockslack.discovery = (function(){
     };
 
     var updateWatchList = function(userId, watching) {
-        blockslack.keysasync.getAsymmetricKey().then(function(keyPair) {
+        blockslack.keys.getAsymmetricKey().then(function(keyPair) {
             var publicKey = keyPair.public;
             var privateKey = keyPair.private;
             var filename = userFeedsFile(userId, publicKey);
