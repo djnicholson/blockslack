@@ -115,6 +115,8 @@ blockslack.discovery = (function(){
                     existingState.watching[userId] = { };
                 }
             });
+
+            blockslack.discovery.updateWatchLists();
         },
 
         forEachWatchedFeed: function(action) {

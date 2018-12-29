@@ -12,6 +12,7 @@ blockslack.chatui = (function(){
     var messageListContentElement = $(".-message-list-content");
     var newMessageElement = $(".-new-message");
     var channelMemberListElement = $(".-channel-member-list");
+    var welcomeAreaElement = $(".-welcome");
 
     var formatDate = function(ts) {
         return (new Date(ts)).toLocaleDateString();
@@ -168,6 +169,10 @@ blockslack.chatui = (function(){
         messageListContentElement.append(element);
     };
 
+    var renderWelcomeArea = function() {
+        welcomeAreaElement.toggle(currentGroupId == undefined);
+    };
+
     var switchChannel = function(newChannelName) {
         currentChannelName = newChannelName;
         newMessageElement.val("");
@@ -187,6 +192,7 @@ blockslack.chatui = (function(){
         renderGroupButtons(allData);
         renderCurrentGroupChannelList(allData);
         renderCurrentChannel(allData);
+        renderWelcomeArea();
         $('[data-toggle="tooltip"]').tooltip();
     };
 
@@ -207,6 +213,15 @@ blockslack.chatui = (function(){
                             switchChannel(channelName);
                         });
                     }
+                }
+            }
+        },
+
+        addContact: function() {
+            if (blockslack.authentication.isSignedIn()) {
+                var username = prompt(blockslack.strings.ENTER_CONTACT_NAME);
+                if (username && username.length) {
+                    blockslack.discovery.addContact(username);
                 }
             }
         },
