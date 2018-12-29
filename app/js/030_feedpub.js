@@ -30,16 +30,17 @@ blockslack.feedpub = (function(){
     };
 
     var publishWithoutRotation = function(keyId, rootFilename, newFeedRootCipherText) {
-        blockstack.putFile(
+        return blockstack.putFile(
             rootFilename,
             newFeedRootCipherText,
             DONT_ENCRYPT).then(function() {
-                blockslack.polling.forceReadFeed(
+                return blockslack.polling.forceReadFeed(
                     blockstack.loadUserData().username,
                     rootFilename,
                     keyId);
             }).catch(function(e) {
                 console.log("Could not publish message, failed to rewrite feed file. Feed: ", keyId);
+                return Promise.reject(Error("Could not publish message, failed to rewrite feed file"));
             });
     };
 
@@ -49,12 +50,12 @@ blockslack.feedpub = (function(){
 
         publish: function(audience, messageObject) {
             messageObject.ts = (new Date).getTime();
-            blockslack.keys.getSymmetricKeyForAudience(audience).then(function(keyObject) {
+            return blockslack.keys.getSymmetricKeyForAudience(audience).then(function(keyObject) {
                 var keyId = keyObject.id;
                 var key = keyObject.key;
                 var rootFilename = feedFilename(keyId, 0);
                 blockslack.discovery.registerFeed(audience, keyId, rootFilename);
-                blockstack.getFile(rootFilename, DONT_DECRYPT).then(function(existingFeedCipherText) {
+                return blockstack.getFile(rootFilename, DONT_DECRYPT).then(function(existingFeedCipherText) {
                     var feedRoot = parseExistingFeedRootOrCreateNew(audience, existingFeedCipherText, key);
                     feedRoot.messages.push(messageObject);
                     var newFeedRootText = JSON.stringify(feedRoot);
@@ -65,10 +66,11 @@ blockslack.feedpub = (function(){
                     //       links when older chat history needs to be reconstructed).
                     //       For now, everything goes in one file, but performance will begin to degrade
                     //       after a set of users have exchanged a lot of messages.
-                    publishWithoutRotation(keyId, rootFilename, newFeedRootCipherText);
+                    return publishWithoutRotation(keyId, rootFilename, newFeedRootCipherText);
                 });
             }).catch(function(e) {
                 console.log("Could not publish message, group key not available", audience, messageObject, e);
+                return Promise.reject("Could not publish message, group key not available");
             });
         },
 

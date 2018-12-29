@@ -31,8 +31,9 @@ blockslack.polling = (function(){
     };
 
     var updateFeed = function(userId, filename, keyId) {
-        blockslack.feedpub.read(userId, filename, keyId).then(function(feedContents) {
+        return blockslack.feedpub.read(userId, filename, keyId).then(function(feedContents) {
             consumeFeed(userId, filename, keyId, feedContents);
+            return Promise.resolve();
         });
     };
 
@@ -66,7 +67,7 @@ blockslack.polling = (function(){
         // publics:
         
         forceReadFeed: function(userId, filename, keyId) {
-            updateFeed(userId, filename, keyId);
+            return updateFeed(userId, filename, keyId);
         },
 
         onload: function() {
