@@ -43,8 +43,15 @@ blockslack.chatui = (function(){
                 var channelData = groupData.channels[currentChannelName];
                 if (channelData && channelData.audience && channelData.audience.members) {
                     var audience = channelData.audience.members;
-                    blockslack.feedpub.publish(audience, message);
-                    newMessageElement.val("");
+                    newMessageElement.prop("disabled", true);
+                    blockslack.feedpub.publish(audience, message).then(function() {
+                        newMessageElement.prop("disabled", false);
+                        newMessageElement.val("");
+                        newMessageElement.focus();
+                    }).catch(function(e) {
+                        newMessageElement.prop("disabled", false);
+                        newMessageElement.focus();
+                    });
                 }
             }
         }
