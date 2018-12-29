@@ -13,7 +13,6 @@ blockslack.aggregation = (function(){
     var KIND_TITLE_CHANGE = "t";
     var KIND_AUDIENCE_CHANGE = "a";
     var KIND_MESSAGE = "m";
-    var KIND_RX = "rx";
 
     var getChannelData = function(groupData, channelName) {
         var channelData = groupData.channels[channelName] || { messages: [] };
@@ -119,15 +118,13 @@ blockslack.aggregation = (function(){
         },
 
         newMessage: function(senderUserId, audience, message) {
-            if (message[FIELD_KIND] != KIND_RX) {
-                if (validate(senderUserId, audience, message, false)) {
-                    var allData = blockslack.aggregation.getAllData();
-                    var groupId = message[FIELD_GROUP_ID];
-                    allData[groupId] = allData[groupId] || { channels: {} };
-                    updateGroupTitle(allData[groupId], message);
-                    updateMemberList(allData[groupId], message, senderUserId, audience);
-                    updateMessages(allData[groupId], message, senderUserId, audience);
-                }
+            if (validate(senderUserId, audience, message, false)) {
+                var allData = blockslack.aggregation.getAllData();
+                var groupId = message[FIELD_GROUP_ID];
+                allData[groupId] = allData[groupId] || { channels: {} };
+                updateGroupTitle(allData[groupId], message);
+                updateMemberList(allData[groupId], message, senderUserId, audience);
+                updateMessages(allData[groupId], message, senderUserId, audience);
             }
         },
 

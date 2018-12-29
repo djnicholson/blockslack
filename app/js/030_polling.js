@@ -9,40 +9,20 @@ blockslack.polling = (function(){
     var currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN;
 
     var renderedAtLeastOnce = {};
+
+    var feedIndex = 0;
     
     var consumeFeed = function(userId, filename, keyId, feedContents) {
         var rxStatus = blockslack.authentication.state("rxStatus") || {};
         blockslack.authentication.state("rxStatus", rxStatus);
-
         var key = userId + "_" + filename + "_" + keyId;
         var lastRead = rxStatus[key] || 0;
-        var lastConsumed = undefined;
-        var updateQueue = {};
         for (var i = 0; i < feedContents.messages.length; i++) {
             var item = feedContents.messages[i];
-            if (item.ts && item.ts > lastRead) {
+            if (item.ts && (item.ts > lastRead)) {
                 newMessage(userId, feedContents.audience, item);
                 rxStatus[key] = item.ts;
-                if (item.k === "rx") {
-                    var foreignKey = item.u + "_" + item.f + "_" + item.sk;
-                    if (!rxStatus[foreignKey] || (rxStatus[foreignKey] < item.max)) {
-                        updateQueue[foreignKey] = item;
-                    }
-                } else {
-                    lastConsumed = item.ts;
-                }
             }
-        }
-
-        if (feedContents.audience && lastConsumed) {
-            blockslack.feedpub.publish(
-                feedContents.audience,
-                { k: "rx", max: lastConsumed, u: userId, f: filename, sk: keyId });
-        }
-
-        for (var foreignKey in updateQueue) {
-            var item = updateQueue[foreignKey];
-            updateFeed(item.u, item.f, item.sk);
         }
     };
 
@@ -69,7 +49,8 @@ blockslack.polling = (function(){
         });
 
         if (allFeeds.length > 0) {
-            var selected = allFeeds[Math.floor(Math.random() * allFeeds.length)];
+            feedIndex = (feedIndex + 1) >= allFeeds.length ? 0 : feedIndex + 1;
+            var selected = allFeeds[feedIndex];
             updateFeed(selected[0], selected[1], selected[2]);
         }
 
