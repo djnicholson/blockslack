@@ -2,9 +2,9 @@ blockslack.discovery = (function(){
     
     // privates:
 
-    var PERSISTED_STATE_FILE = "discovery.json";
+    var PERSISTED_STATE_FILE = "discovery/discovery.json";
 
-    var USER_FEEDS_FILE = "discovery_%1.json";
+    var USER_FEEDS_FILE = "discovery/discovery_%1.json";
 
     var lastPublishedHash = "";
 
