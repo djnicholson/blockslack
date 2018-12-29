@@ -90,7 +90,7 @@ blockslack.keysasync = (function(){
             var derivationPath = asymmetricKeyForCurrentUser.private + "/" + normalizeAudience(audience).join();
             var decryptedSymmetricKey = sha256(derivationPath);
             var symmetricKeyId = sha256(decryptedSymmetricKey).substring(0, 10);
-            derivedKey = { id: symmetricKeyId, key: decryptedSymmetricKey };
+            derivedKey = { id: symmetricKeyId, key: decryptedSymmetricKey, owner: currentUsername };
         });
 
         var cacheIfRequired = deriveKey.then(function() {
@@ -160,7 +160,7 @@ blockslack.keysasync = (function(){
         });
 
         return getDecryptedSymmetricKey.then(function(decryptedSymmetricKey) {
-            var result = { id: symmetricKeyId, key: decryptedSymmetricKey };
+            var result = { id: symmetricKeyId, key: decryptedSymmetricKey, owner: keyOwnerUsername };
             keyCache[cacheKey] = result;
             return Promise.resolve(result);
         });
@@ -195,16 +195,27 @@ blockslack.keysasync = (function(){
         return SYMMETRIC_KEY_FILE_FORMAT.replace("%1", sha256(userId + "_" + keyId));
     };
 
-   
-
     return {
 
-        // publics:
-        
-        initialize: function() {
-            
-        },
-
+        /**
+         * Returns a promise that resolves to an object of the form:
+         *  { public: "...", private: "...", owner: "..." }
+         * Where:
+         *  public is the public portion of the EC key pair
+         *  private is the private portion of the EC key pair, and may be undefined if unknown
+         *  owner is the username of the person who generated the key
+         *
+         * If the username parameter is undefined then they key pair for the current user is
+         * returned.  If the current user has never generated a key pair, then a new key pair
+         * will be generated and returned.
+         *
+         * The returned promise resolving is a guarantee that the corresponding private portion
+         * has been persisted by the owner, and that the public portion has been publically 
+         * published.
+         *
+         * An internal cache is used; subsequent lookups for a key pair that has already been
+         * retrieved within the current session will not incur any network cost.
+         */
         getAsymmetricKey: function(username) {
             if (username) {
                 return getAsymmetricKeyForArbitraryUser(username);
@@ -213,10 +224,41 @@ blockslack.keysasync = (function(){
             }
         },
 
+        /**
+         * Returns a promise that resolves to an object of the form:
+         *  { id: "...", key: "...", owner: "...", publishedTo: [ "...", ... ] }
+         * Where:
+         *  id is a unique identifier for the key (a hash of the key) that can be made public
+         *  key is the actual key and should be kept secret
+         *  owner is the username of the person who generated the key
+         *  publishedTo is an array of usernames that they key has been published to during this
+         *    session (and may be undefined)
+         *
+         * An internal cache is used; subsequent lookups for a key that has already been
+         * retrieved within the current session will not incur any network cost.
+         */
         getSymmetricKeyFromUser: function(keyOwnerUsername, symmetricKeyId) {
             return getSymmetricKeyFromUser(keyOwnerUsername, symmetricKeyId);
         },
 
+        /**
+         * Returns a promise that resolves to an object of the form:
+         *  { id: "...", key: "...", owner: "...", publishedTo: [ "...", ... ] }
+         * Where:
+         *  id is a unique identifier for the key (a hash of the key) that can be made public
+         *  key is the actual key and should be kept secret
+         *  owner is the username of the current user
+         *  publishedTo is an array of usernames that they key has been published to
+         *
+         * An internal cache is used; subsequent lookups for a key that has already been
+         * generated within the current session will not incur any network cost.
+         *
+         * The returned promise resolving is a guarantee that all entries in audience were
+         * valid usernames and that the key has been published to each of these users.
+         * If the returned promise rejects, the key may still have been published to some
+         * members of audience; only those that failed will be retried upon any subsequent 
+         * invocation.
+         */
         getSymmetricKeyForAudience: function(audience) {
             return getSymmetricKeyForAudience(audience);
         },
