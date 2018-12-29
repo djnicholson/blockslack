@@ -1,7 +1,5 @@
 blockslack.keysasync = (function(){
     
-    // privates:
-    
     var MASTER_PRIVATE_KEY_FILE = "keys/_private.txt";
     var MASTER_PUBLIC_KEY_FILE = "keys/_public.txt";
     var SYMMETRIC_KEY_FILE_FORMAT = "keys/%1.txt";
@@ -22,10 +20,16 @@ blockslack.keysasync = (function(){
             if (publicKey) {
                 return Promise.resolve(publicKey);
             } else {
-                return Promise.reject(Error(username + " has not published their public key"));
+                return Promise.resolve(undefined);
             }
         }).catch(function(e) {
-            return Promise.reject(Error("Could not retrieve public key for " + username + "; " + e));
+            return blockstack.lookupProfile(username).then(function() {
+                // user does exist; they have just never used this app
+                return Promise.resolve(undefined);
+            }).catch(function() {
+                // user does not exist
+                return Promise.reject(Error("Could not retrieve public key for " + username + "; user does not exist"));
+            });
         });
 
         return getPublicKey.then(function(publicKey) {
@@ -35,7 +39,10 @@ blockslack.keysasync = (function(){
                 private: undefined,
             };
 
-            keyCache.asymmetric[username] = result;
+            if (publicKey) {
+                keyCache.asymmetric[username] = result;
+            }
+
             return Promise.resolve(result);
         });
     };
@@ -115,11 +122,15 @@ blockslack.keysasync = (function(){
             for (var i = 0; i < audience.length; i++) {
                 if (derivedKey.publishedTo.indexOf(audience[i]) == -1) {
                     var publishPromise = getAsymmetricKeyForArbitraryUser(audience[i]).then(function(keyPair) {
-                        var publishTo = keyPair.owner;
-                        var filename = symmetricKeyFilename(publishTo, derivedKey.id);
-                        var content = blockstack.encryptContent(derivedKey.key, { publicKey: keyPair.public });
-                        var publishToThisUser = blockstack.putFile(filename, content, { encrypt: false });
-                        return publishToThisUser.then(function() { derivedKey.publishedTo.push(publishTo); });
+                        if (keyPair.public) {
+                            var publishTo = keyPair.owner;
+                            var filename = symmetricKeyFilename(publishTo, derivedKey.id);
+                            var content = blockstack.encryptContent(derivedKey.key, { publicKey: keyPair.public });
+                            var publishToThisUser = blockstack.putFile(filename, content, { encrypt: false });
+                            return publishToThisUser.then(function() { derivedKey.publishedTo.push(publishTo); });
+                        } else {
+                            return Promise.resolve();
+                        }
                     });
                     publishPromises.push(publishPromise);
                 }
@@ -207,7 +218,8 @@ blockslack.keysasync = (function(){
          * Returns a promise that resolves to an object of the form:
          *  { public: "...", private: "...", owner: "..." }
          * Where:
-         *  public is the public portion of the EC key pair
+         *  public is the public portion of the EC key pair, and may be undefined if the owner
+         *    is a valid blockstack user that has never used this app
          *  private is the private portion of the EC key pair, and may be undefined if unknown
          *  owner is the username of the person who generated the key
          *
