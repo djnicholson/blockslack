@@ -74,6 +74,21 @@ blockslack.keysasync = (function(){
         return cache;
     };
 
+    var publishPublicKeyIfNotDoneYetThisSession = function(masterAsymmetricKeyPair) {
+        if (!masterAsymmetricKeyPair.published) {
+            var uploadPublicKey = blockstack.putFile(
+                MASTER_PUBLIC_KEY_FILE, 
+                masterAsymmetricKeyPair.public, 
+                { encrypt: false });
+            return uploadPublicKey.then(function() { 
+                masterAsymmetricKeyPair.published = true; 
+                return Promise.resolve(masterAsymmetricKeyPair); 
+            });
+        } else {
+            return Promise.resolve(masterAsymmetricKeyPair);
+        }
+    };
+
     var sha256 = function(input) {
         return sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(input));
     };
@@ -96,7 +111,7 @@ blockslack.keysasync = (function(){
             if (username) {
                 return getAsymmetricKeyForArbitraryUser(username);
             } else {
-                return getAsymmetricKeyForCurrentUser();
+                return getAsymmetricKeyForCurrentUser().then(publishPublicKeyIfNotDoneYetThisSession);
             }
         },
 
