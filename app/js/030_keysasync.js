@@ -21,7 +21,7 @@ blockslack.keysasync = (function(){
                 return Promise.reject(Error(username + " has not published their public key"));
             }
         }).catch(function(e) {
-            return Promise.reject(Error("Could not retrieve public key for " + username + " (not a user of this app?); error: " + e));
+            return Promise.reject(Error("Could not retrieve public key for " + username + "; " + e));
         });
 
         return getPublicKey.then(function(publicKey) {
@@ -69,9 +69,50 @@ blockslack.keysasync = (function(){
     };
 
     var getKeyCache = function() {
-        var cache = blockslack.authentication.state("keyCache") || { symmetric: {}, asymmetric: {} };
-        blockslack.authentication.state("keyCache", cache);
-        return cache;
+        var keyCache = blockslack.authentication.state("keyCache") || { symmetric: {}, asymmetric: {} };
+        blockslack.authentication.state("keyCache", keyCache);
+        return keyCache;
+    };
+
+    var getSymmetricKeyFromUser = function(keyOwnerUsername, symmetricKeyId) {
+        var currentUsername;
+        if (!blockslack.authentication.isSignedIn() || !(currentUsername = blockslack.authentication.getUsername())) {
+            return Promise.reject(Error("Must be signed in to retrieve symmetric keys from other users"));
+        }
+
+        var keyCache = getKeyCache();
+        var cacheKey = keyOwnerUsername+ "_" + symmetricKeyId;
+        var fromCache = keyCache.symmetric[cacheKey];
+        if (fromCache) {
+            return Promise.resolve(fromCache);
+        }
+
+        var filename = symmetricKeyFilename(currentUsername, symmetricKeyId);
+        var getFileOptions = { decrypt: false, username: keyOwnerUsername };
+        var getEncryptedSymmetricKey = blockstack.getFile(filename, getFileOptions).then(function(encryptedSymmetricKey) {
+            if (encryptedSymmetricKey) {
+                return Promise.resolve(encryptedSymmetricKey);
+            } else {
+                return Promise.reject(Error("Key " + symmetricKeyId + " has not ben published by " + keyOwnerUsername));
+            }
+        }).catch(function(e){
+            return Promise.reject(Error("Could not retrieve key " + symmetricKeyId + " from " + keyOwnerUsername + "; " + e));
+        });
+
+        var getDecryptedSymmetricKey = Promise.all([ getEncryptedSymmetricKey, getAsymmetricKeyForCurrentUser() ]).then(function(results) {
+            var encryptedSymmetricKey = results[0];
+            var asymmetricKeyForCurrentUser = results[1];
+            var decryptedSymmetricKey = blockstack.decryptContent(
+                encryptedSymmetricKey, 
+                { privateKey: asymmetricKeyForCurrentUser.private });
+            return Promise.resolve(decryptedSymmetricKey);
+        });
+
+        return getDecryptedSymmetricKey.then(function(decryptedSymmetricKey) {
+            var result = { id: symmetricKeyId, key: decryptedSymmetricKey };
+            keyCache[cacheKey] = result;
+            return Promise.resolve(result);
+        });
     };
 
     var publishPublicKeyIfNotDoneYetThisSession = function(masterAsymmetricKeyPair) {
@@ -115,16 +156,8 @@ blockslack.keysasync = (function(){
             }
         },
 
-        withMasterKey: function(action) {
-            
-        },
-
-        withPublicKeyForUser: function(userId, action) {
-            
-        },
-
-        withSymmetricKeyFromUser: function(keyOwnerUserId, symmetricKeyId, action) {
-            
+        getSymmetricKeyFromUser: function(keyOwnerUsername, symmetricKeyId) {
+            return getSymmetricKeyFromUser(keyOwnerUsername, symmetricKeyId);
         },
 
         withSymmetricKeyForAudience: function(audience, action) {

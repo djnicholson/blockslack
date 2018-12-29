@@ -68,6 +68,11 @@ blockslack.authentication = (function(blockstack){
             if (!blockslack.authentication.isSignedIn) {
                 return null;
             } else {
+
+                if (!key) {
+                    return currentUserState;
+                }
+
                 if (value) {
                     currentUserState[key] = value;
                 }
