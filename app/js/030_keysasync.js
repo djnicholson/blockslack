@@ -26,6 +26,7 @@ blockslack.keysasync = (function(){
 
         return getPublicKey.then(function(publicKey) {
             var result = { 
+                owner: username,
                 public: publicKey, 
                 private: undefined,
             };
@@ -59,6 +60,7 @@ blockslack.keysasync = (function(){
 
         return getPrivateKey.then(function(masterPrivateKey) {
             var result = { 
+                owner: username,
                 public: blockstack.getPublicKeyFromPrivate(masterPrivateKey), 
                 private: masterPrivateKey,
             };
@@ -74,6 +76,55 @@ blockslack.keysasync = (function(){
         return keyCache;
     };
 
+    var getSymmetricKeyForAudience = function(audience) {
+        var currentUsername;
+        if (!blockslack.authentication.isSignedIn() || !(currentUsername = blockslack.authentication.getUsername())) {
+            return Promise.reject(Error("Must be signed in to generate symmetric keys for other users"));
+        }
+
+        var keyCache = getKeyCache();
+        
+        var derivedKey;
+
+        var deriveKey = getAsymmetricKeyForCurrentUser().then(function(asymmetricKeyForCurrentUser) {
+            var derivationPath = asymmetricKeyForCurrentUser.private + "/" + normalizeAudience(audience).join();
+            var decryptedSymmetricKey = sha256(derivationPath);
+            var symmetricKeyId = sha256(decryptedSymmetricKey).substring(0, 10);
+            derivedKey = { id: symmetricKeyId, key: decryptedSymmetricKey };
+        });
+
+        var cacheIfRequired = deriveKey.then(function() {
+            var cacheKey = currentUsername + "_" + derivedKey.id;
+            var currentCacheEntry = keyCache.symmetric[cacheKey];
+            if (currentCacheEntry) {
+                derivedKey = currentCacheEntry;
+            } else {
+                keyCache.symmetric[cacheKey] = derivedKey;
+            }
+        });
+
+        var publishAsRequired = cacheIfRequired.then(function() {
+            derivedKey.publishedTo = derivedKey.publishedTo || [];
+            var publishPromises = [];
+            for (var i = 0; i < audience.length; i++) {
+                if (derivedKey.publishedTo.indexOf(audience[i]) == -1) {
+                    var publishPromise = getAsymmetricKeyForArbitraryUser(audience[i]).then(function(keyPair) {
+                        var publishTo = keyPair.owner;
+                        var filename = symmetricKeyFilename(publishTo, derivedKey.id);
+                        var content = blockstack.encryptContent(derivedKey.key, { publicKey: keyPair.public });
+                        var publishToThisUser = blockstack.putFile(filename, content, { encrypt: false });
+                        return publishToThisUser.then(function() { derivedKey.publishedTo.push(publishTo); });
+                    });
+                    publishPromises.push(publishPromise);
+                }
+            }
+
+            return Promise.all(publishPromises);
+        });
+
+        return publishAsRequired.then(function() { return Promise.resolve(derivedKey); });
+    };
+
     var getSymmetricKeyFromUser = function(keyOwnerUsername, symmetricKeyId) {
         var currentUsername;
         if (!blockslack.authentication.isSignedIn() || !(currentUsername = blockslack.authentication.getUsername())) {
@@ -81,7 +132,7 @@ blockslack.keysasync = (function(){
         }
 
         var keyCache = getKeyCache();
-        var cacheKey = keyOwnerUsername+ "_" + symmetricKeyId;
+        var cacheKey = keyOwnerUsername + "_" + symmetricKeyId;
         var fromCache = keyCache.symmetric[cacheKey];
         if (fromCache) {
             return Promise.resolve(fromCache);
@@ -113,6 +164,12 @@ blockslack.keysasync = (function(){
             keyCache[cacheKey] = result;
             return Promise.resolve(result);
         });
+    };
+
+    var normalizeAudience = function(audience) {
+        var audienceClone = audience.slice();
+        audienceClone.sort(function(a, b){ return a[1] > b[1] ? 1 : -1; });
+        return audienceClone;
     };
 
     var publishPublicKeyIfNotDoneYetThisSession = function(masterAsymmetricKeyPair) {
@@ -160,8 +217,8 @@ blockslack.keysasync = (function(){
             return getSymmetricKeyFromUser(keyOwnerUsername, symmetricKeyId);
         },
 
-        withSymmetricKeyForAudience: function(audience, action) {
-            
+        getSymmetricKeyForAudience: function(audience) {
+            return getSymmetricKeyForAudience(audience);
         },
 
     };
