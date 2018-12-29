@@ -82,11 +82,6 @@ blockslack.aggregation = (function(){
         }
     };
 
-    // initialization:
-    // (don't depend on other packages, order of package initialization is not guaranteed)
-    // foo = 1;
-    // bar = 2;
-
     return {
 
         // publics:

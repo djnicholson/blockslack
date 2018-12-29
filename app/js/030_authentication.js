@@ -31,6 +31,10 @@ blockslack.authentication = (function(blockstack){
     return {
 
         // publics:
+
+        getUsername: function() {
+            return blockstack.loadUserData().username;
+        },
         
         initialize: function() {
             currentUserState = { };
