@@ -1,7 +1,5 @@
 blockslack.aggregation = (function(){
     
-    // privates:
-    
     var FIELD_CHANNEL_NAME = "c";
     var FIELD_TIMESTAMP = "ts";
     var FIELD_GROUP_ID = "g";
@@ -14,158 +12,154 @@ blockslack.aggregation = (function(){
     var KIND_AUDIENCE_CHANGE = "a";
     var KIND_MESSAGE = "m";
 
-    var audienceAtTime = function(channelData, ts) {
-        var audience = channelData.audience;
-        if (audience) {
-            var relevantMemberList = [];
-            for (var i in audience.history) {
-                if (audience.history[i][0] <= ts) {
-                    relevantMemberList = audience.history[i][1];
-                }
-            }
+    var ChannelData = function() {
+        var HISTORY_TYPE_MSG = "m";
+        var HISTORY_TYPE_AUDIENCE = "a";
 
-            if (audience.ts <= ts) {
-                relevantMemberList = audience.members;
-            }
-
-            return relevantMemberList;
-        } else {
-            return [];
-        }
-    };
-
-    var getChannelData = function(groupData, channelName) {
-        var channelData = groupData.channels[channelName] || { messages: [] };
-        groupData.channels[channelName] = channelData;
-        return channelData;
-    };
-
-    var pushMessage = function(channelData, ts, from, text, meta) {
-        var allMessages = channelData.messages;
-        allMessages.push({ ts: ts, from: from, text: text, meta: meta });
-        updateChannelChecksum(channelData, ts);
-        allMessages.sort(function(a, b) { return a.ts - b.ts; });
-    };
-
-    var updateChannelChecksum = function(channelData, ts) {
-        var maxChecksum = Math.round(Number.MAX_SAFE_INTEGER / 2);
-        var existingChecksum = channelData.messagesChecksum || 0;
-        var newChecksum = (existingChecksum + ts) % maxChecksum;
-        channelData.messagesChecksum = newChecksum;
-    };
-
-    var updateGroupTitle = function(groupData, message, senderUserId) {
-        if (!groupData.title) {
-            groupData.title = {
-                title: message[FIELD_GROUP_TITLE],
-                ts: 0,
-            }; 
-        } else {
-            var isMember = false;
-            for (var channelName in groupData.channels) {
-                var audience = groupData.channels[channelName].audience;
-                isMember = isMember || wasMemberOfChannelAtTime(senderUserId, groupData.channels[channelName], message[FIELD_TIMESTAMP]);
-            }
-
-            if (!isMember) {
-                console.log(senderUserId + " tried to update the title of a group they are not a member of");
-                return;
-            }
-
-            if ((message[FIELD_KIND] == KIND_TITLE_CHANGE) &&
-                (message[FIELD_TIMESTAMP] > groupData.title.ts)) {
-                groupData.title.title = message[FIELD_GROUP_TITLE];
-                groupData.title.ts = message[FIELD_TIMESTAMP];
-            }
-        }
-    };
-
-    var updateMemberList = function(groupData, message, senderUserId, latestRecipients) {
-
-        //
-        // TODO: Store this as a list of all memberchange messages received (even those that
-        //       seem invalid at time of receipt). Then, at rendering time, decide which are valid
-        //       and intersperse them with messages (get rid of this "meta" concept).
-        //
-
-        if (message[FIELD_CHANNEL_NAME]) {
-            var channelData = getChannelData(groupData, message[FIELD_CHANNEL_NAME]);
-            if (!channelData.audience) {
-                channelData.audience = {
-                    members: latestRecipients,
-                    history: [],
-                    ts: 0,
-                };
+        this.messagesChecksum = 0;
+        this.channelHistory = [];
+        this.messages = [];
+        this.audiences = [];
+        
+        this.currentAudience = function() {
+            if (this.audiences.length) {
+                return this.audiences[this.audiences.length - 1][1];
             } else {
-                var ts = message[FIELD_TIMESTAMP];
+                return [];
+            }
+        };
 
-                if (!wasMemberOfChannelAtTime(senderUserId, channelData, ts)) {
-                    console.log(senderUserId + " tried to update audience of a channel they are not a member of");
-                    return;
+        this.generateAudienceChangeMessage = function(ts, senderUserId, oldAudience, newAudience) {
+            for (var i = 0; i < oldAudience.length; i++) {
+                if (newAudience.indexOf(oldAudience[i]) == -1) {
+                    this.messages.push({
+                        ts: ts,
+                        from: senderUserId,
+                        text: blockslack.strings.MEMBER_REMOVED.replace("%1", oldAudience[i]),
+                        meta: true,
+                    });
                 }
+            }
 
-                if (validate(senderUserId, latestRecipients, message, true)) {
-                    if (message[FIELD_KIND] == KIND_AUDIENCE_CHANGE) {
-                        var newAudience = message[FIELD_MEMBER_LIST];
-                        var oldAudience = audienceAtTime(channelData, ts - 1);
+            for (var i = 0; i < newAudience.length; i++) {
+                if (oldAudience.indexOf(newAudience[i]) == -1) {
+                    this.messages.push({
+                        ts: ts,
+                        from: senderUserId,
+                        text: blockslack.strings.MEMBER_ADDED.replace("%1", newAudience[i]),
+                        meta: true,
+                    });
+                }
+            }
+        };
 
-                        for (var i in newAudience) {
-                            (oldAudience.indexOf(newAudience[i]) == -1) && 
-                                pushMessage(
-                                    channelData, 
-                                    ts, 
-                                    senderUserId, 
-                                    blockslack.strings.MEMBER_ADDED.replace("%1", newAudience[i]), 
-                                    true);
-                        }
+        this.isMember = function(ts, username) {
+            var i = this.audiences.length - 1;
+            while ((i >= 0) && (this.audiences[i][0] > ts)) {
+                i--;
+            }
 
-                        for (var i in oldAudience) {
-                            (newAudience.indexOf(oldAudience[i]) == -1) &&
-                                pushMessage(
-                                    channelData, 
-                                    ts, 
-                                    senderUserId, 
-                                    blockslack.strings.MEMBER_REMOVED.replace("%1", oldAudience[i]), 
-                                    true);
-                        }
+            var audience = (i < 0) ? [] : this.audiences[i][1];
+            return audience.indexOf(username) != -1;
+        };
 
-                        channelData.audience.history.push([channelData.audience.ts, oldAudience]);
-                        channelData.audience.members = newAudience;
-                        channelData.audience.ts = ts;
+        this.pushMessage = function(ts, senderUserId, audience, text) {
+            this.channelHistory.push([ts, HISTORY_TYPE_MSG, senderUserId, audience, text]);
+            this.refresh();
+        };
+
+        this.pushAudienceChange = function(ts, senderUserId, newAudience) {
+            this.channelHistory.push([ts, HISTORY_TYPE_AUDIENCE, senderUserId, newAudience]);
+            this.refresh();  
+        };
+
+        this.refresh = function() {
+            this.channelHistory.sort(function(a, b) { return a[0] - b[0]; });
+
+            this.messagesChecksum = 0;
+            this.messages = [];
+            this.audiences = [];
+
+            for (var i = 0; i < this.channelHistory.length; i++) {
+                var historyEntry = this.channelHistory[i];
+                var ts = historyEntry[0];
+                var historyType = historyEntry[1];
+                var senderUserId = historyEntry[2];
+                var audience = historyEntry[3];
+                var text = historyEntry[4];
+
+                if ((this.audiences.length == 0) || 
+                    ((historyType == HISTORY_TYPE_AUDIENCE) && this.isMember(ts, senderUserId))) {
+                    
+                    if (this.audiences.length > 0) {
+                        var oldAudience = this.audiences[this.audiences.length - 1][1];
+                        this.generateAudienceChangeMessage(ts, senderUserId, oldAudience, audience);
                     }
+
+                    this.audiences.push([ ts, audience ]);
+                }
+
+                if ((historyType == HISTORY_TYPE_MSG) && this.isMember(ts, senderUserId)) {
+                    this.messages.push({
+                        ts: ts,
+                        from: senderUserId,
+                        text: text,
+                        meta: false,
+                    });
+                    this.updateChecksum(ts);
                 }
             }
-        }
+        };
+
+        this.updateChecksum = function(ts) {
+            var maxChecksum = Math.round(Number.MAX_SAFE_INTEGER / 2);
+            var existingChecksum = this.messagesChecksum || 0;
+            var newChecksum = (existingChecksum + ts) % maxChecksum;
+            this.messagesChecksum = newChecksum;
+        };
     };
 
-    var updateMessages = function(groupData, message, senderUserId, audience) {
-        if ((message[FIELD_KIND] == KIND_MESSAGE) && validate(senderUserId, audience, message, true)) {
-            var channelData = getChannelData(groupData, message[FIELD_CHANNEL_NAME]);
-            if (!wasMemberOfChannelAtTime(senderUserId, channelData, message[FIELD_TIMESTAMP])) {
-                console.log(senderUserId + " tried to send a message to a channel they are not a member of");
-            } else {
-                pushMessage(channelData, message[FIELD_TIMESTAMP], senderUserId, message[FIELD_MESSAGE], false);
+    var GroupData = function() {
+        this.channels = {};
+        this.titleHistory = [];
+        this.currentTitle = blockslack.strings.FALLBACK_GROUP_NAME;
+        
+        this.isMember = function(ts, username) {
+            for (var channelName in this.channels) {
+                var channelData = this.channels[channelName];
+                if (channelData.isMember(ts, username)) {
+                    return true;
+                }
             }
-        }
-    };
 
-    var validate = function(senderUserId, audience, message, channelRequired) {
-        if (!message[FIELD_TIMESTAMP] || !message[FIELD_GROUP_ID] || (channelRequired && !message[FIELD_CHANNEL_NAME])) {
-            console.log("Malformed message from " + senderUserId + " to " + JSON.stringify(audience) + ": " + JSON.stringify(message));
             return false;
-        } else {
-            return true;
-        }
+        };
+
+        this.pushTitleChange = function(ts, senderUserId, newTitle) {
+            this.titleHistory.push([ts, senderUserId, newTitle]);
+            this.refresh();
+        };
+
+        this.refresh = function() {
+            this.titleHistory.sort(function(a, b) { return a[0] - b[0]; });
+
+            this.currentTitle = blockslack.strings.FALLBACK_GROUP_NAME;
+            for (var i = 0; i < this.titleHistory.length; i++) {
+                var historyEntry = this.titleHistory[i];
+                var ts = historyEntry[0];
+                var senderUserId = historyEntry[1];
+                var newTitle = historyEntry[2];
+                if (this.isMember(ts, senderUserId)) {
+                    this.currentTitle = newTitle;
+                }
+            }
+        };
     };
 
-    var wasMemberOfChannelAtTime = function(username, channelData, ts) {
-        var relevantMemberList = audienceAtTime(channelData, ts);
-        var found = false;
-        for (var i in relevantMemberList) {
-            found = found || (relevantMemberList[i] == username);
-        }
-
-        return found;
+    var logMalformed = function(senderUserId, audience, message, reason) {
+        var message = "Malformed message from " + senderUserId + " to " + JSON.stringify(audience) + 
+            ": " + JSON.stringify(message) + " (" + reason + ")";
+        console.log(message);
     };
 
     return {
@@ -205,13 +199,41 @@ blockslack.aggregation = (function(){
         },
 
         newMessage: function(senderUserId, audience, message) {
-            if (validate(senderUserId, audience, message, false)) {
-                var allData = blockslack.aggregation.getAllData();
-                var groupId = message[FIELD_GROUP_ID];
-                allData[groupId] = allData[groupId] || { channels: {} };
-                updateGroupTitle(allData[groupId], message, senderUserId);
-                updateMemberList(allData[groupId], message, senderUserId, audience);
-                updateMessages(allData[groupId], message, senderUserId, audience);
+            var allData = blockslack.aggregation.getAllData();
+
+            var ts = message[FIELD_TIMESTAMP];
+            var groupId = message[FIELD_GROUP_ID];
+            var kind = message[FIELD_KIND];
+            if (!ts || !groupId || !kind) {
+                logMalformed(senderUserId, audience, message, "Mandatory field missing");
+                return;
+            }
+
+            allData[groupId] = allData[groupId] || new GroupData();
+            var groupData = allData[groupId];
+
+            if (kind == KIND_TITLE_CHANGE) {
+                var newTitle = message[FIELD_GROUP_TITLE];
+                groupData.pushTitleChange(ts, senderUserId, newTitle);
+            } else {
+                var channelName = message[FIELD_CHANNEL_NAME];
+                if (!channelName) {
+                    logMalformed(senderUserId, audience, message, "Channel missing");
+                    return;
+                }
+
+                groupData.channels[channelName] = groupData.channels[channelName] || new ChannelData();
+                var channelData = groupData.channels[channelName];
+
+                if (kind == KIND_AUDIENCE_CHANGE) {
+                    var newAudience = message[FIELD_MEMBER_LIST];
+                    channelData.pushAudienceChange(ts, senderUserId, newAudience);
+                } else if (kind == KIND_MESSAGE) {
+                    var text = message[FIELD_MESSAGE];
+                    channelData.pushMessage(ts, senderUserId, audience, text);
+                } else {
+                    logMalformed(senderUserId, audience, message, "Unknown message type: " + kind);
+                }
             }
         },
 

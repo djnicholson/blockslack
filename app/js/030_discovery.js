@@ -57,7 +57,7 @@ blockslack.discovery = (function(){
                         console.log("Discovery feed for " + userId + " updated: " + jsonHash);
                         if (publicKey) {
                             var filename = userFeedsFile(blockstack.loadUserData().username, publicKey);
-                            console.log("Publishing discovery feed for " + userId, json);
+                            console.log("Publishing discovery feed for " + userId);
                             var content = blockstack.encryptContent(json, { publicKey: publicKey });
                             blockstack.putFile(filename, content, { encrypt: false }).then(function(){ 
                                 console.log("Discovery feed for " + userId + " published: " + jsonHash);

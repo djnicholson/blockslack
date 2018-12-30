@@ -38,8 +38,8 @@ blockslack.chatui = (function(){
             var groupData = allData[currentGroupId];
             if (groupData && groupData.channels) {
                 var channelData = groupData.channels[currentChannelName];
-                if (channelData && channelData.audience && channelData.audience.members) {
-                    var audience = channelData.audience.members;
+                if (channelData) {
+                    var audience = channelData.currentAudience();
                     newMessageElement.prop("disabled", true);
                     blockslack.feedpub.publish(audience, message).then(function() {
                         newMessageElement.prop("disabled", false);
@@ -90,9 +90,9 @@ blockslack.chatui = (function(){
                 var groupData = allData[currentGroupId];
                 if (groupData && groupData.channels) {
                     var channelData = groupData.channels[currentChannelName];
-                    if (channelData && channelData.audience && channelData.audience.members) {
+                    if (channelData) {
                         var newAudience = [];
-                        var oldAudience = channelData.audience.members;
+                        var oldAudience = channelData.currentAudience();
                         for (var member in oldAudience) {
                             if (oldAudience[member] != username) {
                                 newAudience.push(oldAudience[member]);
@@ -125,7 +125,7 @@ blockslack.chatui = (function(){
             var channelData = groupData.channels[currentChannelName];
             if (channelData) {
                 var messages = channelData.messages;
-                var audience = channelData.audience;
+                var audience = channelData.currentAudience();
                 var lastPerson = undefined;
                 var lastDate = undefined;
                 for (var i = 0; i < messages.length; i++) {
@@ -151,15 +151,13 @@ blockslack.chatui = (function(){
                 var currentUsername = blockslack.authentication.getUsername();
                 var isMember = false;
                 channelMemberListElement.empty();
-                if (audience.members) {
-                    for (var member in audience.members) {
-                        var username = audience.members[member];
-                        isMember = isMember || (username == currentUsername);
-                        var memberElement = $($("#template-channelMember").html());
-                        memberElement.find(".-username").text(username);
-                        memberElement.find("a").click(function() { removeMember($(this).parent().find(".-username").text()); });
-                        channelMemberListElement.append(memberElement);
-                    }
+                for (var member in audience) {
+                    var username = audience[member];
+                    isMember = isMember || (username == currentUsername);
+                    var memberElement = $($("#template-channelMember").html());
+                    memberElement.find(".-username").text(username);
+                    memberElement.find("a").click(function() { removeMember($(this).parent().find(".-username").text()); });
+                    channelMemberListElement.append(memberElement);
                 }
 
                 $(".-show-if-member").toggle(isMember);
@@ -173,8 +171,7 @@ blockslack.chatui = (function(){
         channelListElement.empty();
         messageListElement.hide();
         if (groupData) {
-            var titleData = groupData.title;
-            groupName = titleData && titleData.title ? titleData.title : blockslack.strings.FALLBACK_GROUP_NAME;
+            groupName = groupData.currentTitle;
             if (groupData.channels) {
                 var sortedChannelNames = sortChannelNames(groupData.channels);
                 for (var i = 0; i < sortedChannelNames.length; i++) {
@@ -204,8 +201,8 @@ blockslack.chatui = (function(){
 
         var allGroups = [];
         for (var groupId in allData) {
-            var titleData = allData[groupId].title;
-            allGroups.push([ groupId, titleData && titleData.title ? titleData.title : blockslack.strings.FALLBACK_GROUP_NAME ]);
+            var title = allData[groupId].currentTitle;
+            allGroups.push([ groupId, title ]);
         }
 
         allGroups.sort(function(a, b){ return a[1] > b[1] ? 1 : -1; });
@@ -339,8 +336,8 @@ blockslack.chatui = (function(){
                     var groupData = allData[currentGroupId];
                     if (groupData && groupData.channels) {
                         var channelData = groupData.channels[currentChannelName];
-                        if (channelData && channelData.audience && channelData.audience.members) {
-                            var oldAudience = channelData.audience.members;
+                        if (channelData) {
+                            var oldAudience = channelData.currentAudience();
                             var newAudience = oldAudience.slice();
                             newAudience.push(newMember);
                             publishAudienceChange(oldAudience, newAudience);
