@@ -26,6 +26,10 @@
     margin-top: 10px;
 }
 
-.-comma-separated:not(:last-child):after {
-  content: ", ";
+.-channel-member-list-section {
+    @extend .pb-2;
+    @extend .mb-2;
+    font-size: 0.8em;
+    font-weight: bold;
+    border-bottom: 1px solid $color-purple;
 }

@@ -16,6 +16,12 @@ $color-red-light: #DAA3AD;
 $color-orange-light: #ECCEB7;
 $color-yellow-light: #FDF2BE;
 
+.-text-dark-purple { color: $color-dark-purple; }
+.-text-purple { color: $color-purple; }
+.-text-red { color: $color-red; }
+.-text-orange { color: $color-orange; }
+.-text-yellow { color: $color-yellow; }
+
 .-dark-purple { background-color: $color-dark-purple; }
 .-purple { background-color: $color-purple; }
 .-red { background-color: $color-red; }

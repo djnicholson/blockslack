@@ -3,12 +3,17 @@
         <div>
             You are in channel <span class="-current-channel-name"></span>.
         </div>
-        <div>
-            People in this channel:
-            <span class="-channel-member-list">
-
-            </span>
-            <a href="javascript:blockslack.chatui.addMember()">Add someone</a>
+        <div class="-channel-member-list-section">
+            <span class="-text-purple">People in this channel:</span>
+            <span class="-channel-member-list"></span>
+            <a 
+                href="javascript:blockslack.chatui.addMember()" 
+                data-toggle="tooltip"
+                data-placement="bottom"
+                title="Add another person to this channel"
+                class="badge">
+                <span class="oi oi-plus"></span>
+            </a>
         </div>
         <div class="-message-list-content">
         </div>
@@ -32,5 +37,5 @@
 </script>
 
 <script id="template-channelMember" type="text/x-template">
-    <span class="-message-person -comma-separated"></span>
+    <span class="badge text-white p-1 mr-1 -purple"></span>
 </script>
