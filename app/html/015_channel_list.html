@@ -1,49 +1,52 @@
 <div class="col-2 p-2 -channel-list">
 
-    <div class="pb-2">
+    <div class="-only-when-signed-in" style="display: none">
 
-        <span class="badge text-white p-2 mr-1 -dark-purple -only-when-signed-in" style="display: none">
-            <span class="oi oi-person"></span>
-            <span class="-current-username"></span>
-        </span>
+        <div class="pb-2">
 
-        <a 
+            <span class="badge text-white p-2 mr-1 -dark-purple">
+                <span class="oi oi-person"></span>
+                <span class="-current-username"></span>
+            </span>
+
+            <a 
+                data-toggle="tooltip"
+                data-placement="bottom"
+                title="Sign out"
+                onclick="blockslack.authentication.signOut()"
+                class="text-white"
+                href="#">
+                <span class="oi oi-account-logout"></span>
+            </a>
+
+        </div>
+
+        <div>
+            <span class="-current-group-name"></span>
+            <a 
+                data-toggle="tooltip"
+                data-placement="bottom"
+                title="Rename this group"
+                onclick="blockslack.chatui.renameGroup()"
+                class="-text-yellow-light -rename-group" 
+                style="display: none" 
+                href="#">
+                <span class="oi oi-pencil"></span>
+            </a>
+        </div>
+
+        <div class="-channel-buttons">
+        </div>
+        <div 
+            class="-add-channel-button mt-2" 
+            onclick="blockslack.chatui.addChannel()"
             data-toggle="tooltip"
-            data-placement="bottom"
-            title="Sign out"
-            onclick="blockslack.authentication.signOut()"
-            class="text-white -only-when-signed-in"
-            style="display: none" 
-            href="#">
-            <span class="oi oi-account-logout"></span>
-        </a>
+            data-placement="right"
+            title="Create a new channel"
+            style="display: none">
+            New channel
+        </div>
 
-    </div>
-
-    <div>
-        <span class="-current-group-name"></span>
-        <a 
-            data-toggle="tooltip"
-            data-placement="bottom"
-            title="Rename this group"
-            onclick="blockslack.chatui.renameGroup()"
-            class="-text-yellow-light -rename-group" 
-            style="display: none" 
-            href="#">
-            <span class="oi oi-pencil"></span>
-        </a>
-    </div>
-
-    <div class="-channel-buttons">
-    </div>
-    <div 
-        class="-add-channel-button mt-2" 
-        onclick="blockslack.chatui.addChannel()"
-        data-toggle="tooltip"
-        data-placement="right"
-        title="Create a new channel"
-        style="display: none">
-        New channel
     </div>
 
 </div>
