@@ -18,6 +18,15 @@ blockslack.chatui = (function(){
     var workAreaElement = $(".-work-area");
     var renameGroupLinkElement = $(".-rename-group");
 
+    var channelDisplayName = function(channelName) {
+        var index = channelName.lastIndexOf(":");
+        if (index != -1) {
+            channelName = channelName.substring(0, index);
+        }
+
+        return channelName;
+    };
+
     var formatDate = function(ts) {
         return (new Date(ts)).toLocaleDateString();
     };
@@ -87,11 +96,11 @@ blockslack.chatui = (function(){
             var confirmMessage;
             if (blockslack.authentication.getUsername() == username) {
                 confirmMessage = blockslack.strings.CONFIRM_REMOVE_SELF
-                    .replace("%1", currentChannelName);
+                    .replace("%1", channelDisplayName(currentChannelName));
             } else {
                 confirmMessage = blockslack.strings.CONFIRM_REMOVE_MEMBER
                     .replace("%1", username)
-                    .replace("%2", currentChannelName);
+                    .replace("%2", channelDisplayName(currentChannelName));
                 }
 
             if (confirm(confirmMessage)) {
@@ -122,7 +131,7 @@ blockslack.chatui = (function(){
         var hasUnread = 
             (channelName != currentChannelName) &&
             blockslack.readstatus.hasUnread(currentGroupId, channelName);
-        buttonElement.find(".-name").text("#" + channelName);
+        buttonElement.find(".-name").text("#" + channelDisplayName(channelName));
         buttonElement.find(".-unread-indicator").toggle(hasUnread);
         buttonElement.click(function(){ switchChannel(channelName); });
         channelListElement.append(buttonElement);
@@ -205,7 +214,7 @@ blockslack.chatui = (function(){
                 }
 
                 if (groupData.channels[currentChannelName]) {
-                    currentChannelElement.text("#" + currentChannelName);
+                    currentChannelElement.text("#" + channelDisplayName(currentChannelName));
                     messageListElement.show();
                 }
             }
@@ -325,14 +334,22 @@ blockslack.chatui = (function(){
         addChannel: function() {
             if (blockslack.authentication.isSignedIn() && currentGroupId) {
                 var channelName = prompt(blockslack.strings.PICK_CHANNEL_NAME);
+                while (channelName.indexOf(" ") != -1) {
+                    channelName = channelName.replace(" ", "");
+                }
+
                 if (channelName && channelName.length) {
                     if (channelName[0] == "#") {
                         channelName = channelName.substring(1);
                     }
 
                     if (channelName.length) {
+                        channelName += ":" + makeId();
                         var audience = [ blockstack.loadUserData().username ];
-                        var message = blockslack.aggregation.generateTextMessage(currentGroupId, channelName, blockslack.strings.CHANNEL_WELCOME_PREFIX + channelName);
+                        var message = blockslack.aggregation.generateTextMessage(
+                            currentGroupId, 
+                            channelName, 
+                            blockslack.strings.CHANNEL_WELCOME_PREFIX + channelDisplayName(channelName));
                         blockslack.feedpub.publish(audience, message).then(function() {
                             switchChannel(channelName);
                         });
