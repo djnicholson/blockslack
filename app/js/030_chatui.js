@@ -110,10 +110,11 @@ blockslack.chatui = (function(){
 
     var renderChannelButton = function(channelName) {
         var buttonElement = $($("#template-channelButton").html());
-        var asterisk = 
+        var hasUnread = 
             (channelName != currentChannelName) &&
-            blockslack.readstatus.hasUnread(currentGroupId, channelName) ? "*" : "";
-        buttonElement.text("#" + channelName + asterisk);
+            blockslack.readstatus.hasUnread(currentGroupId, channelName);
+        buttonElement.find(".-name").text("#" + channelName);
+        buttonElement.find(".-unread-indicator").toggle(hasUnread);
         buttonElement.click(function(){ switchChannel(channelName); });
         channelListElement.append(buttonElement);
     };

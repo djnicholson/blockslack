@@ -13,8 +13,11 @@
     font-size: 1.2em;
     font-weight: bold;
     color: $color-yellow;
-    cursor: pointer;
-    text-decoration: underline;
+
+    .-name {
+        cursor: pointer;
+        text-decoration: underline;
+    }
 }
 
 .-channel-button:hover {
