@@ -124,6 +124,19 @@ blockslack.aggregation = (function(){
         this.titleHistory = [];
         this.currentTitle = blockslack.strings.FALLBACK_GROUP_NAME;
         
+        this.allMembers = function() {
+            var result = [];
+            for (var channelName in this.channels) {
+                var channelData = this.channels[channelName];
+                var audience = channelData.currentAudience();
+                for (var i = 0; i < audience.length; i++) {
+                    (result.indexOf(audience[i]) == -1) && result.push(audience[i]);
+                }
+            }
+
+            return result;
+        };
+
         this.isMember = function(ts, username) {
             for (var channelName in this.channels) {
                 var channelData = this.channels[channelName];

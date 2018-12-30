@@ -16,6 +16,7 @@ blockslack.chatui = (function(){
     var footerElement = $(".-footer");
     var mainPageElement = $(".-main-page");
     var workAreaElement = $(".-work-area");
+    var renameGroupLinkElement = $(".-rename-group");
 
     var formatDate = function(ts) {
         return (new Date(ts)).toLocaleDateString();
@@ -209,6 +210,7 @@ blockslack.chatui = (function(){
 
         currentGroupElement.text(groupName);
         addChannelButtonElement.toggle(groupName != "");
+        renameGroupLinkElement.toggle(currentGroupId ? true : false);
     };
 
     var renderDate = function(date) {
@@ -388,6 +390,21 @@ blockslack.chatui = (function(){
         onload: function() {
             newMessageElement.keypress(newMessageKeyPress);
             $(window).on('resize', sizeElements);
+        },
+
+        renameGroup: function() {
+            if (blockslack.authentication.isSignedIn() && currentGroupId) {
+                var newName = prompt(blockslack.strings.ENTER_NEW_GROUP_NAME);
+                if (newName) {
+                    var allData = blockslack.aggregation.getAllData();
+                    var groupData = allData[currentGroupId];
+                    if (groupData) {
+                        var audience = groupData.allMembers();
+                        var message = blockslack.aggregation.generateTitleChangeMessage(currentGroupId, newName);
+                        blockslack.feedpub.publish(audience, message);
+                    }
+                }
+            }
         },
 
     };

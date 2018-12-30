@@ -34,3 +34,7 @@
 .-add-channel-button:hover {
     color: $color-yellow-sub;
 }
+
+.-rename-group {
+    @extend .ml-2;
+}
