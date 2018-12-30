@@ -30,6 +30,17 @@ blockslack.aggregation = (function(){
         };
 
         this.generateAudienceChangeMessage = function(ts, senderUserId, oldAudience, newAudience) {
+            
+            if (oldAudience.length == 0) {
+                this.messages.push({
+                    ts: ts,
+                    from: senderUserId,
+                    text: blockslack.strings.MEMBER_ADDED.replace("%1", blockslack.authentication.getUsername()),
+                    meta: true,
+                });
+                return;
+            }
+
             for (var i = 0; i < oldAudience.length; i++) {
                 if (newAudience.indexOf(oldAudience[i]) == -1) {
                     this.messages.push({
@@ -91,10 +102,12 @@ blockslack.aggregation = (function(){
                 if ((this.audiences.length == 0) || 
                     ((historyType == HISTORY_TYPE_AUDIENCE) && this.isMember(ts, senderUserId))) {
                     
+                    var oldAudience = [];
                     if (this.audiences.length > 0) {
-                        var oldAudience = this.audiences[this.audiences.length - 1][1];
-                        this.generateAudienceChangeMessage(ts, senderUserId, oldAudience, audience);
+                        oldAudience = this.audiences[this.audiences.length - 1][1];
                     }
+
+                    this.generateAudienceChangeMessage(ts, senderUserId, oldAudience, audience);
 
                     this.audiences.push([ ts, audience ]);
                 }
