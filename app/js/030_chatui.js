@@ -154,7 +154,7 @@ blockslack.chatui = (function(){
                         lastPerson = person;
                     }
 
-                    renderMessage(time, message.text);
+                    renderMessage(time, message.text, message.meta);
                 }
 
                 var currentUsername = blockslack.authentication.getUsername();
@@ -227,10 +227,11 @@ blockslack.chatui = (function(){
         groupButtonListElement.append(buttonElement);
     };
 
-    var renderMessage = function(time, message) {
+    var renderMessage = function(time, message, isMeta) {
         var element = $($("#template-messageText").html());
         element.find(".-message-time").text(time);
         element.find(".-message-text").text(message);
+        isMeta && element.find(".-message-text").addClass("-meta");
         messageListContentElement.append(element);
     };
 
