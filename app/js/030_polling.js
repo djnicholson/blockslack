@@ -1,8 +1,7 @@
 blockslack.polling = (function(){
-    
-    // privates:
 
     var WATCHLIST_UPDATE_INTERVAL = 30000;
+    var READ_STATUS_UPDATE_INTERVAL = 15000;
     var FEED_UPDATE_INTERVAL_MIN = 1500;
     var FEED_UPDATE_INTERVAL_MAX = 15000;
 
@@ -69,8 +68,6 @@ blockslack.polling = (function(){
     };
 
     return {
-
-        // publics:
         
         consumeFeed: function(userId, filename, feedContents) {
             consumeFeed(userId, filename, feedContents);
@@ -78,8 +75,10 @@ blockslack.polling = (function(){
 
         onload: function() {
             blockslack.discovery.updateWatchLists();
+            blockslack.readstatus.sync();
             updateRandomFeed();
             setInterval(blockslack.discovery.updateWatchLists, WATCHLIST_UPDATE_INTERVAL);
+            setInterval(blockslack.readstatus.sync, READ_STATUS_UPDATE_INTERVAL);
             setTimeout(updateRandomFeed, currentFeedUpdateInterval);
             $(document).mousemove(function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });
             $(document).keypress(function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });

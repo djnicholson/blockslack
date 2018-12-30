@@ -20,6 +20,13 @@ blockslack.aggregation = (function(){
         return channelData;
     };
 
+    var updateChannelChecksum = function(channelData, ts) {
+        var maxChecksum = Math.round(Number.MAX_SAFE_INTEGER / 2);
+        var existingChecksum = channelData.messagesChecksum || 0;
+        var newChecksum = (existingChecksum + ts) % maxChecksum;
+        channelData.messagesChecksum = newChecksum;
+    };
+
     var updateGroupTitle = function(groupData, message) {
         if (!groupData.title) {
             groupData.title = {
@@ -67,6 +74,7 @@ blockslack.aggregation = (function(){
                     from: senderUserId,
                     text: message[FIELD_MESSAGE],
                 });
+                updateChannelChecksum(channelData, message[FIELD_TIMESTAMP]);
                 allMessages.sort(function(a, b) { return a.ts - b.ts; });
             }
         }

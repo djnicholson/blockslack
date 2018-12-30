@@ -56,7 +56,8 @@ blockslack.chatui = (function(){
 
     var renderChannelButton = function(channelName) {
         var buttonElement = $($("#template-channelButton").html());
-        buttonElement.text("#" + channelName);
+        var asterisk = blockslack.readstatus.hasUnread(currentGroupId, channelName) ? "*" : "";
+        buttonElement.text("#" + channelName + asterisk);
         buttonElement.click(function(){ switchChannel(channelName); });
         channelListElement.append(buttonElement);
     };
@@ -212,6 +213,7 @@ blockslack.chatui = (function(){
     var updateUi = function() {
         $(".tooltip").hide();
         var allData = blockslack.aggregation.getAllData();
+        currentGroupId && currentChannelName && blockslack.readstatus.markRead(currentGroupId, currentChannelName);
         renderGroupButtons(allData);
         renderCurrentGroupChannelList(allData);
         renderCurrentChannel(allData);
