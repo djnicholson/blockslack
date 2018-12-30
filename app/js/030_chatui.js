@@ -54,6 +54,53 @@ blockslack.chatui = (function(){
         }
     };
 
+    var publishAudienceChange = function(oldAudience, newAudience) {
+        var allData = blockslack.aggregation.getAllData();
+        var groupData = allData[currentGroupId];
+        var message = blockslack.aggregation.generateAudienceChangeMessage(
+            currentGroupId,
+            currentChannelName,
+            newAudience);
+        return blockslack.feedpub.publish(oldAudience, message).then(function() {
+            return blockslack.feedpub.publish(newAudience, message);    
+        }).then(function() {
+            if (groupData.title && groupData.title.title) {
+                var titleMessage = blockslack.aggregation.generateTitleChangeMessage(
+                    currentGroupId, 
+                    groupData.title.title);
+                return blockslack.feedpub.publish(newAudience, titleMessage);
+            }
+        });
+    };
+
+    var removeMember = function(username) {
+        if (blockslack.authentication.isSignedIn() && currentGroupId && currentChannelName) {
+            var confirmMessage = blockslack.strings.CONFIRM_REMOVE_MEMBER
+                .replace("%1", username)
+                .replace("%2", currentChannelName);
+            if (confirm(confirmMessage)) {
+                var allData = blockslack.aggregation.getAllData();
+                var groupData = allData[currentGroupId];
+                if (groupData && groupData.channels) {
+                    var channelData = groupData.channels[currentChannelName];
+                    if (channelData && channelData.audience && channelData.audience.members) {
+                        var newAudience = [];
+                        var oldAudience = channelData.audience.members;
+                        for (var member in oldAudience) {
+                            if (oldAudience[member] != username) {
+                                newAudience.push(oldAudience[member]);
+                            }
+                        }
+
+                        return publishAudienceChange(oldAudience, newAudience);
+                    }
+                }
+            } else {
+                updateUi();
+            }
+        }
+    };
+
     var renderChannelButton = function(channelName) {
         var buttonElement = $($("#template-channelButton").html());
         var asterisk = 
@@ -94,14 +141,21 @@ blockslack.chatui = (function(){
                     renderMessage(time, message.text);
                 }
 
+                var currentUsername = blockslack.authentication.getUsername();
+                var isMember = false;
                 channelMemberListElement.empty();
                 if (audience.members) {
                     for (var member in audience.members) {
+                        var username = audience.members[member];
+                        isMember = isMember || (username == currentUsername);
                         var memberElement = $($("#template-channelMember").html());
-                        memberElement.text(audience.members[member]);
+                        memberElement.find(".-username").text(username);
+                        memberElement.find("a").click(function() { removeMember($(this).parent().find(".-username").text()); });
                         channelMemberListElement.append(memberElement);
                     }
                 }
+
+                $(".-show-if-member").toggle(isMember);
             }
         }
     };
@@ -282,20 +336,7 @@ blockslack.chatui = (function(){
                             var oldAudience = channelData.audience.members;
                             var newAudience = oldAudience.slice();
                             newAudience.push(newMember);
-                            var message = blockslack.aggregation.generateAudienceChangeMessage(
-                                currentGroupId,
-                                currentChannelName,
-                                newAudience);
-                            blockslack.feedpub.publish(oldAudience, message).then(function() {
-                                return blockslack.feedpub.publish(newAudience, message);    
-                            }).then(function() {
-                                if (groupData.title && groupData.title.title) {
-                                    var titleMessage = blockslack.aggregation.generateTitleChangeMessage(
-                                        currentGroupId, 
-                                        groupData.title.title);
-                                    blockslack.feedpub.publish(newAudience, titleMessage);
-                                }
-                            });
+                            publishAudienceChange(oldAudience, newAudience);
                         }
                     }
                 }

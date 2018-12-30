@@ -20,6 +20,13 @@ blockslack.aggregation = (function(){
         return channelData;
     };
 
+    var pushMessage = function(channelData, ts, from, text, meta) {
+        var allMessages = channelData.messages;
+        allMessages.push({ ts: ts, from: from, text: text, meta: meta });
+        updateChannelChecksum(channelData, ts);
+        allMessages.sort(function(a, b) { return a.ts - b.ts; });
+    };
+
     var updateChannelChecksum = function(channelData, ts) {
         var maxChecksum = Math.round(Number.MAX_SAFE_INTEGER / 2);
         var existingChecksum = channelData.messagesChecksum || 0;
@@ -27,18 +34,29 @@ blockslack.aggregation = (function(){
         channelData.messagesChecksum = newChecksum;
     };
 
-    var updateGroupTitle = function(groupData, message) {
+    var updateGroupTitle = function(groupData, message, senderUserId) {
         if (!groupData.title) {
             groupData.title = {
                 title: message[FIELD_GROUP_TITLE],
                 ts: 0,
             }; 
-        }
+        } else {
+            var isMember = false;
+            for (var channelName in groupData.channels) {
+                var audience = groupData.channels[channelName].audience;
+                isMember = isMember || wasMemberOfChannelAtTime(senderUserId, groupData.channels[channelName], message[FIELD_TIMESTAMP]);
+            }
 
-        if ((message[FIELD_KIND] == KIND_TITLE_CHANGE) &&
-            (message[FIELD_TIMESTAMP] > groupData.title.ts)) {
-            groupData.title.title = message[FIELD_GROUP_TITLE];
-            groupData.title.ts = message[FIELD_TIMESTAMP];
+            if (!isMember) {
+                console.log(senderUserId + " tried to update the title of a group they are not a member of");
+                return;
+            }
+
+            if ((message[FIELD_KIND] == KIND_TITLE_CHANGE) &&
+                (message[FIELD_TIMESTAMP] > groupData.title.ts)) {
+                groupData.title.title = message[FIELD_GROUP_TITLE];
+                groupData.title.ts = message[FIELD_TIMESTAMP];
+            }
         }
     };
 
@@ -48,15 +66,55 @@ blockslack.aggregation = (function(){
             if (!channelData.audience) {
                 channelData.audience = {
                     members: latestRecipients,
+                    history: [],
                     ts: 0,
                 };
-            }
-            
-            if (validate(senderUserId, latestRecipients, message, true)) {
-                if ((message[FIELD_KIND] == KIND_AUDIENCE_CHANGE) &&
-                    (message[FIELD_TIMESTAMP] > channelData.audience.ts)) {
-                    channelData.audience.members = message[FIELD_MEMBER_LIST];
-                    channelData.audience.ts = message[FIELD_TIMESTAMP];
+            } else {
+                var ts = message[FIELD_TIMESTAMP];
+
+                if (!wasMemberOfChannelAtTime(senderUserId, channelData, ts)) {
+                    console.log(senderUserId + " tried to update audience of a channel they are not a member of");
+                    return;
+                }
+
+                if (validate(senderUserId, latestRecipients, message, true)) {
+                    if (message[FIELD_KIND] == KIND_AUDIENCE_CHANGE) {
+                        var newAudience = message[FIELD_MEMBER_LIST];
+                        if (ts > channelData.audience.ts) {
+                            var oldAudience = channelData.audience.members;
+
+                            for (var i in newAudience) {
+                                (oldAudience.indexOf(newAudience[i]) == -1) && 
+                                    pushMessage(
+                                        channelData, 
+                                        ts, 
+                                        senderUserId, 
+                                        blockslack.strings.MEMBER_ADDED.replace("%1", newAudience[i]), 
+                                        true);
+                            }
+
+                            for (var i in oldAudience) {
+                                (newAudience.indexOf(oldAudience[i]) == -1) &&
+                                    pushMessage(
+                                        channelData, 
+                                        ts, 
+                                        senderUserId, 
+                                        blockslack.strings.MEMBER_REMOVED.replace("%1", oldAudience[i]), 
+                                        true);
+                            }
+
+                            channelData.audience.history.push([channelData.audience.ts, oldAudience]);
+                            channelData.audience.members = newAudience;
+                            channelData.audience.ts = ts;
+                        } else {
+                            pushMessage(
+                                channelData, 
+                                ts, 
+                                senderUserId, 
+                                blockslack.strings.MEMBERS_CHANGED.replace("%1", newAudience.join(", ")), 
+                                true);
+                        }
+                    }
                 }
             }
         }
@@ -65,17 +123,10 @@ blockslack.aggregation = (function(){
     var updateMessages = function(groupData, message, senderUserId, audience) {
         if ((message[FIELD_KIND] == KIND_MESSAGE) && validate(senderUserId, audience, message, true)) {
             var channelData = getChannelData(groupData, message[FIELD_CHANNEL_NAME]);
-            if (channelData.audience.members.indexOf(senderUserId) === -1) {
+            if (!wasMemberOfChannelAtTime(senderUserId, channelData, message[FIELD_TIMESTAMP])) {
                 console.log(senderUserId + " tried to send a message to a channel they are not a member of");
             } else {
-                var allMessages = channelData.messages;
-                allMessages.push({
-                    ts: message[FIELD_TIMESTAMP],
-                    from: senderUserId,
-                    text: message[FIELD_MESSAGE],
-                });
-                updateChannelChecksum(channelData, message[FIELD_TIMESTAMP]);
-                allMessages.sort(function(a, b) { return a.ts - b.ts; });
+                pushMessage(channelData, message[FIELD_TIMESTAMP], senderUserId, message[FIELD_MESSAGE], false);
             }
         }
     };
@@ -85,6 +136,32 @@ blockslack.aggregation = (function(){
             console.log("Malformed message from " + senderUserId + " to " + JSON.stringify(audience) + ": " + JSON.stringify(message));
             return false;
         } else {
+            return true;
+        }
+    };
+
+    var wasMemberOfChannelAtTime = function(username, channelData, ts) {
+        var audience = channelData.audience;
+        if (audience) {
+            var relevantMemberList = [];
+            for (var i in audience.history) {
+                if (audience.history[i][0] <= ts) {
+                    relevantMemberList = audience.history[i][1];
+                }
+            }
+
+            if (audience.ts <= ts) {
+                relevantMemberList = audience.members;
+            }
+
+            var found = false;
+            for (var i in relevantMemberList) {
+                found = found || (relevantMemberList[i] == username);
+            }
+
+            return found;
+        } else {
+            // No last-known member list; assume free-for-all:
             return true;
         }
     };
@@ -130,7 +207,7 @@ blockslack.aggregation = (function(){
                 var allData = blockslack.aggregation.getAllData();
                 var groupId = message[FIELD_GROUP_ID];
                 allData[groupId] = allData[groupId] || { channels: {} };
-                updateGroupTitle(allData[groupId], message);
+                updateGroupTitle(allData[groupId], message, senderUserId);
                 updateMemberList(allData[groupId], message, senderUserId, audience);
                 updateMessages(allData[groupId], message, senderUserId, audience);
             }
