@@ -75,9 +75,16 @@ blockslack.chatui = (function(){
 
     var removeMember = function(username) {
         if (blockslack.authentication.isSignedIn() && currentGroupId && currentChannelName) {
-            var confirmMessage = blockslack.strings.CONFIRM_REMOVE_MEMBER
-                .replace("%1", username)
-                .replace("%2", currentChannelName);
+            var confirmMessage;
+            if (blockslack.authentication.getUsername() == username) {
+                confirmMessage = blockslack.strings.CONFIRM_REMOVE_SELF
+                    .replace("%1", currentChannelName);
+            } else {
+                confirmMessage = blockslack.strings.CONFIRM_REMOVE_MEMBER
+                    .replace("%1", username)
+                    .replace("%2", currentChannelName);
+                }
+
             if (confirm(confirmMessage)) {
                 var allData = blockslack.aggregation.getAllData();
                 var groupData = allData[currentGroupId];

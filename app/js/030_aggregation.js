@@ -14,6 +14,26 @@ blockslack.aggregation = (function(){
     var KIND_AUDIENCE_CHANGE = "a";
     var KIND_MESSAGE = "m";
 
+    var audienceAtTime = function(channelData, ts) {
+        var audience = channelData.audience;
+        if (audience) {
+            var relevantMemberList = [];
+            for (var i in audience.history) {
+                if (audience.history[i][0] <= ts) {
+                    relevantMemberList = audience.history[i][1];
+                }
+            }
+
+            if (audience.ts <= ts) {
+                relevantMemberList = audience.members;
+            }
+
+            return relevantMemberList;
+        } else {
+            return [];
+        }
+    };
+
     var getChannelData = function(groupData, channelName) {
         var channelData = groupData.channels[channelName] || { messages: [] };
         groupData.channels[channelName] = channelData;
@@ -80,40 +100,31 @@ blockslack.aggregation = (function(){
                 if (validate(senderUserId, latestRecipients, message, true)) {
                     if (message[FIELD_KIND] == KIND_AUDIENCE_CHANGE) {
                         var newAudience = message[FIELD_MEMBER_LIST];
-                        if (ts > channelData.audience.ts) {
-                            var oldAudience = channelData.audience.members;
+                        var oldAudience = audienceAtTime(channelData, ts - 1);
 
-                            for (var i in newAudience) {
-                                (oldAudience.indexOf(newAudience[i]) == -1) && 
-                                    pushMessage(
-                                        channelData, 
-                                        ts, 
-                                        senderUserId, 
-                                        blockslack.strings.MEMBER_ADDED.replace("%1", newAudience[i]), 
-                                        true);
-                            }
-
-                            for (var i in oldAudience) {
-                                (newAudience.indexOf(oldAudience[i]) == -1) &&
-                                    pushMessage(
-                                        channelData, 
-                                        ts, 
-                                        senderUserId, 
-                                        blockslack.strings.MEMBER_REMOVED.replace("%1", oldAudience[i]), 
-                                        true);
-                            }
-
-                            channelData.audience.history.push([channelData.audience.ts, oldAudience]);
-                            channelData.audience.members = newAudience;
-                            channelData.audience.ts = ts;
-                        } else {
-                            pushMessage(
-                                channelData, 
-                                ts, 
-                                senderUserId, 
-                                blockslack.strings.MEMBERS_CHANGED.replace("%1", newAudience.join(", ")), 
-                                true);
+                        for (var i in newAudience) {
+                            (oldAudience.indexOf(newAudience[i]) == -1) && 
+                                pushMessage(
+                                    channelData, 
+                                    ts, 
+                                    senderUserId, 
+                                    blockslack.strings.MEMBER_ADDED.replace("%1", newAudience[i]), 
+                                    true);
                         }
+
+                        for (var i in oldAudience) {
+                            (newAudience.indexOf(oldAudience[i]) == -1) &&
+                                pushMessage(
+                                    channelData, 
+                                    ts, 
+                                    senderUserId, 
+                                    blockslack.strings.MEMBER_REMOVED.replace("%1", oldAudience[i]), 
+                                    true);
+                        }
+
+                        channelData.audience.history.push([channelData.audience.ts, oldAudience]);
+                        channelData.audience.members = newAudience;
+                        channelData.audience.ts = ts;
                     }
                 }
             }
@@ -141,29 +152,13 @@ blockslack.aggregation = (function(){
     };
 
     var wasMemberOfChannelAtTime = function(username, channelData, ts) {
-        var audience = channelData.audience;
-        if (audience) {
-            var relevantMemberList = [];
-            for (var i in audience.history) {
-                if (audience.history[i][0] <= ts) {
-                    relevantMemberList = audience.history[i][1];
-                }
-            }
-
-            if (audience.ts <= ts) {
-                relevantMemberList = audience.members;
-            }
-
-            var found = false;
-            for (var i in relevantMemberList) {
-                found = found || (relevantMemberList[i] == username);
-            }
-
-            return found;
-        } else {
-            // No last-known member list; assume free-for-all:
-            return true;
+        var relevantMemberList = audienceAtTime(channelData, ts);
+        var found = false;
+        for (var i in relevantMemberList) {
+            found = found || (relevantMemberList[i] == username);
         }
+
+        return found;
     };
 
     return {
