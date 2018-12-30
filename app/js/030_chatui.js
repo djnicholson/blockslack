@@ -73,10 +73,10 @@ blockslack.chatui = (function(){
         return blockslack.feedpub.publish(oldAudience, message).then(function() {
             return blockslack.feedpub.publish(newAudience, message);    
         }).then(function() {
-            if (groupData.title && groupData.title.title) {
+            if (groupData.currentTitle) {
                 var titleMessage = blockslack.aggregation.generateTitleChangeMessage(
                     currentGroupId, 
-                    groupData.title.title);
+                    groupData.currentTitle);
                 return blockslack.feedpub.publish(newAudience, titleMessage);
             }
         });
