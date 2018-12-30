@@ -1,6 +1,7 @@
 .-channel-list {
     @extend .-purple;
     border-right: $section-border-width solid $color-purple-sub;
+    overflow-y: auto;
 
     .-current-group-name {
         @extend .h3;
