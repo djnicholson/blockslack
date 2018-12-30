@@ -22,7 +22,12 @@ blockslack.chatui = (function(){
     };
 
     var formatTime = function(ts) {
-        return (new Date(ts)).toLocaleTimeString();
+        var result = (new Date(ts)).toLocaleTimeString([], { hour: '2-digit', minute:'2-digit' });
+        if (result.split(":")[0].length == 1) {
+            result = "\xa0" + result;
+        }
+
+        return result;
     };
 
     var makeId = function() {
@@ -137,6 +142,7 @@ blockslack.chatui = (function(){
                 var audience = channelData.currentAudience();
                 var lastPerson = undefined;
                 var lastDate = undefined;
+                var lastTime = 0;
                 for (var i = 0; i < messages.length; i++) {
                     var message = messages[i];
                     var person = message.from;
@@ -152,9 +158,16 @@ blockslack.chatui = (function(){
                     if (person != lastPerson) {
                         renderPerson(person);
                         lastPerson = person;
+                        lastTime = 0;
                     }
 
-                    renderMessage(time, message.text, message.meta);
+                    var showTime = false;
+                    if (message.ts - lastTime > 60000) {
+                        showTime = true;
+                        lastTime = message.ts;
+                    }
+
+                    renderMessage(time, message.text, message.meta, showTime);
                 }
 
                 var currentUsername = blockslack.authentication.getUsername();
@@ -227,11 +240,12 @@ blockslack.chatui = (function(){
         groupButtonListElement.append(buttonElement);
     };
 
-    var renderMessage = function(time, message, isMeta) {
+    var renderMessage = function(time, message, isMeta, showTime) {
         var element = $($("#template-messageText").html());
         element.find(".-message-time").text(time);
         element.find(".-message-text").text(message);
         isMeta && element.find(".-message-text").addClass("-meta");
+        !showTime && element.find(".-message-time").css("visibility", "hidden");
         messageListContentElement.append(element);
     };
 
