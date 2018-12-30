@@ -38,6 +38,10 @@ blockslack.readstatus = (function(){
         },
 
         sync: function() {
+            if (!blockslack.authentication.isSignedIn()) {
+                return;
+            }
+
             var localReadStatus = getReadStatus();
             return blockstack.getFile(READ_STATUS_FILE).then(function(remoteJson) {
                 var remoteReadStatus = remoteJson ? (JSON.parse(remoteJson) || {}) : {};

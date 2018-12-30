@@ -13,6 +13,8 @@ blockslack.chatui = (function(){
     var newMessageElement = $(".-new-message");
     var channelMemberListElement = $(".-channel-member-list");
     var welcomeAreaElement = $(".-welcome");
+    var footerElement = $(".-footer");
+    var mainPageElement = $(".-main-page");
 
     var formatDate = function(ts) {
         return (new Date(ts)).toLocaleDateString();
@@ -121,6 +123,11 @@ blockslack.chatui = (function(){
 
     var renderCurrentChannel = function(allData) {
         messageListContentElement.empty();
+        channelMemberListElement.empty();
+        if (!blockslack.authentication.isSignedIn()) {
+            return;
+        }
+
         var groupData = allData[currentGroupId];
         if (groupData && groupData.channels) {
             var channelData = groupData.channels[currentChannelName];
@@ -151,7 +158,6 @@ blockslack.chatui = (function(){
 
                 var currentUsername = blockslack.authentication.getUsername();
                 var isMember = false;
-                channelMemberListElement.empty();
                 for (var member in audience) {
                     var username = audience[member];
                     isMember = isMember || (username == currentUsername);
@@ -237,6 +243,12 @@ blockslack.chatui = (function(){
         welcomeAreaElement.toggle(currentGroupId == undefined);
     };
 
+    var sizeElements = function() {
+        var bodyHeight = $(document.body).height();
+        var footerHeight = footerElement.height();
+        mainPageElement.height(Math.max(footerHeight * 2, bodyHeight - footerHeight - 35));
+    };
+
     var sortChannelNames = function(channelData) {
         var toSort = [];
         for (var channelName in channelData) {
@@ -279,6 +291,8 @@ blockslack.chatui = (function(){
         renderCurrentGroupChannelList(allData);
         renderCurrentChannel(allData);
         renderWelcomeArea();
+        sizeElements();
+
         $('[data-toggle="tooltip"]').tooltip();
     };
 
@@ -354,6 +368,7 @@ blockslack.chatui = (function(){
 
         onload: function() {
             newMessageElement.keypress(newMessageKeyPress);
+            $(window).on('resize', sizeElements);
         },
 
     };

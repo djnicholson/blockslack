@@ -1,8 +1,28 @@
 <div class="col-2 p-2 -channel-list">
+
+    <div>
+
+        <span class="badge text-white p-2 mr-1 -dark-purple -only-when-signed-in" style="display: none">
+            <span class="oi oi-person"></span>
+            <span class="-current-username"></span>
+        </span>
+
+        <a 
+            data-toggle="tooltip"
+            data-placement="bottom"
+            title="Sign out"
+            onclick="blockslack.authentication.signOut()"
+            class="text-white -only-when-signed-in"
+            style="display: none" 
+            href="#">
+            <span class="oi oi-account-logout"></span>
+        </a>
+
+    </div>
+
     <div class="-current-group-name"></div>
 
     <div class="-channel-buttons">
-
     </div>
     <div 
         class="-add-channel-button" 
@@ -13,6 +33,7 @@
         style="display: none">
         New channel
     </div>
+
 </div>
 
 <script id="template-channelButton" type="text/x-template">

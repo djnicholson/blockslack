@@ -15,9 +15,11 @@ blockslack.authentication = (function(blockstack){
         if (blockslack.authentication.isSignedIn()) {
             $(".-only-when-signed-in").show();
             $(".-only-when-signed-out").hide();
+            $(".-current-username").text(blockslack.authentication.getUsername());
         } else {
             $(".-only-when-signed-in").hide();
             $(".-only-when-signed-out").show();
+            $(".-current-username").text("");
         }
     };
 
