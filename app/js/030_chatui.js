@@ -374,7 +374,10 @@ blockslack.chatui = (function(){
                     var groupId = makeId();
                     var audience = [ blockstack.loadUserData().username ];
                     var message1 = blockslack.aggregation.generateTitleChangeMessage(groupId, groupName);
-                    var message2 = blockslack.aggregation.generateTextMessage(groupId, "general", blockslack.strings.CHANNEL_WELCOME_PREFIX + "general");
+                    var message2 = blockslack.aggregation.generateTextMessage(
+                        groupId, 
+                        "general:" + makeId(), 
+                        blockslack.strings.CHANNEL_WELCOME_PREFIX + "general");
                     blockslack.feedpub.publish(audience, message1).then(function() {
                         return blockslack.feedpub.publish(audience, message2);    
                     }).then(function() {
