@@ -390,6 +390,7 @@ blockslack.chatui = (function(){
         onload: function() {
             newMessageElement.keypress(newMessageKeyPress);
             $(window).on('resize', sizeElements);
+            sizeElements();
         },
 
         renameGroup: function() {
