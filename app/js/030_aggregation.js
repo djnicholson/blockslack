@@ -81,6 +81,13 @@ blockslack.aggregation = (function(){
     };
 
     var updateMemberList = function(groupData, message, senderUserId, latestRecipients) {
+
+        //
+        // TODO: Store this as a list of all memberchange messages received (even those that
+        //       seem invalid at time of receipt). Then, at rendering time, decide which are valid
+        //       and intersperse them with messages (get rid of this "meta" concept).
+        //
+
         if (message[FIELD_CHANNEL_NAME]) {
             var channelData = getChannelData(groupData, message[FIELD_CHANNEL_NAME]);
             if (!channelData.audience) {
