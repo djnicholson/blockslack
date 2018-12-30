@@ -102,7 +102,8 @@ blockslack.keys = (function(){
         var deriveKey = getAsymmetricKeyForCurrentUser().then(function(asymmetricKeyForCurrentUser) {
             var derivationPath = asymmetricKeyForCurrentUser.private + "/" + normalizeAudience(audience).join();
             var decryptedSymmetricKey = sha256(derivationPath);
-            var symmetricKeyId = sha256(decryptedSymmetricKey).substring(0, 10);
+            var idSalt = currentUsername;
+            var symmetricKeyId = sha256(idSalt + "_" + decryptedSymmetricKey).substring(0, 16);
             derivedKey = { id: symmetricKeyId, key: decryptedSymmetricKey, owner: currentUsername };
         });
 

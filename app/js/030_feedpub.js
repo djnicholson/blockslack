@@ -7,9 +7,9 @@ blockslack.feedpub = (function(){
 
     var FEED_FILE_FORMAT = "feeds_v2/feed_%1_%2.json";
 
-    var feedFilename = function(audience, timestamp) {
+    var feedFilename = function(audience, keyId, timestamp) {
         return FEED_FILE_FORMAT
-            .replace("%1", sha256(normalizeAudience(audience).join()))
+            .replace("%1", sha256(keyId + "_" + normalizeAudience(audience).join()))
             .replace("%2", timestamp);
     };
 
@@ -57,7 +57,7 @@ blockslack.feedpub = (function(){
             return blockslack.keys.getSymmetricKeyForAudience(audience).then(function(keyObject) {
                 var keyId = keyObject.id;
                 var key = keyObject.key;
-                var rootFilename = feedFilename(audience, 0);
+                var rootFilename = feedFilename(audience, keyId, 0);
                 blockslack.discovery.registerFeed(audience, keyId, rootFilename);
                 return blockstack.getFile(rootFilename, DONT_DECRYPT).then(function(existingFeedCipherText) {
                     var feedRoot = parseExistingFeedRootOrCreateNew(audience, existingFeedCipherText, key);
