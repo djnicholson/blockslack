@@ -1,6 +1,7 @@
 .-group-list {
     @extend .-dark-purple;
     border-right: $section-border-width solid $color-dark-purple-sub;
+    overflow-y: auto;
 }
 
 .-group-button {
