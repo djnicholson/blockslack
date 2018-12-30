@@ -42,7 +42,7 @@ blockslack.polling = (function(){
         });
     };
 
-    var updateRandomFeed = function() {
+    var updateNextFeed = function() {
         var allFeeds = [];
         blockslack.discovery.forEachWatchedFeed(function(userId, filename, keyId) {
             allFeeds.push([ userId, filename, keyId ]);
@@ -64,7 +64,7 @@ blockslack.polling = (function(){
             currentFeedUpdateInterval += 1000;
         }
 
-        setTimeout(updateRandomFeed, currentFeedUpdateInterval);
+        setTimeout(updateNextFeed, currentFeedUpdateInterval);
     };
 
     return {
@@ -76,10 +76,10 @@ blockslack.polling = (function(){
         onload: function() {
             blockslack.discovery.updateWatchLists();
             blockslack.readstatus.sync();
-            updateRandomFeed();
+            updateNextFeed();
             setInterval(blockslack.discovery.updateWatchLists, WATCHLIST_UPDATE_INTERVAL);
             setInterval(blockslack.readstatus.sync, READ_STATUS_UPDATE_INTERVAL);
-            setTimeout(updateRandomFeed, currentFeedUpdateInterval);
+            setTimeout(updateNextFeed, currentFeedUpdateInterval);
             $(document).mousemove(function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });
             $(document).keypress(function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });
             $(document).click(function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });
