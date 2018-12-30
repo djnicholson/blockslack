@@ -184,6 +184,7 @@ blockslack.chatui = (function(){
 
                 isMember && newMessageElement.focus();
                 $(".-show-if-member").toggle(isMember);
+                $(".-show-if-not-member").toggle(!isMember);
             }
         }
     };

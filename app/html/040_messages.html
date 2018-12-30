@@ -3,8 +3,11 @@
         <div class="p-2 -message-list-content">
         </div>
         <div class="p-2 -input-area">
-            <div>
+            <div class="-show-if-member">
                 Send a message to <span class="-current-channel-name"></span>:
+            </div>
+            <div class="-show-if-not-member">
+                You're no longer a member of <span class="-current-channel-name"></span>.
             </div>
             <input type="text" class="mt-0 -new-message -show-if-member" />
             <div class="mt-1 -channel-member-list-section">
