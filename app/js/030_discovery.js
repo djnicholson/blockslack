@@ -110,6 +110,10 @@ blockslack.discovery = (function(){
         // publics:
 
         addContact: function(userId) {
+            if (!blockslack.authentication.isSignedIn()) {
+                return;
+            }
+
             updateState(function(existingState) {
                 if (!existingState.watching[userId]) {
                     existingState.watching[userId] = { };
@@ -120,6 +124,10 @@ blockslack.discovery = (function(){
         },
 
         forEachWatchedFeed: function(action) {
+            if (!blockslack.authentication.isSignedIn()) {
+                return;
+            }
+
             updateState(function(existingState) {
                 for (var hostUserId in existingState.watching) {
                     if (validId(hostUserId)) {
@@ -133,6 +141,10 @@ blockslack.discovery = (function(){
         },
 
         registerFeed: function(audience, keyId, filename) {
+            if (!blockslack.authentication.isSignedIn()) {
+                return;
+            }
+
             updateState(function(existingState) {
                 for (var i = 0; i < audience.length; i++) {
                     var userId = audience[i];
@@ -148,6 +160,10 @@ blockslack.discovery = (function(){
         },
 
         updateWatchLists: function() {
+            if (!blockslack.authentication.isSignedIn()) {
+                return;
+            }
+
             updateState(function(existingState) {
                 for (var userId in existingState.watching) {
                     if (validId(userId)) {
