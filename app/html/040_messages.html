@@ -1,43 +1,45 @@
-<div class="row align-items-bottom m-0 p-2 -only-when-signed-in -white" style="display: none">
-    <div class="col text-left -message-list" style="display: none">
-        <div>
-            You are in channel <span class="-current-channel-name"></span>
+<div class="row m-0 p-0 -only-when-signed-in -white" style="display: none;">
+    <div class="col p-0 text-left -message-list" style="display: none">
+        <div class="p-2 -message-list-content">
         </div>
-        <div class="-channel-member-list-section">
-            <span class="-text-purple">People in this channel:</span>
-            <span class="-channel-member-list"></span>
-            <a 
-                href="javascript:blockslack.chatui.addMember()" 
-                data-toggle="tooltip"
-                data-placement="bottom"
-                title="Add another person to this channel"
-                class="badge -show-if-member">
-                <span class="oi oi-plus"></span>
-            </a>
+        <div class="p-2 -input-area">
+            <div>
+                Send a message to <span class="-current-channel-name"></span>:
+            </div>
+            <input type="text" class="mt-0 -new-message -show-if-member" />
+            <div class="mt-1 -channel-member-list-section">
+                <span class="-text-purple">People in this channel:</span>
+                <span class="-channel-member-list"></span>
+                <a 
+                    href="javascript:blockslack.chatui.addMember()" 
+                    data-toggle="tooltip"
+                    data-placement="bottom"
+                    title="Add another person to this channel"
+                    class="badge -show-if-member">
+                    <span class="oi oi-plus"></span>
+                </a>
+            </div>
         </div>
-        <div class="-message-list-content">
-        </div>
-        <input type="text" class="-new-message -show-if-member" />
     </div>
 </div>
 
 <script id="template-messageDate" type="text/x-template">
-    <div class="-message-date"></div>
+    <div class="mt-2 -message-date"></div>
 </script>
 
 <script id="template-messagePerson" type="text/x-template">
-    <div class="-message-person"></div>
+    <div class="ml-1 mt-1 -message-person"></div>
 </script>
 
 <script id="template-messageText" type="text/x-template">
-    <div>
+    <div class="ml-2">
         <span class="-message-time"></span>
         <span class="-message-text"></span>
     </div>
 </script>
 
 <script id="template-channelMember" type="text/x-template">
-    <span class="badge text-white p-2 mr-1 -purple">
+    <span class="badge text-white p-2 mt-1 mr-1 -purple">
         <span class="oi oi-person"></span>
         <span class="-username"></span>
         <a 

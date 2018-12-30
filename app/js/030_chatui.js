@@ -15,6 +15,7 @@ blockslack.chatui = (function(){
     var welcomeAreaElement = $(".-welcome");
     var footerElement = $(".-footer");
     var mainPageElement = $(".-main-page");
+    var workAreaElement = $(".-work-area");
 
     var formatDate = function(ts) {
         return (new Date(ts)).toLocaleDateString();
@@ -246,7 +247,10 @@ blockslack.chatui = (function(){
     var sizeElements = function() {
         var bodyHeight = $(document.body).height();
         var footerHeight = footerElement.height();
-        mainPageElement.height(Math.max(footerHeight * 2, bodyHeight - footerHeight - 35));
+        var mainPageHeight = Math.max(footerHeight * 2, bodyHeight - footerHeight - 35);
+        mainPageElement.height(mainPageHeight);
+        workAreaElement.prop("scrollTop", workAreaElement.prop("scrollHeight") - workAreaElement.height() );
+        messageListContentElement.css("margin-top", mainPageHeight + "px");
     };
 
     var sortChannelNames = function(channelData) {
