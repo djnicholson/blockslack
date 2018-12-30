@@ -13,6 +13,7 @@ blockslack.strings = (function(){
         MEMBER_REMOVED: "I removed %1 from this channel",
         PICK_CHANNEL_NAME: "Pick a name for your new channel",
         PICK_GROUP_NAME: "Pick a name for your new blockslack group",
+        USERNAME_REQUIRED: "Sorry, your Blockstack ID must have a username associated with it to use blockslack.io.",
 
     };
 

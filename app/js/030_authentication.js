@@ -12,6 +12,10 @@ blockslack.authentication = (function(blockstack){
     };
 
     var updateUiAccordingToAuthState = function() {
+        if (blockstack.isUserSignedIn() && !blockslack.authentication.getUsername()) {
+            alert(blockslack.strings.USERNAME_REQUIRED);
+        }
+
         if (blockslack.authentication.isSignedIn()) {
             $(".-only-when-signed-in").show();
             $(".-only-when-signed-out").hide();
@@ -46,7 +50,7 @@ blockslack.authentication = (function(blockstack){
         },
 
         isSignedIn: function() {
-            return blockstack.isUserSignedIn();
+            return blockstack.isUserSignedIn() && blockslack.authentication.getUsername();
         },
 
         signIn: function() {
@@ -65,7 +69,7 @@ blockslack.authentication = (function(blockstack){
         },
 
         state: function(key, value) {
-            if (!blockslack.authentication.isSignedIn) {
+            if (!blockslack.authentication.isSignedIn()) {
                 return null;
             } else {
 
