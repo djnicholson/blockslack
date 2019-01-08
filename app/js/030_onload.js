@@ -17,7 +17,11 @@ blockslack.onload = (function(){
             blockslack.authentication.initialize();
             blockslack.polling.onload();
             blockslack.chatui.onload();
-            $(".-loading").hide();
+            
+            // Ensure user has published their public key successfully before app is loaded:
+            blockslack.keys.getAsymmetricKey().then(function() {
+                $(".-loading").hide();
+            });
         },
 
     };
