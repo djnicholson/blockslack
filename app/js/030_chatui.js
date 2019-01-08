@@ -283,6 +283,7 @@ blockslack.chatui = (function(){
         mainPageElement.height(mainPageHeight);
         workAreaElement.prop("scrollTop", workAreaElement.prop("scrollHeight") - workAreaElement.height() );
         messageListContentElement.css("margin-top", mainPageHeight + "px");
+        welcomeAreaElement.css("margin-top", mainPageHeight + "px");
     };
 
     var sortChannelNames = function(channelData) {
