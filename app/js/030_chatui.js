@@ -21,6 +21,7 @@ blockslack.chatui = (function(){
     var newContactUsernameInputElement = $("#newContactUsername");
     var welcomeGroupsContainerElement = $(".-welcome-groups");
     var welcomeGroupsList = $(".-welcome-groups-list");
+    var noMembersElement = $(".-no-members");
 
     var channelDisplayName = function(channelName) {
         var index = channelName.lastIndexOf(":");
@@ -196,6 +197,7 @@ blockslack.chatui = (function(){
                 }
 
                 isMember && newMessageElement.focus();
+                noMembersElement.toggle(audience.length < 2);
                 $(".-show-if-member").toggle(isMember);
                 $(".-show-if-not-member").toggle(!isMember);
                 $(".-show-if-any-members").toggle(audience.length > 0);
@@ -291,7 +293,7 @@ blockslack.chatui = (function(){
         var mainPageHeight = Math.max(footerHeight * 2, bodyHeight - footerHeight - 35);
         mainPageElement.height(mainPageHeight);
         workAreaElement.prop("scrollTop", workAreaElement.prop("scrollHeight") - workAreaElement.height() );
-        messageListContentElement.css("margin-top", mainPageHeight + "px");
+        messageListElement.css("margin-top", mainPageHeight + "px");
         welcomeAreaElement.css("margin-top", mainPageHeight + "px");
     };
 

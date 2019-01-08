@@ -18,3 +18,14 @@ $section-border-width: 3px;
     right: 0;
     z-index: 1000;
 }
+
+.-box {
+    @extend .-yellow-light;
+    @extend .p-3;
+    border: $section-border-width solid $color-yellow;
+
+    input[type=button] {
+        @extend .-red;
+        @extend .text-white;
+    }
+}

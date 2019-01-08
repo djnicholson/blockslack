@@ -1,5 +1,31 @@
 <div class="row m-0 p-0 -only-when-signed-in -white" style="display: none;">
     <div class="col p-0 text-left -message-list" style="display: none">
+        <div class="p-5 text-center -no-members" style="display: none">
+            <div class="-box">
+                <div class="h4 m-3">It's quiet in here!</div>
+                <div class="h5 m-3">
+                    Add one or more members to this channel to start chatting.
+                </div>
+                <div class="m-3">
+                    You can add members to any channel (even ones you didn't create) at any time
+                    by clicking the <span class="oi oi-plus"></span> button at the bottom of the 
+                    channel.
+                </div>
+                <div class="m-3">
+                    If you add someone you have not previously communicated with, you may
+                    need to ask them to go to the blockslack.io homepage and enter your username
+                    before they see the channel.
+                </div>
+                <div class="m-3">
+                    <input 
+                        type="button" 
+                        class="btn" 
+                        value="Add someone to this channel" 
+                        onclick="blockslack.chatui.addMember()">
+                    </input>
+                </div>
+            </div>
+        </div>
         <div class="p-2 -message-list-content">
         </div>
         <div class="p-2 -input-area">

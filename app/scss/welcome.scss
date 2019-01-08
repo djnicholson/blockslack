@@ -1,9 +1,5 @@
 .-welcome {
     .-box {
-        @extend .-yellow-light;
-        @extend .p-3;
-        border: $section-border-width solid $color-yellow;
-
         input {
             width: 100%;
             height: 100%;
@@ -12,10 +8,6 @@
         input[type=text] {
             @extend .-text-red;
             font-weight: bold;
-        }
-
-        input[type=button] {
-            @extend .text-white;
         }
 
         .oi {
