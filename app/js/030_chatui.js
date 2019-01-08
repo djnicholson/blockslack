@@ -407,6 +407,10 @@ blockslack.chatui = (function(){
             }
         },
 
+        home: function() {
+            switchGroup(undefined);
+        },
+
         updateUi: function() {
             updateUi();
         },
