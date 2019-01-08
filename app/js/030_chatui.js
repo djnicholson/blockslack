@@ -69,6 +69,7 @@ blockslack.chatui = (function(){
                         newMessageElement.val("");
                         newMessageElement.focus();
                     }).catch(function(e) {
+                        alert(blockslack.strings.COULD_NOT_SEND);
                         newMessageElement.prop("disabled", false);
                         newMessageElement.focus();
                     });
