@@ -23,4 +23,22 @@
             font-size: 2em;
         }
     }
+
+    .-welcome-groups-list {
+        a {
+            @extend .-text-red;
+            @extend .h5;
+            @extend .ml-2;
+            display: inline-block;
+        }
+
+        a:after {
+            color: #000;
+            content: ", ";
+        }
+
+        a:last-child:after {
+            content: "";
+        }
+    }
 }

@@ -19,6 +19,8 @@ blockslack.chatui = (function(){
     var renameGroupLinkElement = $(".-rename-group");
     var newGroupNameInputElement = $("#newGroupName");
     var newContactUsernameInputElement = $("#newContactUsername");
+    var welcomeGroupsContainerElement = $(".-welcome-groups");
+    var welcomeGroupsList = $(".-welcome-groups-list");
 
     var channelDisplayName = function(channelName) {
         var index = channelName.lastIndexOf(":");
@@ -235,6 +237,7 @@ blockslack.chatui = (function(){
 
     var renderGroupButtons = function(allData) {
         groupButtonListElement.empty();
+        welcomeGroupsList.empty();
 
         var allGroups = [];
         for (var groupId in allData) {
@@ -255,6 +258,11 @@ blockslack.chatui = (function(){
         buttonElement.click(function(){ switchGroup(groupData[0]); });
         buttonElement.attr("title", groupData[1]);
         groupButtonListElement.append(buttonElement);
+
+        var linkElement = $("<a href='#'>");
+        linkElement.text(groupData[1]);
+        linkElement.click(function(){ switchGroup(groupData[0]); });
+        welcomeGroupsList.append(linkElement);
     };
 
     var renderMessage = function(time, message, isMeta, showTime) {
@@ -272,8 +280,9 @@ blockslack.chatui = (function(){
         messageListContentElement.append(element);
     };
 
-    var renderWelcomeArea = function() {
+    var renderWelcomeArea = function(allData) {
         welcomeAreaElement.toggle(!currentGroupId);
+        welcomeGroupsContainerElement.toggle(Object.keys(allData).length ? true : false);
     };
 
     var sizeElements = function() {
@@ -321,7 +330,7 @@ blockslack.chatui = (function(){
         renderGroupButtons(allData);
         renderCurrentGroupChannelList(allData);
         renderCurrentChannel(allData);
-        renderWelcomeArea();
+        renderWelcomeArea(allData);
         sizeElements();
 
         $('[data-toggle="tooltip"]').tooltip();
