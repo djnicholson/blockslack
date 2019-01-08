@@ -1,4 +1,4 @@
-![blockslack.io](/app/images/logo.png)
+![blockslack.io](/app/images/logo-bw.png)
 
 # blockslack.io
 
