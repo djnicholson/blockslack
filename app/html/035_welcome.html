@@ -1,20 +1,61 @@
 <div class="row align-items-center m-2 p-4 -only-when-signed-in -white -welcome" style="display: none">
-    <div class="col text-center">
-        <h1 class="display-3 p-5">A decentralized group communication tool</h1>
-        <h1 class="display-5 p-5">Chat for small teams &mdash; encrypted and decentralized</h1>
-        <div class="p-5">
-            <div class="h4">
-                <div class="p-3">
-                    To get started, selected a group on the left hand side or 
-                    <a href="javascript:void(blockslack.chatui.addGroup())">create a 
-                    new group</a>.
+    <div class="col-12 text-center pb-5">
+        <h1 class="display-4 p-4">A decentralized group communication tool</h1>
+        <h1 class="display-6 p-4">Chat for small teams &mdash; encrypted and decentralized</h1>
+    </div>
+    
+    <div class="col-6 text-center">
+        <div class="-box">
+            <div class="h5 m-3">Create a new group</div>
+            <div class="h6 m-3">
+                Groups are places where you chat about various topics with members of a team.
+            </div>
+            <div class="m-3">
+                To get started, pick a name for your new group (e.g. <em>My Company</em>). The name can
+                be changed later by you or any other member of the group.
+            </div>
+            <div class="row m-3">
+                <div class="col-2 p-1 text-right"><span class="oi oi-chat"></span></div>
+                <div class="col-7 p-1">
+                    <input id="newGroupName" type="text" placeholder="Enter a group name" class="pl-2" />
                 </div>
-                <div class="p-3">
-                    Been invited to a group by someone else?
-                    <a href="javascript:void(blockslack.chatui.addContact())">Enter their 
-                    username</a> to see the groups that they have added you to.
+                <div class="col-3 p-1">
+                    <input 
+                        type="button" 
+                        class="btn -red" 
+                        value="Create" 
+                        onclick="blockslack.chatui.addGroup()">
+                    </input>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="col-6 text-center">
+        <div class="-box">
+            <div class="h5 m-3">Join someone's group</div>
+            <div class="h6 m-3">
+                Connect with another user to see the groups that they have added you to.
+            </div>
+            <div class="m-3">
+                If someone has asked you to chat with them, enter their Blockstack username below
+                (e.g. <em>johndoe.id.blockstack</em>) to see their groups.
+            </div>
+            <div class="row m-3">
+                <div class="col-2 p-1 text-right"><span class="oi oi-person"></span></div>
+                <div class="col-7 p-1">
+                    <input id="newContactUsername" type="text" placeholder="Enter a username" class="pl-2" />
+                </div>
+                <div class="col-3 p-1">
+                    <input 
+                        type="button" 
+                        class="btn -red" 
+                        value="Connect" 
+                        onclick="blockslack.chatui.addContact()">
+                    </input>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>

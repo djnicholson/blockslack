@@ -1,11 +1,13 @@
 blockslack.feedpub = (function(){
-    
-    // privates:
 
     var DONT_ENCRYPT = { encrypt: false };
     var DONT_DECRYPT = { decrypt: false };
 
     var FEED_FILE_FORMAT = "feeds_v2/feed_%1_%2.json";
+
+    var cacheBust = function(filename) {
+        return filename + "?" + Math.random();
+    };
 
     var feedFilename = function(audience, keyId, timestamp) {
         return FEED_FILE_FORMAT
@@ -50,8 +52,6 @@ blockslack.feedpub = (function(){
 
     return {
 
-        // publics:
-
         publish: function(audience, messageObject) {
             messageObject.ts = (new Date).getTime();
             return blockslack.keys.getSymmetricKeyForAudience(audience).then(function(keyObject) {
@@ -59,9 +59,10 @@ blockslack.feedpub = (function(){
                 var key = keyObject.key;
                 var rootFilename = feedFilename(audience, keyId, 0);
                 blockslack.discovery.registerFeed(audience, keyId, rootFilename);
-                return blockstack.getFile(rootFilename, DONT_DECRYPT).then(function(existingFeedCipherText) {
+                return blockstack.getFile(cacheBust(rootFilename), DONT_DECRYPT).then(function(existingFeedCipherText) {
                     var feedRoot = parseExistingFeedRootOrCreateNew(audience, existingFeedCipherText, key);
                     feedRoot.messages.push(messageObject);
+                    console.log(">", rootFilename, keyId, feedRoot);
                     var newFeedRootText = JSON.stringify(feedRoot);
                     var newFeedRootCipherText = sjcl.encrypt(key, newFeedRootText);
 
@@ -86,8 +87,9 @@ blockslack.feedpub = (function(){
             return blockslack.keys.getSymmetricKeyFromUser(userId, keyId).then(function(keyObject) {
                 var key = keyObject.key;
                 var getFileOptions = { decrypt: false, username: userId };
-                return blockstack.getFile(filename, getFileOptions).then(function(cipherText) {
+                return blockstack.getFile(cacheBust(filename), getFileOptions).then(function(cipherText) {
                     var feedRoot = parseExistingFeedRootOrCreateNew([], cipherText, key);
+                    console.log(userId, filename, keyId, feedRoot);
                     return Promise.resolve(feedRoot);
                 });
             });

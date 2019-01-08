@@ -17,6 +17,8 @@ blockslack.chatui = (function(){
     var mainPageElement = $(".-main-page");
     var workAreaElement = $(".-work-area");
     var renameGroupLinkElement = $(".-rename-group");
+    var newGroupNameInputElement = $("#newGroupName");
+    var newContactUsernameInputElement = $("#newContactUsername");
 
     var channelDisplayName = function(channelName) {
         var index = channelName.lastIndexOf(":");
@@ -356,28 +358,34 @@ blockslack.chatui = (function(){
 
         addContact: function() {
             if (blockslack.authentication.isSignedIn()) {
-                var username = prompt(blockslack.strings.ENTER_CONTACT_NAME);
+                var username = newContactUsernameInputElement.val();
+                newContactUsernameInputElement.val("");
                 if (username && username.length) {
                     blockslack.discovery.addContact(username);
+                    alert(blockslack.strings.CONTACT_ADDED.replace("%1", username));
                 }
             }
         },
 
         addGroup: function() {
             if (blockslack.authentication.isSignedIn()) {
-                var groupName = prompt(blockslack.strings.PICK_GROUP_NAME);
+                var groupName = newGroupNameInputElement.val();
+                newGroupNameInputElement.val("");
                 if (groupName && groupName.length) {
                     var groupId = makeId();
-                    var audience = [ blockstack.loadUserData().username ];
+                    var audience = [ blockslack.authentication.getUsername() ];
                     var message1 = blockslack.aggregation.generateTitleChangeMessage(groupId, groupName);
                     var message2 = blockslack.aggregation.generateTextMessage(
                         groupId, 
                         "general:" + makeId(), 
                         blockslack.strings.CHANNEL_WELCOME_PREFIX + "general");
-                    blockslack.feedpub.publish(audience, message1).then(function() {
-                        return blockslack.feedpub.publish(audience, message2);    
+                    Promise.resolve().then(function() {
+                        return blockslack.feedpub.publish(audience, message1);
+                    }).then(function() {
+                        return blockslack.feedpub.publish(audience, message2);
                     }).then(function() {
                         switchGroup(groupId);
+                        return Promise.resolve();
                     });
                 }
             }

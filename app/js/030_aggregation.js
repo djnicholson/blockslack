@@ -174,16 +174,18 @@ blockslack.aggregation = (function(){
         this.refresh = function() {
             this.titleHistory.sort(function(a, b) { return a[0] - b[0]; });
 
-            this.currentTitle = blockslack.strings.FALLBACK_GROUP_NAME;
+            this.currentTitle = undefined;
             for (var i = 0; i < this.titleHistory.length; i++) {
                 var historyEntry = this.titleHistory[i];
                 var ts = historyEntry[0];
                 var senderUserId = historyEntry[1];
                 var newTitle = historyEntry[2];
-                if (this.isMember(ts, senderUserId)) {
+                if (!this.currentTitle || this.isMember(ts, senderUserId)) {
                     this.currentTitle = newTitle;
                 }
             }
+
+            this.currentTitle = this.currentTitle || blockslack.strings.FALLBACK_GROUP_NAME;
 
             for (var channel in this.channels) {
                 this.lastActivity = Math.max(this.lastActivity, this.channels[channel].lastActivity);
