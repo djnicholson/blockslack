@@ -1,8 +1,27 @@
 .-person-tooltip {
     @extend .p-1;
+    @extend .text-left;
+
+    div {
+        @extend .p-1;
+    }
 
     .-full-name {
         @extend .h4;
         white-space: nowrap;
+    }
+
+    .-username {
+        white-space: nowrap;
+    }
+
+    .-not-found {
+        @extend .-text-red;
+        font-size: 0.9em;
+    }
+
+    .-non-user {
+        @extend .-text-yellow;
+        font-size: 0.9em;
     }
 }

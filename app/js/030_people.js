@@ -29,6 +29,8 @@ blockslack.people = (function(){
         tooltipElement.find(".-username").text(person.userId);
         tooltipElement.find(".-full-name").text(person.fullName);
         tooltipElement.find(".-full-name").toggle(person.hasFullName);
+        tooltipElement.find(".-not-found").toggle(!person.exists);
+        tooltipElement.find(".-non-user").toggle(person.exists && !person.blockslackUser);
         return tooltipElement.html();
     };
 
@@ -40,6 +42,8 @@ blockslack.people = (function(){
             var badgeTextElement = element.find(".-username");
             var removeLink = element.find("a");
             
+            element.attr("data-username", userId);
+            
             badgeTextElement.text(userId);
             badgeTextElement.tooltip({
                 boundary: "window",
@@ -49,7 +53,7 @@ blockslack.people = (function(){
             });
 
             if (removeMember) {
-                removeLink.click(function() { removeMember($(this).parent().find(".-username").text()); });
+                removeLink.click(function() { removeMember($(this).parent().attr("data-username")); });
             } else {
                 removeLink.hide();
             }
@@ -57,6 +61,7 @@ blockslack.people = (function(){
             var person = new Person(userId);
             person.dataReady.then(function() {
                 !person.exists && badgeTextElement.css("text-decoration", "line-through");
+                !person.blockslackUser && badgeTextElement.css("font-style", "italic");
                 badgeTextElement.text(person.fullName);
             });
 
