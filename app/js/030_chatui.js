@@ -13,6 +13,7 @@ blockslack.chatui = (function(){
     var newMessageElement = $(".-new-message");
     var channelMemberListElement = $(".-channel-member-list");
     var welcomeAreaElement = $(".-welcome");
+    var welcomeAreaElementForNewUser = $(".-welcome-new");
     var footerElement = $(".-footer");
     var mainPageElement = $(".-main-page");
     var workAreaElement = $(".-work-area");
@@ -269,8 +270,17 @@ blockslack.chatui = (function(){
         messageListContentElement.append(element);
     };
 
-    var renderWelcomeArea = function() {
-        welcomeAreaElement.toggle(currentGroupId == undefined);
+    var renderWelcomeArea = function(allData) {
+        if (currentGroupId) {
+            welcomeAreaElement.hide();
+            welcomeAreaElementForNewUser.hide();
+        } else if (Object.keys(allData).length) {
+            welcomeAreaElement.show();
+            welcomeAreaElementForNewUser.hide();
+        } else {
+            welcomeAreaElement.hide();
+            welcomeAreaElementForNewUser.show();
+        }
     };
 
     var sizeElements = function() {
@@ -323,7 +333,7 @@ blockslack.chatui = (function(){
         renderGroupButtons(allData);
         renderCurrentGroupChannelList(allData);
         renderCurrentChannel(allData);
-        renderWelcomeArea();
+        renderWelcomeArea(allData);
         sizeElements();
 
         $('[data-toggle="tooltip"]').tooltip();

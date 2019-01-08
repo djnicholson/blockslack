@@ -9,8 +9,10 @@ blockslack.onload = (function(){
             
             // Ensure user has published their public key successfully before app is loaded:
             blockslack.keys.getAsymmetricKey().then(function() {
-                $(".-loading").hide();
+                console.log("Master key pair available");
             });
+
+            $(".-loading").hide();
         },
 
     };
