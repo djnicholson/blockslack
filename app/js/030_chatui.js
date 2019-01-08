@@ -84,8 +84,12 @@ blockslack.chatui = (function(){
             currentGroupId,
             currentChannelName,
             newAudience);
-        return blockslack.feedpub.publish(oldAudience, message).then(function() {
-            return blockslack.feedpub.publish(newAudience, message);    
+        // Send to the smallest audience first 
+        // (most likely to succeed in cases when invalid usernames are present)
+        var firstAudience = oldAudience.length < newAudience.length ? oldAudience : newAudience;
+        var secondAudience = oldAudience.length < newAudience.length ? newAudience : oldAudience;
+        return blockslack.feedpub.publish(firstAudience, message).then(function() {
+            return blockslack.feedpub.publish(secondAudience, message);    
         }).then(function() {
             if (groupData.currentTitle) {
                 var titleMessage = blockslack.aggregation.generateTitleChangeMessage(
