@@ -6,6 +6,7 @@ blockslack.onload = (function(){
             blockslack.authentication.initialize();
             blockslack.polling.onload();
             blockslack.chatui.onload();
+            $(".-loading").hide();
         },
 
     };

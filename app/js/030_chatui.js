@@ -334,7 +334,6 @@ blockslack.chatui = (function(){
         sizeElements();
 
         $('[data-toggle="tooltip"]').tooltip({ boundary: 'window' });
-        $(".-loading").hide();
     };
 
     return {
