@@ -6,12 +6,6 @@ blockslack.onload = (function(){
             blockslack.authentication.initialize();
             blockslack.polling.onload();
             blockslack.chatui.onload();
-            
-            // Ensure user has published their public key successfully before app is loaded:
-            blockslack.keys.getAsymmetricKey().then(function() {
-                console.log("Master key pair available");
-            });
-
             $(".-loading").hide();
         },
 

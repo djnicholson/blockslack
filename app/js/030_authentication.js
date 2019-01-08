@@ -20,6 +20,11 @@ blockslack.authentication = (function(blockstack){
             $(".-only-when-signed-in").show();
             $(".-only-when-signed-out").hide();
             $(".-current-username").text(blockslack.authentication.getUsername());
+
+            // Ensure user has published their public key successfully before app is loaded:
+            blockslack.keys.getAsymmetricKey().then(function() {
+                console.log("Master key pair available");
+            });
         } else {
             $(".-only-when-signed-in").hide();
             $(".-only-when-signed-out").show();
