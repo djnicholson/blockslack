@@ -333,7 +333,7 @@ blockslack.chatui = (function(){
         renderWelcomeArea(allData);
         sizeElements();
 
-        $('[data-toggle="tooltip"]').tooltip();
+        $('[data-toggle="tooltip"]').tooltip({ boundary: 'window' });
         $(".-loading").hide();
     };
 
