@@ -190,10 +190,7 @@ blockslack.chatui = (function(){
                 for (var member in audience) {
                     var username = audience[member];
                     isMember = isMember || (username == currentUsername);
-                    var memberElement = $($("#template-channelMember").html());
-                    memberElement.find(".-username").text(username);
-                    memberElement.find("a").click(function() { removeMember($(this).parent().find(".-username").text()); });
-                    channelMemberListElement.append(memberElement);
+                    channelMemberListElement.append(blockslack.people.getBadge(username, removeMember));
                 }
 
                 isMember && newMessageElement.focus();

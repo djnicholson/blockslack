@@ -25,6 +25,18 @@ blockslack.people = (function(){
 
     return {
         
+        getBadge: function(userId, removeMember) {
+            var element = $($("#template-personBadge").html());
+            element.find(".-username").text(userId);
+            var removeLink = element.find("a");
+            if (removeMember) {
+                removeLink.click(function() { removeMember($(this).parent().find(".-username").text()); });
+            } else {
+                removeLink.hide();
+            }
+            return element;
+        },
+
         lookup: function(userId) {
             return new Person(userId);
         },
