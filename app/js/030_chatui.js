@@ -237,10 +237,11 @@ blockslack.chatui = (function(){
         var allGroups = [];
         for (var groupId in allData) {
             var title = allData[groupId].currentTitle;
-            allGroups.push([ groupId, title ]);
+            var lastActivity = allData[groupId].lastActivity;
+            allGroups.push([ groupId, title, lastActivity ]);
         }
 
-        allGroups.sort(function(a, b){ return a[1] > b[1] ? 1 : -1; });
+        allGroups.sort(function(a, b){ return b[2] - a[2]; });
         for (var i = 0; i < allGroups.length; i++) {
             renderGroupButton(allGroups[i]);
         }
@@ -285,13 +286,7 @@ blockslack.chatui = (function(){
     var sortChannelNames = function(channelData) {
         var toSort = [];
         for (var channelName in channelData) {
-            var ts = 0;
-            var messages = channelData[channelName].messages;
-            if (messages.length) {
-                ts = messages[messages.length - 1].ts;
-            }
-
-            toSort.push([ channelName, ts]);
+            toSort.push([ channelName, channelData[channelName].lastActivity]);
         }
 
         toSort.sort(function(a, b) { return b[1] - a[1] });

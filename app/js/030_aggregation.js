@@ -16,8 +16,10 @@ blockslack.aggregation = (function(){
         var HISTORY_TYPE_MSG = "m";
         var HISTORY_TYPE_AUDIENCE = "a";
 
-        this.messagesChecksum = 0;
         this.channelHistory = [];
+
+        this.messagesChecksum = 0;
+        this.lastActivity = 0;
         this.messages = [];
         this.audiences = [];
         
@@ -88,6 +90,7 @@ blockslack.aggregation = (function(){
             this.channelHistory.sort(function(a, b) { return a[0] - b[0]; });
 
             this.messagesChecksum = 0;
+            this.lastActivity = 0;
             this.messages = [];
             this.audiences = [];
 
@@ -119,6 +122,7 @@ blockslack.aggregation = (function(){
                         text: text,
                         meta: false,
                     });
+                    this.lastActivity = ts;
                     this.updateChecksum(ts);
                 }
             }
@@ -136,6 +140,7 @@ blockslack.aggregation = (function(){
         this.channels = {};
         this.titleHistory = [];
         this.currentTitle = blockslack.strings.FALLBACK_GROUP_NAME;
+        this.lastActivity = 0;
         
         this.allMembers = function() {
             var result = [];
@@ -178,6 +183,10 @@ blockslack.aggregation = (function(){
                 if (this.isMember(ts, senderUserId)) {
                     this.currentTitle = newTitle;
                 }
+            }
+
+            for (var channel in this.channels) {
+                this.lastActivity = Math.max(this.lastActivity, this.channels[channel].lastActivity);
             }
         };
     };
@@ -260,6 +269,8 @@ blockslack.aggregation = (function(){
                 } else {
                     logMalformed(senderUserId, audience, message, "Unknown message type: " + kind);
                 }
+
+                groupData.refresh();
             }
         },
 
