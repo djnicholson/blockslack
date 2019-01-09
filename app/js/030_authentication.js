@@ -25,6 +25,8 @@ blockslack.authentication = (function(blockstack){
             blockslack.keys.getAsymmetricKey().then(function() {
                 console.log("Master key pair available");
             });
+
+            blockslack.chatui.updateUi(); // scroll to correct location, etc.
         } else {
             $(".-only-when-signed-in").hide();
             $(".-only-when-signed-out").show();

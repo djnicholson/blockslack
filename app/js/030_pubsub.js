@@ -12,7 +12,12 @@ blockslack.pubsub = (function(){
         
         (this.ensureConnected = function() {
             if (!this.connection || this.connection.readyState > 1) {
-                this.connection = new WebSocket(serverUrl);
+                try {
+                    this.connection = new WebSocket(serverUrl);
+                } catch(e) {
+                    console.warn("Websocket connection to " + this.serverUrl + " not possible (" + e + ")");
+                }
+
                 this.subscribed = { };
                 this.connection.onmessage = handleUpdate;
             }
@@ -28,13 +33,15 @@ blockslack.pubsub = (function(){
             var failCount = 0;
             var action = function() {
                 that.ensureConnected();
-                if (connection.readyState == 1) {
-                    that.connection.send(JSON.stringify(messageObject));
-                    then && then();
-                } else if (failCount < MAX_ATTEMPTS) {
-                    failCount++;
-                    console.warn("Delay (" + failCount + ") in sending " + JSON.stringify(messageObject) + " to " + that.serverUrl);
-                    setTimeout(action, WARMUP_DELAY);
+                if (this.connection) {
+                    if (connection.readyState == 1) {
+                        that.connection.send(JSON.stringify(messageObject));
+                        then && then();
+                    } else if (failCount < MAX_ATTEMPTS) {
+                        failCount++;
+                        console.warn("Delay (" + failCount + ") in sending " + JSON.stringify(messageObject) + " to " + that.serverUrl);
+                        setTimeout(action, WARMUP_DELAY);
+                    }
                 }
             };
 
