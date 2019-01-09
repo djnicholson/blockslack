@@ -1,5 +1,7 @@
 blockslack.pubsub = (function(){
     
+    var DEFAULT_SERVER = "ws://server.blockslack.io:80";
+
     var WARMUP_DELAY = 5000;
     var MAX_ATTEMPTS = 10;
 
@@ -96,8 +98,10 @@ blockslack.pubsub = (function(){
         },
 
         getServerUrl: function() {
+            //
             // TODO: Allow users to choose their own URL
-            return "ws://blockslack-env.5xxrpyk2hy.us-east-2.elasticbeanstalk.com:80";
+            //
+            return DEFAULT_SERVER;
         },
 
         notifyPublish: function(filename, keyId, serverUrl) {

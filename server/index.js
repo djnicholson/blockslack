@@ -15,7 +15,16 @@ var crypto = require('crypto');
 
 var salt = Math.random();
 var obfuscate = function(input) {
-    return crypto.createHmac('sha256', salt + "").update(input).digest().toString('hex');
+    return "OBV_" + crypto.createHmac('sha256', salt + "").update(input).digest().toString('hex');
+};
+
+var obfuscateAll = function(inputs) {
+    var inputsClone = inputs.slice();
+    for (var i = 0; i < inputsClone.length; i++) {
+        inputsClone[i] = obfuscate(inputsClone[i]);
+    }
+
+    return inputsClone;
 };
 
 var State = function() {
@@ -96,14 +105,14 @@ var State = function() {
             result += "\n    " + connectionId + ": \t";
             this.forConnection(connectionId, function(connectionInfo) {
                 if (connectionInfo.subscriptions) {
-                    result += Object.keys(connectionInfo.subscriptions).join(", ");
+                    result += obfuscateAll(Object.keys(connectionInfo.subscriptions)).join(", ");
                 }
             });
         }
 
         result += "\n  Feeds:";
         for (var feedId in this.byFeed) {
-            result += "\n    " + feedId + ": \t";
+            result += "\n    " + obfuscate(feedId) + ": \t";
             this.forFeed(feedId, function(feedSubscriptions) {
                 result += Object.keys(feedSubscriptions).join(", ");
             });
@@ -118,7 +127,6 @@ var state = new State();
 
 var log = function(message) {
     console.log((new Date()) + ": " + message);
-    console.debug(state.toString());
 };
 
 var httpServer = http.createServer(function(request, response) {
