@@ -11,6 +11,12 @@ var TYPE_PUBLISH = "p";
 
 var WebSocketServer = require('websocket').server;
 var http = require('http');
+var crypto = require('crypto');
+
+var salt = Math.random();
+var obfuscate = function(input) {
+    return crypto.createHmac('sha256', salt + "").update(input).digest().toString('hex');
+};
 
 var State = function() {
     this.byFeed = { };
@@ -115,14 +121,18 @@ var log = function(message) {
     console.debug(state.toString());
 };
 
-var httpServer = http.createServer(function(request, response) { });
+var httpServer = http.createServer(function(request, response) {
+    response.writeHead(200);
+    response.write(state.toString());
+    response.end();
+});
 httpServer.listen(PORT, function() { log("Listening for connections on port " + PORT); });
 var webSocketServer = new WebSocketServer({ httpServer: httpServer, autoAcceptConnections: true });
 
 webSocketServer.on("connect", function(connection) {
 
     var socket = connection.socket;
-    var connectionId = socket.remoteAddress + "_" + socket.remotePort;
+    var connectionId = obfuscate(socket.remoteAddress + "_" + socket.remotePort);
 
     state.connect(connectionId, connection);
 
