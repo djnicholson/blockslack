@@ -1,3 +1,4 @@
 /build
 /deploy
 .DS_Store
+node_modules

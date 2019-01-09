@@ -1,0 +1,22 @@
+{
+  "name": "blockslackserver",
+  "version": "1.0.0",
+  "description": "blockslack.io notification server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/djnicholson/blockslack.git"
+  },
+  "author": "David Nicholson",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/djnicholson/blockslack/issues"
+  },
+  "homepage": "https://github.com/djnicholson/blockslack#readme",
+  "dependencies": {
+    "websocket": "^1.0.28"
+  }
+}
