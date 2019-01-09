@@ -1,5 +1,7 @@
 blockslack.pubsub = (function(){
     
+    var WARMUP_DELAY = 5000;
+
     var Connection = function(serverUrl) {
         this.serverUrl = serverUrl;
         this.connection = undefined;
@@ -12,25 +14,33 @@ blockslack.pubsub = (function(){
                 this.connection.onmessage = handleUpdate;
             }
         })();
-        
-        this.subscribe = function(feedId) {
-            this.ensureConnected();
-            if (!this.subscribed[feedId]) {
-                try {
-                    this.connection.send(JSON.stringify({ t: "s", f: feedId }));
-                    this.subscribed[feedId] = true;
-                } catch(e) {
-                    console.log("Error subscribing to " + feedId + " on " + this.serverUrl);
-                }
-            }
-        };
 
         this.publish = function(feedId) {
+            this.send({ t: "p", f: feedId });
+        };
+
+        this.send = function(messageObject, then) {
             this.ensureConnected();
-            try {
-                this.connection.send(JSON.stringify({ t: "p", f: feedId }));
-            } catch(e) {
-                console.log("Error publishing to " + feedId + " on " + this.serverUrl);
+            var that = this;
+            var action = function() {
+                that.ensureConnected();
+                that.connection.send(JSON.stringify(messageObject));
+                then && then();
+            };
+
+            if (connection.readyState == 1) {
+                action();
+            } else {
+                setTimeout(action, WARMUP_DELAY);
+            }
+        };
+        
+        this.subscribe = function(feedId) {
+            if (!this.subscribed || !this.subscribed[feedId]) {
+                var that = this;
+                this.send(
+                    { t: "s", f: feedId },
+                    function() { that.subscribed[feedId] = true; });
             }
         };
     };
