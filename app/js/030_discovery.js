@@ -114,8 +114,6 @@ blockslack.discovery = (function(){
 
     return {
 
-        // publics:
-
         addContact: function(userId) {
             if (!blockslack.authentication.isSignedIn()) {
                 return;

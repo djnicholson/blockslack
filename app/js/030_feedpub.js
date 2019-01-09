@@ -62,6 +62,7 @@ blockslack.feedpub = (function(){
                 return blockstack.getFile(cacheBust(rootFilename), DONT_DECRYPT).then(function(existingFeedCipherText) {
                     var feedRoot = parseExistingFeedRootOrCreateNew(audience, existingFeedCipherText, key);
                     feedRoot.messages.push(messageObject);
+                    feedRoot.pubsubUrl = blockslack.pubsub.getServerUrl();
                     var newFeedRootText = JSON.stringify(feedRoot);
                     var newFeedRootCipherText = sjcl.encrypt(key, newFeedRootText);
 
@@ -73,6 +74,7 @@ blockslack.feedpub = (function(){
                     return publishWithoutRotation(keyId, rootFilename, newFeedRootCipherText).then(function() {
                         var username = blockslack.authentication.getUsername();
                         blockslack.polling.consumeFeed(username, rootFilename, feedRoot);
+                        blockslack.pubsub.notifyPublish(rootFilename, keyId, feedRoot.pubsubUrl);
                         return Promise.resolve();
                     });
                 });

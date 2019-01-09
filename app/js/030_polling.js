@@ -37,7 +37,11 @@ blockslack.polling = (function(){
 
     var updateFeed = function(userId, filename, keyId) {
         return blockslack.feedpub.read(userId, filename, keyId).then(function(feedContents) {
+            feedContents.pubsubUrl &&
+                blockslack.pubsub.ensureMonitored(userId, filename, keyId, feedContents.pubsubUrl);
+            
             consumeFeed(userId, filename, feedContents);
+            
             return Promise.resolve();
         });
     };
@@ -77,9 +81,11 @@ blockslack.polling = (function(){
             blockslack.discovery.updateWatchLists();
             blockslack.readstatus.sync();
             updateNextFeed();
+            
             setInterval(blockslack.discovery.updateWatchLists, WATCHLIST_UPDATE_INTERVAL);
             setInterval(blockslack.readstatus.sync, READ_STATUS_UPDATE_INTERVAL);
             setTimeout(updateNextFeed, currentFeedUpdateInterval);
+
             $(document).mousemove(function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });
             $(document).keypress(function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });
             $(document).click(function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });
