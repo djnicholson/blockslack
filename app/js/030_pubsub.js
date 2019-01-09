@@ -92,7 +92,7 @@ blockslack.pubsub = (function(){
 
         getServerUrl: function() {
             // TODO: Allow users to choose their own URL
-            return "ws://127.0.0.1:80";
+            return "ws://blockslack-env.5xxrpyk2hy.us-east-2.elasticbeanstalk.com:80";
         },
 
         notifyPublish: function(filename, keyId, serverUrl) {

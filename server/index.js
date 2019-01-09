@@ -2,7 +2,7 @@
 
 process.title = "blockslack-server";
 
-var PORT = 80;
+var PORT = process.env.PORT || 80;
 
 var FIELD_TYPE = "t";
 var FIELD_FEED_ID = "f";
@@ -42,7 +42,7 @@ var State = function() {
         });
 
         delete that.byConnection[connectionId];
-        
+
         log(connectionId + " disconnected");
     };
 
