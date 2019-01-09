@@ -1,6 +1,7 @@
 blockslack.pubsub = (function(){
     
     var WARMUP_DELAY = 5000;
+    var MAX_ATTEMPTS = 10;
 
     var Connection = function(serverUrl) {
         this.serverUrl = serverUrl;
@@ -22,17 +23,20 @@ blockslack.pubsub = (function(){
         this.send = function(messageObject, then) {
             this.ensureConnected();
             var that = this;
+            var failCount = 0;
             var action = function() {
                 that.ensureConnected();
-                that.connection.send(JSON.stringify(messageObject));
-                then && then();
+                if (connection.readyState == 1) {
+                    that.connection.send(JSON.stringify(messageObject));
+                    then && then();
+                } else if (failCount < MAX_ATTEMPTS) {
+                    failCount++;
+                    console.warn("Delay (" + failCount + ") in sending " + JSON.stringify(messageObject) + " to " + that.serverUrl);
+                    setTimeout(action, WARMUP_DELAY);
+                }
             };
 
-            if (connection.readyState == 1) {
-                action();
-            } else {
-                setTimeout(action, WARMUP_DELAY);
-            }
+            action();
         };
         
         this.subscribe = function(feedId) {
@@ -64,7 +68,8 @@ blockslack.pubsub = (function(){
     };
 
     var getLookupTable = function() {
-        return blockslack.authentication.state("pubsubLookup") || blockslack.authentication.state("pubsubLookup", { });
+        return blockslack.authentication.state("pubsubLookup") || 
+            blockslack.authentication.state("pubsubLookup", { });
     };
 
     var handleUpdate = function(feedId) {
