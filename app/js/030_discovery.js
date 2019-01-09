@@ -1,12 +1,15 @@
 blockslack.discovery = (function(){
-    
-    // privates:
 
     var PERSISTED_STATE_FILE = "discovery_v2/discovery.json";
-
     var USER_FEEDS_FILE = "discovery_v2/discovery_%1.json";
 
+    var THROTTLE_DURATION = 1000 * 60; // wait 60s before retrying a publish for a failing user
+
     var lastPublishedHash = "";
+
+    var now = function() {
+        return (new Date).getTime();
+    };
 
     var sha256 = function(input) {
         return sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(input));
@@ -45,30 +48,34 @@ blockslack.discovery = (function(){
         var lastPublished = blockslack.authentication.state("lastPublished") || {};
         blockslack.authentication.state("lastPublished", lastPublished);
 
+        var lastFailure = blockslack.authentication.state("lastFailure") || {};
+        blockslack.authentication.state("lastFailure", lastFailure);
+
         for (var userId in publishedFeedsByUser) {
             if (validId(userId)) {
-                blockslack.keys.getAsymmetricKey(userId).then(function(keyPair) {
-                    var userId = keyPair.owner;
-                    var publicKey = keyPair.public;
-                    var feeds = publishedFeedsByUser[userId];
-                    var json = JSON.stringify(feeds);
-                    var jsonHash = sha256(json);
-                    if (lastPublished[userId] != jsonHash) {
-                        console.log("Discovery feed for " + userId + " updated: " + jsonHash);
-                        if (publicKey) {
-                            var filename = userFeedsFile(blockstack.loadUserData().username, publicKey);
-                            console.log("Publishing discovery feed for " + userId);
-                            var content = blockstack.encryptContent(json, { publicKey: publicKey });
-                            blockstack.putFile(filename, content, { encrypt: false }).then(function(){ 
-                                console.log("Discovery feed for " + userId + " published: " + jsonHash);
-                                lastPublished[userId] = jsonHash;
-                            });
-                        } else {
-                            console.log(userId + " does not have a public key, not publishing discovery feed");
+                if (!lastFailure[userId] || (lastFailure[userId] + THROTTLE_DURATION < now())) {
+                    blockslack.keys.getAsymmetricKey(userId).then(function(keyPair) {
+                        var userId = keyPair.owner;
+                        var publicKey = keyPair.public;
+                        var feeds = publishedFeedsByUser[userId];
+                        var json = JSON.stringify(feeds);
+                        var jsonHash = sha256(json);
+                        if (lastPublished[userId] != jsonHash) {
+                            if (publicKey) {
+                                var filename = userFeedsFile(blockstack.loadUserData().username, publicKey);
+                                console.log("Publishing discovery feed for " + userId);
+                                var content = blockstack.encryptContent(json, { publicKey: publicKey });
+                                blockstack.putFile(filename, content, { encrypt: false }).then(function(){ 
+                                    console.log("Discovery feed for " + userId + " published: " + jsonHash);
+                                    lastPublished[userId] = jsonHash;
+                                });
+                            } else {
+                                console.log(userId + " does not have a public key, not publishing discovery feed");
+                                lastFailure[userId] = now();
+                            }
                         }
-                    }
-
-                });
+                    });
+                }
             }
         }
     };
