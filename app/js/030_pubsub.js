@@ -14,12 +14,12 @@ blockslack.pubsub = (function(){
             if (!this.connection || this.connection.readyState > 1) {
                 try {
                     this.connection = new WebSocket(serverUrl);
+                    this.connection.onmessage = handleUpdate;
                 } catch(e) {
                     console.warn("Websocket connection to " + this.serverUrl + " not possible (" + e + ")");
                 }
 
                 this.subscribed = { };
-                this.connection.onmessage = handleUpdate;
             }
         })();
 
