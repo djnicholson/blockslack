@@ -86,6 +86,7 @@ blockslack.feedpub = (function(){
             return blockslack.keys.getSymmetricKeyFromUser(userId, keyId).then(function(keyObject) {
                 var key = keyObject.key;
                 var getFileOptions = { decrypt: false, username: userId };
+                console.log("Retrieving feed from " + userId + ": " + filename);
                 return blockstack.getFile(cacheBust(filename), getFileOptions).then(function(cipherText) {
                     var feedRoot = parseExistingFeedRootOrCreateNew([], cipherText, key);
                     return Promise.resolve(feedRoot);
