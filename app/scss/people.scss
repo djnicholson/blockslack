@@ -6,7 +6,7 @@
         @extend .p-1;
     }
 
-    .-full-name {
+    .-full-name-holder {
         @extend .h4;
         white-space: nowrap;
     }
@@ -23,5 +23,11 @@
     .-non-user {
         @extend .-text-yellow;
         font-size: 0.9em;
+    }
+
+    .-profile-pic {
+        @extend .pr-1;
+        height: 1em;
+        border-radius: 50%;
     }
 }

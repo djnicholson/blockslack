@@ -26,11 +26,15 @@ blockslack.people = (function(){
 
     var getTooltipTitle = function(badgeTextElement, person) {
         var tooltipElement = $($("#template-personTooltip").html());
+        var profilePic = tooltipElement.find(".-profile-pic");
         tooltipElement.find(".-username").text(person.userId);
         tooltipElement.find(".-full-name").text(person.fullName);
         tooltipElement.find(".-full-name").toggle(person.hasFullName);
         tooltipElement.find(".-not-found").toggle(!person.exists);
         tooltipElement.find(".-non-user").toggle(person.exists && !person.blockslackUser);
+        profilePic.hide();
+        person.image && (profilePic.attr("src", person.image)) && profilePic.show();
+        !person.image && !person.hasFullName && tooltipElement.find(".-full-name-holder").hide();
         return tooltipElement.html();
     };
 

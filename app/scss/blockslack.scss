@@ -29,3 +29,7 @@ $section-border-width: 3px;
         @extend .text-white;
     }
 }
+
+.tooltip-inner {
+    max-width: 350px;
+}
