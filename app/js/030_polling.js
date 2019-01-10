@@ -84,7 +84,6 @@ blockslack.polling = (function(){
             
             setInterval(blockslack.discovery.updateWatchLists, WATCHLIST_UPDATE_INTERVAL);
             setInterval(blockslack.readstatus.sync, READ_STATUS_UPDATE_INTERVAL);
-            setTimeout(updateNextFeed, currentFeedUpdateInterval);
 
             $(document).mousemove(function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });
             $(document).keypress(function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });
