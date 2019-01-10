@@ -11,17 +11,27 @@ blockslack.people = (function(){
         person.fullName = userId;
         person.hasFullName = false;
         person.pending = true;
-        person.dataReady = blockstack.lookupProfile(userId).then(function (blockstackProfile) {
-            person.exists = true;
-            person.blockslackUser = blockstackProfile.apps[APP_URL] ? true : false;
-            blockstackProfile.image && blockstackProfile.image.length && (person.image = blockstackProfile.image[0].contentUrl);
-            blockstackProfile.name && (person.fullName = blockstackProfile.name) && (person.hasFullName = true);
-            person.pending = false;
-        }).catch(function(e) {
-            person.exists = false;
-            person.blockslackUser = false;
-            person.pending = false;
-        }).then(function() { return person; });
+
+        this.refresh = function() {
+            person.dataReady = blockstack.lookupProfile(userId).then(function (blockstackProfile) {
+                person.exists = true;
+                person.blockslackUser = blockstackProfile.apps[APP_URL] ? true : false;
+                blockstackProfile.image && blockstackProfile.image.length && (person.image = blockstackProfile.image[0].contentUrl);
+                blockstackProfile.name && (person.fullName = blockstackProfile.name) && (person.hasFullName = true);
+                person.pending = false;
+            }).catch(function(e) {
+                person.exists = false;
+                person.blockslackUser = false;
+                person.pending = false;
+            }).then(function() { return person; });
+        };
+
+        this.refresh();
+    };
+
+    var getCache = function() {
+        return blockslack.authentication.state("peopleCache") || 
+            blockslack.authentication.state("peopleCache", { });
     };
 
     var getTooltipTitle = function(badgeTextElement, person) {
@@ -47,8 +57,7 @@ blockslack.people = (function(){
             var removeLink = element.find("a");
             
             element.attr("data-username", userId);
-            
-            badgeTextElement.text(userId);
+
             badgeTextElement.tooltip({
                 boundary: "window",
                 html: true,
@@ -62,7 +71,8 @@ blockslack.people = (function(){
                 removeLink.hide();
             }
 
-            var person = new Person(userId);
+            var person = blockslack.people.lookup(userId);
+            badgeTextElement.text(person.fullName);
             person.dataReady.then(function() {
                 !person.exists && badgeTextElement.css("text-decoration", "line-through");
                 !person.blockslackUser && badgeTextElement.css("font-style", "italic");
@@ -73,7 +83,16 @@ blockslack.people = (function(){
         },
 
         lookup: function(userId) {
-            return new Person(userId);
+            var cache = getCache();
+            var result = cache[userId];
+            if (result) {
+                result.refresh();
+            } else {
+                result = new Person(userId);
+                cache[userId] = result;
+            }
+            
+            return result;
         },
 
     };
