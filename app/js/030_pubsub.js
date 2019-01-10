@@ -100,8 +100,8 @@ blockslack.pubsub = (function(){
     return {
 
         ensureMonitored: function(hostUserId, filename, keyId, serverUrl) {
-            var connection = getConnection(serverUrl);
-            connection.subscribe(encodeFeedId(hostUserId, filename, keyId));
+            // var connection = getConnection(serverUrl);
+            // connection.subscribe(encodeFeedId(hostUserId, filename, keyId));
         },
 
         getServerUrl: function() {
@@ -112,9 +112,9 @@ blockslack.pubsub = (function(){
         },
 
         notifyPublish: function(filename, keyId, serverUrl) {
-            var hostUserId = blockslack.authentication.getUsername();
-            var connection = getConnection(serverUrl);
-            connection.publish(encodeFeedId(hostUserId, filename, keyId));
+            // var hostUserId = blockslack.authentication.getUsername();
+            // var connection = getConnection(serverUrl);
+            // connection.publish(encodeFeedId(hostUserId, filename, keyId));
         },
 
     };

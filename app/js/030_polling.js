@@ -2,8 +2,8 @@ blockslack.polling = (function(){
 
     var WATCHLIST_UPDATE_INTERVAL = 30000;
     var READ_STATUS_UPDATE_INTERVAL = 15000;
-    var FEED_UPDATE_INTERVAL_MIN = 10000;
-    var FEED_UPDATE_INTERVAL_MAX = 60000;
+    var FEED_UPDATE_INTERVAL_MIN = 1500;
+    var FEED_UPDATE_INTERVAL_MAX = 15000;
 
     var currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN;
 
