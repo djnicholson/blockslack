@@ -31,16 +31,30 @@ blockslack.pubsub = (function(){
             this.ensureConnected();
             var that = this;
             var failCount = 0;
+            
+            var onError = function() {
+                if (failCount < MAX_ATTEMPTS) {
+                    failCount++;
+                    console.warn("Delay (" + failCount + ") in sending " + JSON.stringify(messageObject) + " to " + that.serverUrl);
+                    setTimeout(action, WARMUP_DELAY);
+                }
+            };
+
             var action = function() {
                 that.ensureConnected();
-                if (this.connection) {
-                    if (connection.readyState == 1) {
-                        that.connection.send(JSON.stringify(messageObject));
-                        then && then();
-                    } else if (failCount < MAX_ATTEMPTS) {
-                        failCount++;
-                        console.warn("Delay (" + failCount + ") in sending " + JSON.stringify(messageObject) + " to " + that.serverUrl);
-                        setTimeout(action, WARMUP_DELAY);
+                if (that.connection) {
+                    if (that.connection.readyState == 1) {
+                        var ok = false;
+                        try {
+                            that.connection.send(JSON.stringify(messageObject));
+                            ok = true;
+                        } catch (e) {
+                            onError();
+                        }
+
+                        ok && then && then();
+                    } else {
+                        onError();
                     }
                 }
             };
