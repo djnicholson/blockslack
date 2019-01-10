@@ -78,7 +78,7 @@ var State = function() {
                 that.forConnection(connectionId, function(connectionInfo) {
                     var connection = connectionInfo.connection;
                     connection && connection.send(feedId);
-                    log("Notified " + connectionId + " of update to " + feedId);
+                    log("Notified " + connectionId + " of update to " + obfuscate(feedId));
                 });
             }
         });
@@ -93,7 +93,7 @@ var State = function() {
             feedSubscriptions[connectionId] = true;
         });
 
-        log(connectionId + " subscribed to " + feedId);
+        log(connectionId + " subscribed to " + obfuscate(feedId));
     };
 
     this.toString = function() {
