@@ -33,6 +33,10 @@ blockslack.polling = (function(){
 
     var newMessage = function(senderUserId, audience, message) {
         blockslack.aggregation.newMessage(senderUserId, audience, message);
+
+        if (senderUserId != blockslack.authentication.getUsername()) {
+            blockslack.sound.beep();
+        }
     };
 
     var updateFeed = function(userId, filename, keyId) {
