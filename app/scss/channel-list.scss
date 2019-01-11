@@ -13,7 +13,14 @@
     }
 }
 
+.-current-group-name-holder {
+    @extend .p-1;
+    @extend .mb-3;
+}
+
 .-channel-button {
+    @extend .p-1;
+    cursor: pointer;
     font-size: 1.2em;
     font-weight: bold;
     color: $color-yellow;
@@ -24,11 +31,17 @@
     }
 }
 
+.-channel-button:nth-child(odd) {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
 .-channel-button:hover {
-    color: $color-yellow-sub; 
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .-add-channel-button {
+    @extend .p-1;
+    @extend .mt-3;
     font-size: 0.8em;
     color: $color-yellow;
     cursor: pointer;
@@ -36,7 +49,7 @@
 }
 
 .-add-channel-button:hover {
-    color: $color-yellow-sub;
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .-rename-group {
