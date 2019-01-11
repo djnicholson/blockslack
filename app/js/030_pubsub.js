@@ -26,7 +26,6 @@ blockslack.pubsub = (function(){
 
         this.publish = function(feedId) {
             this.send({ t: "p", f: feedId });
-            console.warn("> ", { t: "p", f: feedId });
         };
 
         this.send = function(messageObject, then) {
@@ -98,7 +97,6 @@ blockslack.pubsub = (function(){
     };
 
     var handleUpdate = function(feedId) {
-        console.warn("< ", { t: "p", f: feedId.data });
         var feedDetails = feedId && decodeFeedId(feedId.data);
         if (feedDetails) {
             var hostUserId = feedDetails.hostUserId;
