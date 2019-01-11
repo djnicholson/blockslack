@@ -315,7 +315,7 @@ blockslack.chatui = (function(){
 
     var sizeElements = function(isPageLoad) {
         var bodyHeight = $(document.body).height();
-        if (isPageLoad && bodyHeight < 700) {
+        if ((isPageLoad === true) && bodyHeight < 700) {
             blockslack.chatui.toggleFooter();
         }
 
