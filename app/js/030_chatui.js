@@ -199,7 +199,7 @@ blockslack.chatui = (function(){
                 }
 
                 isMember && newMessageElement.focus();
-                noMembersElement.toggle(audience.length < 2);
+                noMembersElement.toggle(isMember && audience.length < 2);
                 $(".-show-if-member").toggle(isMember);
                 $(".-show-if-not-member").toggle(!isMember);
                 $(".-show-if-any-members").toggle(audience.length > 0);
