@@ -478,16 +478,16 @@ blockslack.chatui = (function(){
         },
 
         renameGroup: function() {
-            if (blockslack.authentication.isSignedIn() && currentGroupId) {
-                var newName = prompt(blockslack.strings.ENTER_NEW_GROUP_NAME);
-                if (newName) {
-                    var allData = blockslack.aggregation.getAllData();
-                    var groupData = allData[currentGroupId];
-                    if (groupData) {
+            var allData = blockslack.aggregation.getAllData();
+            var groupData = allData[currentGroupId];
+            if (groupData) {
+                if (blockslack.authentication.isSignedIn() && currentGroupId) {
+                    var newName = prompt(blockslack.strings.ENTER_NEW_GROUP_NAME, groupData.currentTitle);
+                    if (newName) {
                         var audience = groupData.allMembers();
                         var message = blockslack.aggregation.generateTitleChangeMessage(currentGroupId, newName);
                         blockslack.feedpub.publish(audience, message);
-                    }
+                    }        
                 }
             }
         },
