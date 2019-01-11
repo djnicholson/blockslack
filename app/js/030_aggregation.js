@@ -245,7 +245,7 @@ blockslack.aggregation = (function(){
             return allData;
         },
 
-        newMessage: function(senderUserId, audience, message) {
+        newMessage: function(senderUserId, audience, message, suppressAudio) {
             var allData = blockslack.aggregation.getAllData();
 
             var ts = message[FIELD_TIMESTAMP];
@@ -278,6 +278,9 @@ blockslack.aggregation = (function(){
                 } else if (kind == KIND_MESSAGE) {
                     var text = message[FIELD_MESSAGE];
                     channelData.pushMessage(ts, senderUserId, audience, text);
+                    if (!suppressAudio && (senderUserId != blockslack.authentication.getUsername())) {
+                        blockslack.sound.beep();
+                    }
                 } else {
                     logMalformed(senderUserId, audience, message, "Unknown message type: " + kind);
                 }

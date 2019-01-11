@@ -75,7 +75,6 @@ blockslack.feedpub = (function(){
                         var username = blockslack.authentication.getUsername();
                         blockslack.polling.consumeFeed(username, rootFilename, feedRoot);
                         blockslack.pubsub.notifyPublish(rootFilename, keyId, feedRoot.pubsubUrl);
-                        blockslack.sound.pop();
                         return Promise.resolve();
                     });
                 });

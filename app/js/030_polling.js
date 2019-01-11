@@ -32,11 +32,7 @@ blockslack.polling = (function(){
     };
 
     var newMessage = function(senderUserId, audience, message, suppressAudio) {
-        blockslack.aggregation.newMessage(senderUserId, audience, message);
-
-        if (!suppressAudio && (senderUserId != blockslack.authentication.getUsername())) {
-            blockslack.sound.beep();
-        }
+        blockslack.aggregation.newMessage(senderUserId, audience, message, suppressAudio);
     };
 
     var updateFeed = function(userId, filename, keyId, suppressAudio) {
