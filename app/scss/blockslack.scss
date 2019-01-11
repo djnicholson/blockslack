@@ -17,6 +17,10 @@ $section-border-width: 3px;
     left: 0;
     right: 0;
     z-index: 1000;
+
+    img {
+        max-width: 100%;
+    }
 }
 
 .-box {
