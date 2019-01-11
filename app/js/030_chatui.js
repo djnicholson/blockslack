@@ -25,6 +25,7 @@ blockslack.chatui = (function(){
     var welcomeGroupsContainerElement = $(".-welcome-groups");
     var welcomeGroupsList = $(".-welcome-groups-list");
     var noMembersElement = $(".-no-members");
+    var footerContentsElement = $(".-footer .-contents");
     var faviconDescriptor = $("#favicon");
     
     var animateOnUnread = function() {
@@ -307,8 +308,12 @@ blockslack.chatui = (function(){
         welcomeGroupsContainerElement.toggle(Object.keys(allData).length ? true : false);
     };
 
-    var sizeElements = function() {
+    var sizeElements = function(isPageLoad) {
         var bodyHeight = $(document.body).height();
+        if (isPageLoad && bodyHeight < 700) {
+            blockslack.chatui.toggleFooter();
+        }
+
         var footerHeight = footerElement.height();
         var mainPageHeight = Math.max(footerHeight * 2, bodyHeight - footerHeight - 35);
         mainPageElement.height(mainPageHeight);
@@ -469,7 +474,7 @@ blockslack.chatui = (function(){
             newMessageElement.keypress(newMessageKeyPress);
             $(window).on('resize', sizeElements);
             setInterval(animateOnUnread, FLASH_SPEED);
-            sizeElements();
+            sizeElements(/*isPageLoad*/ true);
         },
 
         renameGroup: function() {
@@ -485,6 +490,17 @@ blockslack.chatui = (function(){
                     }
                 }
             }
+        },
+
+        toggleFooter: function() {
+            footerContentsElement.toggle();
+            if (footerContentsElement.is(":visible")) {
+                footerElement.find(".oi").addClass("oi-chevron-bottom").removeClass("oi-chevron-top");
+            } else {
+                footerElement.find(".oi").addClass("oi-chevron-top").removeClass("oi-chevron-bottom");
+            }
+
+            updateUi();
         },
 
     };
