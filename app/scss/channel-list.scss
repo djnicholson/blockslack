@@ -1,10 +1,13 @@
-.-channel-list {
+.-channel-list,.-channel-list-mobile {
     @extend .-purple;
-    border-right: $section-border-width solid $color-purple-sub;
-    overflow-y: auto;
     overflow-wrap: break-word;
     word-wrap: break-word;
     word-break: break-all;
+    overflow-y: auto;
+}
+
+.-channel-list {
+    border-right: $section-border-width solid $color-purple-sub;
 
     .-current-group-name {
         @extend .h3;
@@ -15,6 +18,23 @@
     .-current-group-name-holder {
         @extend .p-1;
         @extend .mb-3;
+    }
+}
+
+.-channel-list-mobile {
+    @extend .shadow;
+    border-top: $section-border-width solid $color-purple-sub;
+    border-right: $section-border-width solid $color-purple-sub;
+    border-bottom: $section-border-width solid $color-purple-sub;
+    position: fixed;
+    top: 100px;
+    bottom: 20px;
+    left: 0px;
+    z-index: 900;
+    margin-right: 40px; // don't let it hit right screen edge when there are long channel names
+
+    .-channel-buttons {
+        min-width: 50vw;
     }
 }
 
