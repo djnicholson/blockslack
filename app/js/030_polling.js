@@ -11,7 +11,7 @@ blockslack.polling = (function(){
 
     var feedIndex = 0;
     
-    var consumeFeed = function(userId, filename, feedContents) {
+    var consumeFeed = function(userId, filename, feedContents, suppressAudio) {
         var rxStatus = blockslack.authentication.state("rxStatus") || {};
         blockslack.authentication.state("rxStatus", rxStatus);
         var key = userId + "_" + filename;
@@ -20,7 +20,7 @@ blockslack.polling = (function(){
         for (var i = 0; i < feedContents.messages.length; i++) {
             var item = feedContents.messages[i];
             if (item.ts && (item.ts > lastRead)) {
-                newMessage(userId, feedContents.audience, item);
+                newMessage(userId, feedContents.audience, item, suppressAudio);
                 hadUpdates = true;
                 rxStatus[key] = item.ts;
             }
@@ -31,20 +31,20 @@ blockslack.polling = (function(){
         }
     };
 
-    var newMessage = function(senderUserId, audience, message) {
+    var newMessage = function(senderUserId, audience, message, suppressAudio) {
         blockslack.aggregation.newMessage(senderUserId, audience, message);
 
-        if (senderUserId != blockslack.authentication.getUsername()) {
+        if (!suppressAudio && (senderUserId != blockslack.authentication.getUsername())) {
             blockslack.sound.beep();
         }
     };
 
-    var updateFeed = function(userId, filename, keyId) {
+    var updateFeed = function(userId, filename, keyId, suppressAudio) {
         return blockslack.feedpub.read(userId, filename, keyId).then(function(feedContents) {
             feedContents.pubsubUrl &&
                 blockslack.pubsub.ensureMonitored(userId, filename, keyId, feedContents.pubsubUrl);
             
-            consumeFeed(userId, filename, feedContents);
+            consumeFeed(userId, filename, feedContents, suppressAudio);
             
             return Promise.resolve();
         });
@@ -57,7 +57,7 @@ blockslack.polling = (function(){
 
             var key = userId + "_" + filename + "_" + keyId;
             if (!renderedAtLeastOnce[key]) {
-                updateFeed(userId, filename, keyId);
+                updateFeed(userId, filename, keyId, /*suppressAudio*/ true);
                 renderedAtLeastOnce[key] = true;
             }
         });

@@ -4,6 +4,7 @@ blockslack.pubsub = (function(){
 
     var WARMUP_DELAY = 5000;
     var MAX_ATTEMPTS = 10;
+    var PUBLISH_DELAY = 2000; // retrieving a file from GAIA immeadietely after publish soemtimes returns the old version
 
     var Connection = function(serverUrl) {
         this.serverUrl = serverUrl;
@@ -25,6 +26,7 @@ blockslack.pubsub = (function(){
 
         this.publish = function(feedId) {
             this.send({ t: "p", f: feedId });
+            console.warn("> ", { t: "p", f: feedId });
         };
 
         this.send = function(messageObject, then) {
@@ -96,6 +98,7 @@ blockslack.pubsub = (function(){
     };
 
     var handleUpdate = function(feedId) {
+        console.warn("< ", { t: "p", f: feedId.data });
         var feedDetails = feedId && decodeFeedId(feedId.data);
         if (feedDetails) {
             var hostUserId = feedDetails.hostUserId;
@@ -126,9 +129,11 @@ blockslack.pubsub = (function(){
         },
 
         notifyPublish: function(filename, keyId, serverUrl) {
-            var hostUserId = blockslack.authentication.getUsername();
-            var connection = getConnection(serverUrl);
-            connection.publish(encodeFeedId(hostUserId, filename, keyId));
+            setTimeout(function() {
+                var hostUserId = blockslack.authentication.getUsername();
+                var connection = getConnection(serverUrl);
+                connection.publish(encodeFeedId(hostUserId, filename, keyId));
+            }, PUBLISH_DELAY);
         },
 
     };
