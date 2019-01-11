@@ -34,12 +34,15 @@ $section-border-width: 3px;
     }
 }
 
-.-signin-status {
+.-signin-status,.-signin-status-mobile {
     @extend .-dark-purple;
     @extend .shadow;
     @extend .p-1;
     @extend .pl-2;
     @extend .pr-3;
+}
+
+.-signin-status {
     @extend .mr-4;
     position: fixed;
     top: 0px;
