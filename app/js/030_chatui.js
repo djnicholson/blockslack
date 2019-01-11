@@ -138,9 +138,7 @@ blockslack.chatui = (function(){
 
     var renderChannelButton = function(channelName) {
         var buttonElement = $($("#template-channelButton").html());
-        var hasUnread = 
-            (channelName != currentChannelName) &&
-            blockslack.readstatus.hasUnread(currentGroupId, channelName);
+        var hasUnread = blockslack.readstatus.hasUnread(currentGroupId, channelName);
         buttonElement.find(".-name").text("#" + channelDisplayName(channelName));
         buttonElement.find(".-unread-indicator").toggle(hasUnread);
         buttonElement.click(function(){ switchChannel(channelName); });
@@ -330,7 +328,7 @@ blockslack.chatui = (function(){
     var updateUi = function() {
         $(".tooltip").hide();
         var allData = blockslack.aggregation.getAllData();
-        currentGroupId && currentChannelName && blockslack.readstatus.markRead(currentGroupId, currentChannelName);
+        windowHasFocus && currentGroupId && currentChannelName && blockslack.readstatus.markRead(currentGroupId, currentChannelName);
         renderGroupButtons(allData);
         renderCurrentGroupChannelList(allData);
         renderCurrentChannel(allData);
@@ -339,6 +337,14 @@ blockslack.chatui = (function(){
 
         $('[data-toggle="tooltip"]').tooltip({ boundary: 'window' });
     };
+
+    var windowHasFocus = true;
+    $(window).focus(function() {
+        windowHasFocus = true;
+        currentGroupId && currentChannelName && blockslack.readstatus.markRead(currentGroupId, currentChannelName);
+    }).blur(function() {
+        windowHasFocus = false;
+    });
 
     return {
 
