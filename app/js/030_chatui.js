@@ -27,17 +27,19 @@ blockslack.chatui = (function(){
     var welcomeGroupsList = $(".-welcome-groups-list");
     var noMembersElement = $(".-no-members");
     var footerContentsElement = $(".-footer .-contents");
-    var faviconDescriptor = $("#favicon");
+    var mobileChannelListElement = $(".-channel-list-mobile");
+    var mobileChannelListContentsElement = $(".-channel-list-mobile-contents");
+    var faviconDescriptorElement = $("#favicon");
     
     var animateOnUnread = function() {
         if (!hasUnread) {
-            faviconDescriptor.attr("href", "favicon.png");
+            faviconDescriptorElement.attr("href", "favicon.png");
         } else {
-            var current = faviconDescriptor.attr("href");
+            var current = faviconDescriptorElement.attr("href");
             if (current == "favicon.png") {
-                faviconDescriptor.attr("href", "favicon-new.png");
+                faviconDescriptorElement.attr("href", "favicon-new.png");
             } else {
-                faviconDescriptor.attr("href", "favicon.png");
+                faviconDescriptorElement.attr("href", "favicon.png");
             }
         }
     };
@@ -246,6 +248,7 @@ blockslack.chatui = (function(){
             }
         }
 
+        mobileChannelListElement.toggle(currentGroupId ? true : false);
         currentGroupHolderElement.toggle(groupName ? true : false);
         currentGroupElement.text(groupName);
         addChannelButtonElement.toggle(groupName != "");
