@@ -18,4 +18,23 @@
             </div>
         </div>
 
+        <div class="-signin-status">
+
+            <span class="badge text-white p-2 mr-1 -dark-purple">
+                <span class="oi oi-person"></span>
+                <span class="-current-username"></span>
+            </span>
+
+            <a 
+                data-toggle="tooltip"
+                data-placement="bottom"
+                title="Sign out"
+                onclick="blockslack.authentication.signOut()"
+                class="text-white"
+                href="#">
+                <span class="oi oi-account-logout"></span>
+            </a>
+
+        </div>
+
         <div class="container-fluid" style="min-height: 100%; height: 100%">

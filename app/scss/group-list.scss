@@ -2,6 +2,10 @@
     @extend .-dark-purple;
     border-right: $section-border-width solid $color-dark-purple-sub;
     overflow-y: auto;
+
+    img {
+        max-width: 100%;
+    }
 }
 
 .-group-button {
@@ -18,7 +22,7 @@
 }
 
 .-group-button.-unread {
-    border: 4px solid $color-orange-sub;   
+    border: 3px solid $color-orange-sub;   
 }
 
 .-group-button:hover {

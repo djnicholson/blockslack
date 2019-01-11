@@ -34,6 +34,19 @@ $section-border-width: 3px;
     }
 }
 
+.-signin-status {
+    @extend .-dark-purple;
+    @extend .shadow;
+    @extend .p-1;
+    @extend .pl-2;
+    @extend .pr-3;
+    @extend .mr-4;
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    z-index: 900;
+}
+
 .tooltip-inner {
     max-width: 350px;
 }
