@@ -523,9 +523,11 @@ blockslack.chatui = (function(){
             if (targetVisibility) {
                 mobileChannelListElement.addClass("-expanded");
                 mobileChannelListElement.find(".oi").addClass("oi-chevron-left").removeClass("oi-chevron-right");
+                newMessageElement.blur();
             } else {
                 mobileChannelListElement.removeClass("-expanded");
                 mobileChannelListElement.find(".oi").addClass("oi-chevron-right").removeClass("oi-chevron-left");
+                newMessageElement.focus();
             }
         },
 
