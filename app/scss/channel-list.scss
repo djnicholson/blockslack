@@ -11,11 +11,11 @@
         @extend .text-left;
         color: $color-yellow;
     }
-}
 
-.-current-group-name-holder {
-    @extend .p-1;
-    @extend .mb-3;
+    .-current-group-name-holder {
+        @extend .p-1;
+        @extend .mb-3;
+    }
 }
 
 .-channel-button {

@@ -34,6 +34,19 @@
         title="Create a new group">
         +
     </div>
+    <div class="-current-group-name-holder">
+        <span class="-current-group-name"></span>
+        <a 
+            data-toggle="tooltip"
+            data-placement="bottom"
+            title="Rename this group"
+            onclick="blockslack.chatui.renameGroup()"
+            class="-text-yellow-light -rename-group" 
+            style="display: none" 
+            href="#">
+            <span class="oi oi-pencil"></span>
+        </a>
+    </div>
 </div>
 
 <script id="template-groupButton" type="text/x-template">

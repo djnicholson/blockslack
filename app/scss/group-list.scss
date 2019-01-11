@@ -16,7 +16,7 @@
     top: 0px;
     left: 0px;
     right: 0px;
-    z-index: 900;
+    z-index: 800;
     white-space: nowrap;
 
     img {
@@ -32,6 +32,26 @@
         @extend .m-1;
         padding: 2px;
         min-width: 60px;
+    }
+
+    .-current-group-name-holder {
+        @extend .text-right;
+        @extend .-purple;
+        @extend .pr-2;
+        @extend .pl-2;
+        @extend .pb-1;
+        @extend .pt-1;
+        @extend .mr-2;
+        @extend .shadow;
+        position: fixed;
+        right: 0px;
+        margin-top: $section-border-width;
+        display: block;
+    }
+
+    .-current-group-name {
+        @extend .h6;
+        color: $color-yellow;
     }
 }
 
