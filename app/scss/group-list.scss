@@ -11,7 +11,7 @@
 .-group-list-mobile {
     @extend .-dark-purple;
     border-bottom: $section-border-width solid $color-dark-purple-sub;
-    overflow-x: scroll;
+    overflow-x: auto;
     position: fixed;
     top: 0px;
     left: 0px;
@@ -37,6 +37,7 @@
 
 .-group-button {
     @extend .-dark-purple-sub;
+    @extend .text-center;
     @extend .p-1;
     @extend .m-1;
     @extend .mt-4;
