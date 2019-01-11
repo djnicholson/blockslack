@@ -17,6 +17,10 @@
     border: 1px solid $color-orange-sub;
 }
 
+.-group-button.-unread {
+    border: 4px solid $color-orange-sub;   
+}
+
 .-group-button:hover {
     @extend .-dark-purple;  
 }

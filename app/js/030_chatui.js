@@ -245,7 +245,8 @@ blockslack.chatui = (function(){
         for (var groupId in allData) {
             var title = allData[groupId].currentTitle;
             var lastActivity = allData[groupId].lastActivity;
-            allGroups.push([ groupId, title, lastActivity ]);
+            var hasUnread = allData[groupId].hasUnread();
+            allGroups.push([ groupId, title, lastActivity, hasUnread ]);
         }
 
         allGroups.sort(function(a, b){ return b[2] - a[2]; });
@@ -256,6 +257,7 @@ blockslack.chatui = (function(){
 
     var renderGroupButton = function(groupData) {
         var buttonElement = $($("#template-groupButton").html());
+        groupData[3] && buttonElement.addClass("-unread");
         buttonElement.text(groupData[1].charAt(0).toUpperCase());
         buttonElement.click(function(){ switchGroup(groupData[0]); });
         buttonElement.attr("title", groupData[1]);

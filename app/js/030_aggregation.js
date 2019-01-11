@@ -136,7 +136,8 @@ blockslack.aggregation = (function(){
         };
     };
 
-    var GroupData = function() {
+    var GroupData = function(groupId) {
+        this.groupId = groupId;
         this.channels = {};
         this.titleHistory = [];
         this.currentTitle = blockslack.strings.FALLBACK_GROUP_NAME;
@@ -150,6 +151,15 @@ blockslack.aggregation = (function(){
                 for (var i = 0; i < audience.length; i++) {
                     (result.indexOf(audience[i]) == -1) && result.push(audience[i]);
                 }
+            }
+
+            return result;
+        };
+
+        this.hasUnread = function() {
+            var result = false;
+            for (var channelName in this.channels) {
+                result = result || blockslack.readstatus.hasUnread(this.groupId, channelName);
             }
 
             return result;
@@ -246,7 +256,7 @@ blockslack.aggregation = (function(){
                 return;
             }
 
-            allData[groupId] = allData[groupId] || new GroupData();
+            allData[groupId] = allData[groupId] || new GroupData(groupId);
             var groupData = allData[groupId];
 
             if (kind == KIND_TITLE_CHANGE) {
