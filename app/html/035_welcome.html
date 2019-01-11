@@ -1,94 +1,103 @@
-<div class="-only-when-signed-in -white -welcome" style="display: none">
+<div class="-only-when-signed-in" style="display: none">
+    <div class="-white -welcome">
 
-    <div class="row m-2 p-4">
+        <div class="row m-2 p-4">
 
-        <div class="col-12 text-center pb-4">
-            <div class="p-4"><img src="logo-bw.png" alt="blockslack logo" title="blockslack" /></div>
-            <div class="h3 p-4">Chat for small teams &mdash; encrypted and decentralized</div>
-        </div>
-        
-        <div class="col-12 col-lg-6 text-center mb-4">
-            <div class="-box">
-                <div class="h5 m-2">Create a new group</div>
-                <div class="h6 m-2">
-                    Groups are places where you chat about various topics with members of a team.
-                </div>
-                <div class="m-2">
-                    To get started, pick a name for your new group (e.g. <em>My Company</em>). The name can
-                    be changed later by you or any other member of the group.
-                </div>
-                <div class="row m-2">
-                    <div class="d-none d-lg-block col-2 p-1 text-right"><span class="oi oi-chat"></span></div>
-                    <div class="col-6 col-lg-7 p-1">
-                        <input id="newGroupName" type="text" placeholder="Enter a group name" class="pl-2" />
-                    </div>
-                    <div class="col-6 col-lg-3 p-1">
-                        <input 
-                            type="button" 
-                            class="btn" 
-                            value="Create" 
-                            onclick="blockslack.chatui.addGroup()">
-                        </input>
-                    </div>
-                </div>
+            <div class="col-12 text-center pb-4">
+                <div class="p-4"><img src="logo-bw.png" alt="blockslack logo" title="blockslack" /></div>
+                <div class="h3 p-4">Chat for small teams &mdash; encrypted and decentralized</div>
             </div>
-        </div>
-
-        <div class="col-12 col-lg-6 text-center mb-4">
-            <div class="-box">
-                <div class="h5 m-2">Join someone's group</div>
-                <div class="h6 m-2">
-                    Connect with another user to see the groups that they have added you to.
-                </div>
-                <div class="m-2">
-                    If someone has asked you to chat with them, enter their Blockstack username below
-                    (e.g. <em>johndoe.id.blockstack</em>) to see their groups.
-                </div>
-                <div class="row m-2">
-                    <div class="d-none d-lg-block col-2 p-1 text-right"><span class="oi oi-person"></span></div>
-                    <div class="col-6 col-lg-7 p-1">
-                        <input id="newContactUsername" type="text" placeholder="Enter a username" class="pl-2" />
-                    </div>
-                    <div class="col-6 col-lg-3 p-1">
-                        <input 
-                            type="button" 
-                            class="btn" 
-                            value="Connect" 
-                            onclick="blockslack.chatui.addContact()">
-                        </input>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12 text-center -welcome-groups">
-            <div class="h5 m-3">Your groups&hellip;</div>
-            <div class="m-3 -welcome-groups-list">
-
-            </div>
-        </div>
-
-        <div class="d-lg-none col-12 text-center pt-4 pb-4">
             
-            <!-- see also: -signin-status -->
-            <div class="-signin-status-mobile">
-                <span class="badge text-white p-2 mr-1 -dark-purple">
-                    <span class="oi oi-person"></span>
-                    <span class="-current-username"></span>
-                </span>
-                <a 
-                    data-toggle="tooltip"
-                    data-placement="bottom"
-                    title="Sign out"
-                    onclick="blockslack.authentication.signOut()"
-                    class="text-white"
-                    href="#">
-                    <span class="oi oi-account-logout"></span>
-                </a>
+            <div class="col-12 col-lg-6 text-center mb-4">
+                <div class="-box">
+                    <div class="h5 m-2">Create a new group</div>
+                    <div class="h6 m-2">
+                        Groups are places where you chat about various topics with members of a team.
+                    </div>
+                    <div class="m-2">
+                        To get started, pick a name for your new group (e.g. <em>My Company</em>). The name can
+                        be changed later by you or any other member of the group.
+                    </div>
+                    <div class="row m-2">
+                        <div class="d-none d-lg-block col-2 p-1 text-right">
+                            <span class="oi oi-chat"></span>
+                        </div>
+                        <div class="col-6 col-lg-7 p-1">
+                            <input id="newGroupName" type="text" placeholder="Enter a group name" class="pl-2" />
+                        </div>
+                        <div class="col-6 col-lg-3 p-1">
+                            <input 
+                                type="button" 
+                                class="btn" 
+                                value="Create" 
+                                onclick="blockslack.chatui.addGroup()">
+                            </input>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-6 text-center mb-4">
+                <div class="-box">
+                    <div class="h5 m-2">Join someone's group</div>
+                    <div class="h6 m-2">
+                        Connect with another user to see the groups that they have added you to.
+                    </div>
+                    <div class="m-2">
+                        If someone has asked you to chat with them, enter their Blockstack username below
+                        (e.g. <em>johndoe.id.blockstack</em>) to see their groups.
+                    </div>
+                    <div class="row m-2">
+                        <div class="d-none d-lg-block col-2 p-1 text-right">
+                            <span class="oi oi-person"></span>
+                        </div>
+                        <div class="col-6 col-lg-7 p-1">
+                            <input id="newContactUsername" 
+                                type="text" 
+                                placeholder="Enter a username" 
+                                class="pl-2" />
+                        </div>
+                        <div class="col-6 col-lg-3 p-1">
+                            <input 
+                                type="button" 
+                                class="btn" 
+                                value="Connect" 
+                                onclick="blockslack.chatui.addContact()">
+                            </input>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 text-center -welcome-groups">
+                <div class="h5 m-3">Your groups&hellip;</div>
+                <div class="m-3 -welcome-groups-list">
+
+                </div>
+            </div>
+
+            <div class="d-lg-none col-12 text-center pt-4 pb-4">
+                
+                <!-- see also: -signin-status -->
+                <div class="-signin-status-mobile">
+                    <span class="badge text-white p-2 mr-1 -dark-purple">
+                        <span class="oi oi-person"></span>
+                        <span class="-current-username"></span>
+                    </span>
+                    <a 
+                        data-toggle="tooltip"
+                        data-placement="bottom"
+                        title="Sign out"
+                        onclick="blockslack.authentication.signOut()"
+                        class="text-white"
+                        href="#">
+                        <span class="oi oi-account-logout"></span>
+                    </a>
+                </div>
+
             </div>
 
         </div>
 
     </div>
-
 </div>

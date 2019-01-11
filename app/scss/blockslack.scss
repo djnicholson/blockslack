@@ -50,6 +50,12 @@ $section-border-width: 3px;
     z-index: 900;
 }
 
+.-about {
+    img {
+        max-width: 100%;
+    }
+}
+
 .tooltip-inner {
     max-width: 350px;
 }

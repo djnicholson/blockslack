@@ -18,34 +18,36 @@
     </div>
 </div>
 
-<div class="d-lg-none col-12 -group-list-mobile">
-    <a href="javascript:blockslack.chatui.home()">
-        <img src="logo-192x192.png" alt="blockslack" title="blockslack" />
-    </a>
-    <div class="-group-buttons -only-when-signed-in">
-
-    </div>
-    <div 
-        class="-group-button -only-when-signed-in" 
-        onclick="blockslack.chatui.home()"
-        data-toggle="tooltip"
-        data-placement="right"
-        style="display: none"
-        title="Create a new group">
-        +
-    </div>
-    <div class="-current-group-name-holder">
-        <span class="-current-group-name"></span>
-        <a 
-            data-toggle="tooltip"
-            data-placement="bottom"
-            title="Rename this group"
-            onclick="blockslack.chatui.renameGroup()"
-            class="-text-yellow-light -rename-group" 
-            style="display: none" 
-            href="#">
-            <span class="oi oi-pencil"></span>
+<div class="-only-when-signed-in" style="display: none">
+    <div class="d-lg-none col-12 -group-list-mobile">
+        <a href="javascript:blockslack.chatui.home()">
+            <img src="logo-192x192.png" alt="blockslack" title="blockslack" />
         </a>
+        <div class="-group-buttons -only-when-signed-in">
+
+        </div>
+        <div 
+            class="-group-button -only-when-signed-in" 
+            onclick="blockslack.chatui.home()"
+            data-toggle="tooltip"
+            data-placement="right"
+            style="display: none"
+            title="Create a new group">
+            +
+        </div>
+        <div class="-current-group-name-holder">
+            <span class="-current-group-name"></span>
+            <a 
+                data-toggle="tooltip"
+                data-placement="bottom"
+                title="Rename this group"
+                onclick="blockslack.chatui.renameGroup()"
+                class="-text-yellow-light -rename-group" 
+                style="display: none" 
+                href="#">
+                <span class="oi oi-pencil"></span>
+            </a>
+        </div>
     </div>
 </div>
 
