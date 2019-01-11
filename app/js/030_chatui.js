@@ -345,6 +345,7 @@ blockslack.chatui = (function(){
     var switchChannel = function(newChannelName) {
         currentChannelName = newChannelName;
         newMessageElement.val("");
+        blockslack.chatui.toggleChannels(/*forceState*/ false);
         updateUi();
     };
 
@@ -352,6 +353,7 @@ blockslack.chatui = (function(){
         currentGroupId = newGroupId;
         currentChannelName = undefined;
         newMessageElement.val("");
+        blockslack.chatui.toggleChannels(/*forceState*/ true);
         updateUi();
     };
 
@@ -506,6 +508,25 @@ blockslack.chatui = (function(){
             }
 
             updateUi();
+        },
+
+        toggleChannels: function(forceState) {
+            var initialVisibility = mobileChannelListContentsElement.is(":visible");
+            var targetVisibility = !initialVisibility;
+            if (forceState === true) {
+                targetVisibility = true;
+            } else if (forceState === false) {
+                targetVisibility = false;
+            }
+
+            mobileChannelListContentsElement.toggle(targetVisibility);
+            if (targetVisibility) {
+                mobileChannelListElement.addClass("-expanded");
+                mobileChannelListElement.find(".oi").addClass("oi-chevron-left").removeClass("oi-chevron-right");
+            } else {
+                mobileChannelListElement.removeClass("-expanded");
+                mobileChannelListElement.find(".oi").addClass("oi-chevron-right").removeClass("oi-chevron-left");
+            }
         },
 
     };
