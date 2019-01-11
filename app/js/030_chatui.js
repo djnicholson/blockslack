@@ -8,6 +8,7 @@ blockslack.chatui = (function(){
 
     var currentChannelElement = $(".-current-channel-name");
     var currentGroupElement = $(".-current-group-name");
+    var currentGroupHolderElement = $(".-current-group-name-holder");
     var addChannelButtonElement = $(".-add-channel-button");
     var groupButtonListElement = $(".-group-buttons");
     var channelListElement = $(".-channel-buttons");
@@ -245,6 +246,7 @@ blockslack.chatui = (function(){
             }
         }
 
+        currentGroupHolderElement.toggle(groupName ? true : false);
         currentGroupElement.text(groupName);
         addChannelButtonElement.toggle(groupName != "");
         renameGroupLinkElement.toggle(currentGroupId ? true : false);
