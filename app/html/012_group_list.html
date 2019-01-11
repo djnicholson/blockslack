@@ -18,6 +18,24 @@
     </div>
 </div>
 
+<div class="d-lg-none col-12 text-center -group-list-mobile">
+    <a href="javascript:blockslack.chatui.home()">
+        <img src="logo-192x192.png" alt="blockslack" title="blockslack" />
+    </a>
+    <div class="-group-buttons -only-when-signed-in">
+
+    </div>
+    <div 
+        class="-group-button -only-when-signed-in" 
+        onclick="blockslack.chatui.home()"
+        data-toggle="tooltip"
+        data-placement="right"
+        style="display: none"
+        title="Create a new group">
+        +
+    </div>
+</div>
+
 <script id="template-groupButton" type="text/x-template">
     <div 
         class="-group-button -only-when-signed-in"
