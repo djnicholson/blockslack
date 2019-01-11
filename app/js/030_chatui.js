@@ -1,7 +1,10 @@
 blockslack.chatui = (function(){
 
+    var FLASH_SPEED = 750;
+
     var currentGroupId = undefined;
     var currentChannelName = undefined;
+    var hasUnread = false;
 
     var currentChannelElement = $(".-current-channel-name");
     var currentGroupElement = $(".-current-group-name");
@@ -22,6 +25,20 @@ blockslack.chatui = (function(){
     var welcomeGroupsContainerElement = $(".-welcome-groups");
     var welcomeGroupsList = $(".-welcome-groups-list");
     var noMembersElement = $(".-no-members");
+    var faviconDescriptor = $("#favicon");
+    
+    var animateOnUnread = function() {
+        if (!hasUnread) {
+            faviconDescriptor.attr("href", "favicon.png");
+        } else {
+            var current = faviconDescriptor.attr("href");
+            if (current == "favicon.png") {
+                faviconDescriptor.attr("href", "favicon-new.png");
+            } else {
+                faviconDescriptor.attr("href", "favicon.png");
+            }
+        }
+    };
 
     var channelDisplayName = function(channelName) {
         var index = channelName.lastIndexOf(":");
@@ -327,6 +344,13 @@ blockslack.chatui = (function(){
         updateUi();
     };
 
+    var updateGlobalUnreadStatus = function(allData) {
+        hasUnread = false;    
+        for (var groupId in allData) {
+            hasUnread = hasUnread || allData[groupId].hasUnread();
+        }
+    };
+
     var updateUi = function() {
         $(".tooltip").hide();
         var allData = blockslack.aggregation.getAllData();
@@ -335,6 +359,7 @@ blockslack.chatui = (function(){
         renderCurrentGroupChannelList(allData);
         renderCurrentChannel(allData);
         renderWelcomeArea(allData);
+        updateGlobalUnreadStatus(allData);
         sizeElements();
 
         $('[data-toggle="tooltip"]').tooltip({ boundary: 'window' });
@@ -442,6 +467,7 @@ blockslack.chatui = (function(){
         onload: function() {
             newMessageElement.keypress(newMessageKeyPress);
             $(window).on('resize', sizeElements);
+            setInterval(animateOnUnread, FLASH_SPEED);
             sizeElements();
         },
 
