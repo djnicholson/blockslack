@@ -12,4 +12,5 @@ pushd $MOBILEROOT
 cordova prepare
 cordova build
 cordova build --release
+cp platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk $DEPLOYROOT/android.apk
 popd
