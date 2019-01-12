@@ -482,6 +482,8 @@ blockslack.chatui = (function(){
         onload: function() {
             newMessageElement.keypress(newMessageKeyPress);
             $(window).on('resize', sizeElements);
+            newMessageElement.focus(sizeElements);
+            newMessageElement.blur(sizeElements);
             setInterval(animateOnUnread, FLASH_SPEED);
             sizeElements(/*isPageLoad*/ true);
             workAreaElement.click(function(e) { 
