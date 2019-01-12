@@ -482,7 +482,10 @@ blockslack.chatui = (function(){
             $(window).on('resize', sizeElements);
             setInterval(animateOnUnread, FLASH_SPEED);
             sizeElements(/*isPageLoad*/ true);
-            workAreaElement.click(function(e) { blockslack.chatui.toggleChannels(/*forceState*/ false); });
+            workAreaElement.click(function(e) { 
+                mobileChannelListContentsElement.is(":visible") &&
+                    blockslack.chatui.toggleChannels(/*forceState*/ false); 
+            });
         },
 
         renameGroup: function() {
