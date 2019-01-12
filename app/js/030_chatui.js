@@ -218,7 +218,7 @@ blockslack.chatui = (function(){
                     channelMemberListElement.append(blockslack.people.getBadge(username, removeMember));
                 }
 
-                isMember && newMessageElement.focus();
+                isMember && !mobileChannelListContentsElement.is(":visible") && newMessageElement.focus();
                 noMembersElement.toggle(isMember && audience.length < 2);
                 $(".-show-if-member").toggle(isMember);
                 $(".-show-if-not-member").toggle(!isMember);
