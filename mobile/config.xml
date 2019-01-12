@@ -7,7 +7,6 @@
     <author email="me@djnicholson.com" href="http://blockslack.io">
         Consensus Solutions LLC
     </author>
-    <icon src="logo.png" />
     <content src="index.html" />
     <access origin="*" />
     <allow-navigation href="https://blockslack.io/*" />
@@ -29,4 +28,5 @@
     <plugin name="cordova-plugin-network-information" spec="^2.0.1" />
     <plugin name="cordova-plugin-whitelist" spec="https://github.com/apache/cordova-plugin-whitelist.git" />
     <engine name="android" spec="7.1.4" />
+    <engine name="ios" spec="4.5.5" />
 </widget>
