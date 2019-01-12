@@ -1,0 +1,18 @@
+{
+  "ios": {
+    "debug": {
+      "developmentTeam": "JSPN299V87"
+    },
+    "release": {
+      "developmentTeam": "JSPN299V87"
+    }
+  },
+  "osx": {
+    "debug": {
+      "developmentTeam": "JSPN299V87"
+    },
+    "release": {
+      "developmentTeam": "JSPN299V87"
+    }
+  }
+}
