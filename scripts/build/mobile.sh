@@ -3,11 +3,13 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 ROOT=$DIR/../..
 APPROOT=$ROOT/app
+MOBILEROOT=$ROOT/mobile
 BUILDROOT=$ROOT/build
 DEPLOYROOT=$ROOT/deploy
 
-$DIR/html.sh
-$DIR/css.sh
-$DIR/static.sh
-$DIR/mobile.sh
-$DIR/javascript.sh
+echo Building mobile apps...
+pushd $MOBILEROOT
+cordova prepare
+cordova build
+cordova build --release
+popd
