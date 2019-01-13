@@ -231,7 +231,7 @@ blockslack.aggregation = (function(){
         var currentTime = (new Date).getTime();
         if ((currentTime - lastSave) > MINIMUM_DELAY_BETWEEN_SAVES) {
             var payload = JSON.stringify(getState());
-            var compressedPayload = LZString.compress(payload);
+            var compressedPayload = LZString.compressToUTF16(payload);
             console.log(
                 "Persisting aggregation state: " + Math.round(payload.length / 1024.0) + " KB (compressed to " +
                 Math.round(compressedPayload.length / 1024.0) + " KB)");
@@ -284,21 +284,27 @@ blockslack.aggregation = (function(){
             blockslack.authentication.state(STATE_KEY, hydrated);
             return blockstack.getFile(MASTER_AGGREGATION_FILE).then(function (compressedSerializedState) {
                 if (compressedSerializedState) {
-                    var serializedState = LZString.decompress(compressedSerializedState);
-                    var dataOnly = JSON.parse(serializedState);
-                    
-                    hydrated.rxStatus = dataOnly.rxStatus;
-                    
-                    for (var groupId in dataOnly.allData) {
-                        var groupObject = new GroupData(groupId);
-                        copyProperties(dataOnly.allData[groupId], groupObject);
-                        hydrated.allData[groupId] = groupObject;
-                        for (var channelId in dataOnly.allData[groupId].channels) {
-                            var channelObject = new ChannelData();
-                            copyProperties(dataOnly.allData[groupId].channels[channelId], channelObject);
-                            hydrated.allData[groupId].channels[channelId] = channelObject;
+                    var serializedState = LZString.decompressFromUTF16(compressedSerializedState);
+                    if (serializedState) {
+                        var dataOnly = JSON.parse(serializedState);
+                        
+                        hydrated.rxStatus = dataOnly.rxStatus;
+                        
+                        for (var groupId in dataOnly.allData) {
+                            var groupObject = new GroupData(groupId);
+                            copyProperties(dataOnly.allData[groupId], groupObject);
+                            hydrated.allData[groupId] = groupObject;
+                            for (var channelId in dataOnly.allData[groupId].channels) {
+                                var channelObject = new ChannelData();
+                                copyProperties(dataOnly.allData[groupId].channels[channelId], channelObject);
+                                hydrated.allData[groupId].channels[channelId] = channelObject;
+                            }
                         }
+                    } else {
+                        console.warn("Serialized aggregation state was corrupted (could not decompress)");
                     }
+                } else {
+                    console.warn("Serialized aggregation state not found");
                 }
 
                 return Promise.resolve();

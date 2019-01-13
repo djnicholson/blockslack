@@ -15,6 +15,10 @@ blockslack.feedpub = (function(){
             .replace("%2", timestamp);
     };
 
+    var getFeed = function(filename, options) {
+        return blockstack.getFile(cacheBust(filename), options);
+    };
+
     var newFeedObject = function(audience, nextFilename) {
         return {
             audience: audience,
@@ -40,10 +44,14 @@ blockslack.feedpub = (function(){
     };
 
     var publishWithoutRotation = function(keyId, rootFilename, newFeedRootCipherText) {
-        return blockstack.putFile(rootFilename, newFeedRootCipherText, DONT_ENCRYPT).catch(function(e) {
+        return putFeed(rootFilename, newFeedRootCipherText, DONT_ENCRYPT).catch(function(e) {
             console.log("Could not publish message, failed to rewrite feed file. Feed: ", keyId);
             return Promise.reject(Error("Could not publish message, failed to rewrite feed file"));
         });
+    };
+
+    var putFeed = function(filename, feedCipherText, options) {
+        return blockstack.putFile(filename, feedCipherText, options);
     };
 
     var sha256 = function(input) {
@@ -59,7 +67,7 @@ blockslack.feedpub = (function(){
                 var key = keyObject.key;
                 var rootFilename = feedFilename(audience, keyId, 0);
                 blockslack.discovery.registerFeed(audience, keyId, rootFilename);
-                return blockstack.getFile(cacheBust(rootFilename), DONT_DECRYPT).then(function(existingFeedCipherText) {
+                return getFeed(rootFilename, DONT_DECRYPT).then(function(existingFeedCipherText) {
                     var feedRoot = parseExistingFeedRootOrCreateNew(audience, existingFeedCipherText, key);
                     feedRoot.messages.push(messageObject);
                     feedRoot.pubsubUrl = blockslack.pubsub.getServerUrl();
@@ -89,7 +97,7 @@ blockslack.feedpub = (function(){
                 var key = keyObject.key;
                 var getFileOptions = { decrypt: false, username: userId };
                 console.log("Retrieving feed from " + userId + ": " + filename);
-                return blockstack.getFile(cacheBust(filename), getFileOptions).then(function(cipherText) {
+                return getFeed(filename, getFileOptions).then(function(cipherText) {
                     var feedRoot = parseExistingFeedRootOrCreateNew([], cipherText, key);
                     return Promise.resolve(feedRoot);
                 });
