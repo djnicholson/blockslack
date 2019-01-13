@@ -1,6 +1,6 @@
 blockslack.aggregation = (function(){
     
-    var MASTER_AGGREGATION_FILE = "aggregation/index.json";
+    var MASTER_AGGREGATION_FILE = "aggregation/index.json.lz";
 
     var STATE_KEY = "aggregation";
 
@@ -231,8 +231,11 @@ blockslack.aggregation = (function(){
         var currentTime = (new Date).getTime();
         if ((currentTime - lastSave) > MINIMUM_DELAY_BETWEEN_SAVES) {
             var payload = JSON.stringify(getState());
-            console.log("Persisting aggregation state: " + Math.round(payload.length / 1024.0) + " KB");
-            blockstack.putFile(MASTER_AGGREGATION_FILE, payload);
+            var compressedPayload = LZString.compress(payload);
+            console.log(
+                "Persisting aggregation state: " + Math.round(payload.length / 1024.0) + " KB (compressed to " +
+                Math.round(compressedPayload.length / 1024.0) + " KB)");
+            blockstack.putFile(MASTER_AGGREGATION_FILE, compressedPayload);
             lastSave = currentTime;
         }
     };
@@ -279,8 +282,9 @@ blockslack.aggregation = (function(){
         initialize: function() {
             var hydrated = { rxStatus: { }, allData: { } };
             blockslack.authentication.state(STATE_KEY, hydrated);
-            return blockstack.getFile(MASTER_AGGREGATION_FILE).then(function (serializedState) {
-                if (serializedState) {
+            return blockstack.getFile(MASTER_AGGREGATION_FILE).then(function (compressedSerializedState) {
+                if (compressedSerializedState) {
+                    var serializedState = LZString.decompress(compressedSerializedState);
                     var dataOnly = JSON.parse(serializedState);
                     
                     hydrated.rxStatus = dataOnly.rxStatus;
