@@ -92,11 +92,17 @@ blockslack.polling = (function(){
 
         onsignin: function() {
             suspendPolling();
-            blockslack.aggregation.initialize().then(resumePolling);
+            blockslack.aggregation.initialize().then(function() {
+                resumePolling();
+                blockslack.chatui.updateUi();
+                $(".-loading").hide();
+            });
         },
 
         onsignout: function() {
             suspendPolling();
+            blockslack.chatui.updateUi();
+            $(".-loading").hide();
         },
 
     };
