@@ -230,8 +230,9 @@ blockslack.aggregation = (function(){
     var saveState = function() {
         var currentTime = (new Date).getTime();
         if ((currentTime - lastSave) > MINIMUM_DELAY_BETWEEN_SAVES) {
-            console.log("Persisting aggregation state");
-            blockstack.putFile(MASTER_AGGREGATION_FILE, JSON.stringify(getState()));
+            var payload = JSON.stringify(getState());
+            console.log("Persisting aggregation state: " + Math.round(payload.length / 1024.0) + " KB");
+            blockstack.putFile(MASTER_AGGREGATION_FILE, payload);
             lastSave = currentTime;
         }
     };
