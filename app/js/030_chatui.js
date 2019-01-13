@@ -75,11 +75,11 @@ blockslack.chatui = (function(){
         e = e || window.event;
         var keyCode = e.keyCode || e.which;
         if (keyCode == '13' && currentGroupId && currentChannelName) {
-            var message = blockslack.aggregation2.generateTextMessage(
+            var message = blockslack.aggregation.generateTextMessage(
                 currentGroupId, 
                 currentChannelName, 
                 newMessageElement.val());
-            var allData = blockslack.aggregation2.getAllData();
+            var allData = blockslack.aggregation.getAllData();
             var groupData = allData[currentGroupId];
             if (groupData && groupData.channels) {
                 var channelData = groupData.channels[currentChannelName];
@@ -102,9 +102,9 @@ blockslack.chatui = (function(){
     };
 
     var publishAudienceChange = function(oldAudience, newAudience) {
-        var allData = blockslack.aggregation2.getAllData();
+        var allData = blockslack.aggregation.getAllData();
         var groupData = allData[currentGroupId];
-        var message = blockslack.aggregation2.generateAudienceChangeMessage(
+        var message = blockslack.aggregation.generateAudienceChangeMessage(
             currentGroupId,
             currentChannelName,
             newAudience);
@@ -116,7 +116,7 @@ blockslack.chatui = (function(){
             return blockslack.feedpub.publish(secondAudience, message);    
         }).then(function() {
             if (groupData.currentTitle) {
-                var titleMessage = blockslack.aggregation2.generateTitleChangeMessage(
+                var titleMessage = blockslack.aggregation.generateTitleChangeMessage(
                     currentGroupId, 
                     groupData.currentTitle);
                 return blockslack.feedpub.publish(newAudience, titleMessage);
@@ -137,7 +137,7 @@ blockslack.chatui = (function(){
                 }
 
             if (confirm(confirmMessage)) {
-                var allData = blockslack.aggregation2.getAllData();
+                var allData = blockslack.aggregation.getAllData();
                 var groupData = allData[currentGroupId];
                 if (groupData && groupData.channels) {
                     var channelData = groupData.channels[currentChannelName];
@@ -368,7 +368,7 @@ blockslack.chatui = (function(){
 
     var updateUi = function() {
         $(".tooltip").hide();
-        var allData = blockslack.aggregation2.getAllData();
+        var allData = blockslack.aggregation.getAllData();
         windowHasFocus && currentGroupId && currentChannelName && blockslack.readstatus.markRead(currentGroupId, currentChannelName);
         renderGroupButtons(allData);
         renderCurrentGroupChannelList(allData);
@@ -405,7 +405,7 @@ blockslack.chatui = (function(){
                     if (channelName.length) {
                         channelName += ":" + makeId();
                         var audience = [ blockstack.loadUserData().username ];
-                        var message = blockslack.aggregation2.generateTextMessage(
+                        var message = blockslack.aggregation.generateTextMessage(
                             currentGroupId, 
                             channelName, 
                             blockslack.strings.CHANNEL_WELCOME_PREFIX + channelDisplayName(channelName));
@@ -435,8 +435,8 @@ blockslack.chatui = (function(){
                 if (groupName && groupName.length) {
                     var groupId = makeId();
                     var audience = [ blockslack.authentication.getUsername() ];
-                    var message1 = blockslack.aggregation2.generateTitleChangeMessage(groupId, groupName);
-                    var message2 = blockslack.aggregation2.generateTextMessage(
+                    var message1 = blockslack.aggregation.generateTitleChangeMessage(groupId, groupName);
+                    var message2 = blockslack.aggregation.generateTextMessage(
                         groupId, 
                         "general:" + makeId(), 
                         blockslack.strings.CHANNEL_WELCOME_PREFIX + "general");
@@ -456,7 +456,7 @@ blockslack.chatui = (function(){
             if (blockslack.authentication.isSignedIn() && currentGroupId && currentChannelName) {
                 var newMember = prompt(blockslack.strings.ENTER_NEW_MEMBER_NAME);
                 if (newMember) {
-                    var allData = blockslack.aggregation2.getAllData();
+                    var allData = blockslack.aggregation.getAllData();
                     var groupData = allData[currentGroupId];
                     if (groupData && groupData.channels) {
                         var channelData = groupData.channels[currentChannelName];
@@ -493,14 +493,14 @@ blockslack.chatui = (function(){
         },
 
         renameGroup: function() {
-            var allData = blockslack.aggregation2.getAllData();
+            var allData = blockslack.aggregation.getAllData();
             var groupData = allData[currentGroupId];
             if (groupData) {
                 if (blockslack.authentication.isSignedIn() && currentGroupId) {
                     var newName = prompt(blockslack.strings.ENTER_NEW_GROUP_NAME, groupData.currentTitle);
                     if (newName) {
                         var audience = groupData.allMembers();
-                        var message = blockslack.aggregation2.generateTitleChangeMessage(currentGroupId, newName);
+                        var message = blockslack.aggregation.generateTitleChangeMessage(currentGroupId, newName);
                         blockslack.feedpub.publish(audience, message);
                     }        
                 }

@@ -18,7 +18,7 @@ blockslack.polling = (function(){
         var key = userId + "_" + filename;
         for (var i = 0; i < feedContents.messages.length; i++) {
             var item = feedContents.messages[i];
-            blockslack.aggregation2.newMessage(key, userId, feedContents.audience, item, suppressAudio);
+            blockslack.aggregation.newMessage(key, userId, feedContents.audience, item, suppressAudio);
         }
     };
 
@@ -92,7 +92,7 @@ blockslack.polling = (function(){
 
         onsignin: function() {
             suspendPolling();
-            blockslack.aggregation2.initialize().then(resumePolling);
+            blockslack.aggregation.initialize().then(resumePolling);
         },
 
         onsignout: function() {

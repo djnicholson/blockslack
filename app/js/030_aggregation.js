@@ -1,4 +1,4 @@
-blockslack.aggregation2 = (function(){
+blockslack.aggregation = (function(){
     
     var MASTER_AGGREGATION_FILE = "aggregation/index.json";
 
