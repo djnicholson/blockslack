@@ -1,5 +1,11 @@
 blockslack.aggregation2 = (function(){
     
+    var MASTER_AGGREGATION_FILE = "aggregation/index.json";
+
+    var STATE_KEY = "aggregation";
+
+    var MINIMUM_DELAY_BETWEEN_SAVES = 60 * 1000; // don't save more than once per minute
+
     var FIELD_CHANNEL_NAME = "c";
     var FIELD_TIMESTAMP = "ts";
     var FIELD_GROUP_ID = "g";
@@ -11,6 +17,8 @@ blockslack.aggregation2 = (function(){
     var KIND_TITLE_CHANGE = "t";
     var KIND_AUDIENCE_CHANGE = "a";
     var KIND_MESSAGE = "m";
+
+    var lastSave = 0;
 
     var ChannelData = function() {
         var HISTORY_TYPE_MSG = "m";
@@ -203,10 +211,29 @@ blockslack.aggregation2 = (function(){
         };
     };
 
+    var copyProperties = function(from, to) {
+        for (var key in from) {
+            to[key] = from[key];
+        }
+    };
+
+    var getState = function() {
+        return blockslack.authentication.state(STATE_KEY);
+    };
+
     var logMalformed = function(senderUserId, audience, message, reason) {
         var message = "Malformed message from " + senderUserId + " to " + JSON.stringify(audience) + 
             ": " + JSON.stringify(message) + " (" + reason + ")";
         console.log(message);
+    };
+
+    var saveState = function() {
+        var currentTime = (new Date).getTime();
+        if ((currentTime - lastSave) > MINIMUM_DELAY_BETWEEN_SAVES) {
+            console.log("Persisting aggregation state");
+            blockstack.putFile(MASTER_AGGREGATION_FILE, JSON.stringify(getState()));
+            lastSave = currentTime;
+        }
     };
 
     return {
@@ -240,19 +267,53 @@ blockslack.aggregation2 = (function(){
         },
         
         getAllData: function() {
-            var allData = blockslack.authentication.state("allData") || {};
-            blockslack.authentication.state("allData", allData);
-            return allData;
+            var state = getState();
+            return (state && state.allData) || {};
         },
 
-        newMessage: function(senderUserId, audience, message, suppressAudio) {
-            var allData = blockslack.aggregation.getAllData();
+        getAllState: function() {
+            return getState();
+        },
+
+        initialize: function() {
+            var hydrated = { rxStatus: { }, allData: { } };
+            blockslack.authentication.state(STATE_KEY, hydrated);
+            return blockstack.getFile(MASTER_AGGREGATION_FILE).then(function (serializedState) {
+                if (serializedState) {
+                    var dataOnly = JSON.parse(serializedState);
+                    
+                    hydrated.rxStatus = dataOnly.rxStatus;
+                    
+                    for (var groupId in dataOnly.allData) {
+                        var groupObject = new GroupData(groupId);
+                        copyProperties(dataOnly.allData[groupId], groupObject);
+                        hydrated.allData[groupId] = groupObject;
+                        for (var channelId in dataOnly.allData[groupId].channels) {
+                            var channelObject = new ChannelData();
+                            copyProperties(dataOnly.allData[groupId].channels[channelId], channelObject);
+                            hydrated.allData[groupId].channels[channelId] = channelObject;
+                        }
+                    }
+                }
+
+                return Promise.resolve();
+            });
+        },
+
+        newMessage: function(key, senderUserId, audience, message, suppressAudio) {
+            var allData = getState().allData;
+            var rxStatus = getState().rxStatus;
 
             var ts = message[FIELD_TIMESTAMP];
             var groupId = message[FIELD_GROUP_ID];
             var kind = message[FIELD_KIND];
             if (!ts || !groupId || !kind) {
                 logMalformed(senderUserId, audience, message, "Mandatory field missing");
+                return;
+            }
+
+            var lastRead = rxStatus[key] || 0;
+            if (message.ts <= lastRead) {
                 return;
             }
 
@@ -287,6 +348,10 @@ blockslack.aggregation2 = (function(){
 
                 groupData.refresh();
             }
+
+            rxStatus[key] = ts;
+            blockslack.chatui.updateUi();
+            saveState();
         },
 
     };

@@ -15,27 +15,11 @@ blockslack.polling = (function(){
     var activeTimeout = undefined;
     
     var consumeFeed = function(userId, filename, feedContents, suppressAudio) {
-        var rxStatus = blockslack.authentication.state("rxStatus") || {};
-        blockslack.authentication.state("rxStatus", rxStatus);
         var key = userId + "_" + filename;
-        var lastRead = rxStatus[key] || 0;
-        var hadUpdates = false;
         for (var i = 0; i < feedContents.messages.length; i++) {
             var item = feedContents.messages[i];
-            if (item.ts && (item.ts > lastRead)) {
-                newMessage(userId, feedContents.audience, item, suppressAudio);
-                hadUpdates = true;
-                rxStatus[key] = item.ts;
-            }
+            blockslack.aggregation2.newMessage(key, userId, feedContents.audience, item, suppressAudio);
         }
-
-        if (hadUpdates) {
-            blockslack.chatui.updateUi();
-        }
-    };
-
-    var newMessage = function(senderUserId, audience, message, suppressAudio) {
-        blockslack.aggregation.newMessage(senderUserId, audience, message, suppressAudio);
     };
 
     var updateFeed = function(userId, filename, keyId, suppressAudio) {
@@ -75,8 +59,6 @@ blockslack.polling = (function(){
     };
 
     var resumePolling = function() {
-        suspendPolling();
-
         blockslack.discovery.updateWatchLists();
         blockslack.readstatus.sync();
         updateNextFeed();
@@ -109,7 +91,8 @@ blockslack.polling = (function(){
         },
 
         onsignin: function() {
-            resumePolling();
+            suspendPolling();
+            blockslack.aggregation2.initialize().then(resumePolling);
         },
 
         onsignout: function() {

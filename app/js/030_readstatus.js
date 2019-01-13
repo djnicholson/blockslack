@@ -3,7 +3,7 @@ blockslack.readstatus = (function(){
     var READ_STATUS_FILE = "readstatus/state.json";
 
     var getCurrentChecksum = function(groupId, channelName) {
-        var allData = blockslack.aggregation.getAllData();
+        var allData = blockslack.aggregation2.getAllData();
         var groupData = allData[groupId];
         if (groupData) {
             var channelData = groupData.channels[channelName];
