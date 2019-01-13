@@ -16,7 +16,21 @@ blockslack.feedpub = (function(){
     };
 
     var getFeed = function(filename, options) {
-        return blockstack.getFile(cacheBust(filename), options);
+        return blockstack.getFile(cacheBust(filename), options).then(function(result) {
+            var resultUncompressed = result;
+            if (result) {
+                if (result.startsWith("LZ_")) {
+                    resultUncompressed = LZString.decompressFromUTF16(result.substring(3));
+                }
+
+                console.log("Retrieved " + filename + ": " + Math.round(resultUncompressed.length / 1024.0) + 
+                    " KB compressed to " + Math.round(result.length / 1024.0) + " KB");
+            } else {
+                console.log("Could not retrieve " + filename);
+            }
+
+            return Promise.resolve(resultUncompressed);
+        });
     };
 
     var newFeedObject = function(audience, nextFilename) {
@@ -51,7 +65,10 @@ blockslack.feedpub = (function(){
     };
 
     var putFeed = function(filename, feedCipherText, options) {
-        return blockstack.putFile(filename, feedCipherText, options);
+        var feedCipherTextCompressed = LZString.compressToUTF16(feedCipherText);
+        console.log("Publishing " + filename + ": " + Math.round(feedCipherText.length / 1024.0) + 
+            " KB compressed to " + Math.round(feedCipherTextCompressed.length / 1024.0) + " KB");
+        return blockstack.putFile(filename, "LZ_" + feedCipherTextCompressed, options);
     };
 
     var sha256 = function(input) {
@@ -96,7 +113,6 @@ blockslack.feedpub = (function(){
             return blockslack.keys.getSymmetricKeyFromUser(userId, keyId).then(function(keyObject) {
                 var key = keyObject.key;
                 var getFileOptions = { decrypt: false, username: userId };
-                console.log("Retrieving feed from " + userId + ": " + filename);
                 return getFeed(filename, getFileOptions).then(function(cipherText) {
                     var feedRoot = parseExistingFeedRootOrCreateNew([], cipherText, key);
                     return Promise.resolve(feedRoot);
