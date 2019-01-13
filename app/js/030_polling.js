@@ -10,6 +10,9 @@ blockslack.polling = (function(){
     var renderedAtLeastOnce = {};
 
     var feedIndex = 0;
+
+    var activeIntervals = [];
+    var activeTimeout = undefined;
     
     var consumeFeed = function(userId, filename, feedContents, suppressAudio) {
         var rxStatus = blockslack.authentication.state("rxStatus") || {};
@@ -68,7 +71,29 @@ blockslack.polling = (function(){
             currentFeedUpdateInterval += 1000;
         }
 
-        setTimeout(updateNextFeed, currentFeedUpdateInterval);
+        activeTimeout = setTimeout(updateNextFeed, currentFeedUpdateInterval);
+    };
+
+    var resumePolling = function() {
+        suspendPolling();
+
+        blockslack.discovery.updateWatchLists();
+        blockslack.readstatus.sync();
+        updateNextFeed();
+        
+        activeIntervals.push(setInterval(blockslack.discovery.updateWatchLists, WATCHLIST_UPDATE_INTERVAL));
+        activeIntervals.push(setInterval(blockslack.readstatus.sync, READ_STATUS_UPDATE_INTERVAL));
+    };
+
+    var suspendPolling = function() {
+        for (var i = 0; i < activeIntervals.length; i++) {
+            clearInterval(activeIntervals[i]);
+        }
+
+        activeTimeout && clearTimeout(activeTimeout);
+
+        activeIntervals = [];
+        activeTimeout = undefined;
     };
 
     return {
@@ -78,16 +103,17 @@ blockslack.polling = (function(){
         },
 
         onload: function() {
-            blockslack.discovery.updateWatchLists();
-            blockslack.readstatus.sync();
-            updateNextFeed();
-            
-            setInterval(blockslack.discovery.updateWatchLists, WATCHLIST_UPDATE_INTERVAL);
-            setInterval(blockslack.readstatus.sync, READ_STATUS_UPDATE_INTERVAL);
-
             $(document).mousemove(function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });
             $(document).keypress(function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });
             $(document).click(function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });
+        },
+
+        onsignin: function() {
+            resumePolling();
+        },
+
+        onsignout: function() {
+            suspendPolling();
         },
 
     };
