@@ -1,6 +1,4 @@
 blockslack.authentication = (function(blockstack){
-    
-    // privates:
 
     var REQUIRED_PERMISSIONS = ["store_write", "publish_data"];
 
@@ -38,14 +36,7 @@ blockslack.authentication = (function(blockstack){
         blockslack.chatui.updateUi(); // scroll to correct location, etc.
     };
 
-    // initialization:
-    // (don't depend on other packages, order of package initialization is not guaranteed)
-    // foo = 1;
-    // bar = 2;
-
     return {
-
-        // publics:
 
         getUsername: function() {
             return blockstack.loadUserData().username;
