@@ -211,6 +211,14 @@ blockslack.aggregation = (function(){
         };
     };
 
+    var consumeFeed = function(userId, filename, feedContents, suppressAudio) {
+        var key = userId + "_" + filename;
+        for (var i = 0; i < feedContents.messages.length; i++) {
+            var item = feedContents.messages[i];
+            newMessage(key, userId, feedContents.audience, item, suppressAudio);
+        }
+    };
+
     var copyProperties = function(from, to) {
         for (var key in from) {
             to[key] = from[key];
@@ -227,6 +235,60 @@ blockslack.aggregation = (function(){
         console.log(message);
     };
 
+    var newMessage = function(key, senderUserId, audience, message, suppressAudio) {
+        var allData = getState().allData;
+        var rxStatus = getState().rxStatus;
+
+        var ts = message[FIELD_TIMESTAMP];
+        var groupId = message[FIELD_GROUP_ID];
+        var kind = message[FIELD_KIND];
+        if (!ts || !groupId || !kind) {
+            logMalformed(senderUserId, audience, message, "Mandatory field missing");
+            return;
+        }
+
+        var lastRead = rxStatus[key] || 0;
+        if (message.ts <= lastRead) {
+            return;
+        }
+
+        allData[groupId] = allData[groupId] || new GroupData(groupId);
+        var groupData = allData[groupId];
+
+        if (kind == KIND_TITLE_CHANGE) {
+            var newTitle = message[FIELD_GROUP_TITLE];
+            groupData.pushTitleChange(ts, senderUserId, newTitle);
+        } else {
+            var channelName = message[FIELD_CHANNEL_NAME];
+            if (!channelName) {
+                logMalformed(senderUserId, audience, message, "Channel missing");
+                return;
+            }
+
+            groupData.channels[channelName] = groupData.channels[channelName] || new ChannelData();
+            var channelData = groupData.channels[channelName];
+
+            if (kind == KIND_AUDIENCE_CHANGE) {
+                var newAudience = message[FIELD_MEMBER_LIST];
+                channelData.pushAudienceChange(ts, senderUserId, newAudience);
+            } else if (kind == KIND_MESSAGE) {
+                var text = message[FIELD_MESSAGE];
+                channelData.pushMessage(ts, senderUserId, audience, text);
+                if (!suppressAudio && (senderUserId != blockslack.authentication.getUsername())) {
+                    blockslack.sound.beep();
+                }
+            } else {
+                logMalformed(senderUserId, audience, message, "Unknown message type: " + kind);
+            }
+
+            groupData.refresh();
+        }
+
+        rxStatus[key] = ts;
+        blockslack.chatui.updateUi();
+        saveState();
+    };
+
     var saveState = function() {
         var currentTime = (new Date).getTime();
         if ((currentTime - lastSave) > MINIMUM_DELAY_BETWEEN_SAVES) {
@@ -240,9 +302,14 @@ blockslack.aggregation = (function(){
         }
     };
 
-    return {
+    var updateFeed = function(userId, filename, keyId, suppressAudio) {
+        return blockslack.feedpub.read(userId, filename, keyId).then(function(feedContents) {            
+            consumeFeed(userId, filename, feedContents, suppressAudio);
+            return Promise.resolve();
+        });
+    };
 
-        // publics:
+    return {
 
         generateAudienceChangeMessage(groupId, channelName, newAudience) {
             result = {};
@@ -311,58 +378,8 @@ blockslack.aggregation = (function(){
             });
         },
 
-        newMessage: function(key, senderUserId, audience, message, suppressAudio) {
-            var allData = getState().allData;
-            var rxStatus = getState().rxStatus;
-
-            var ts = message[FIELD_TIMESTAMP];
-            var groupId = message[FIELD_GROUP_ID];
-            var kind = message[FIELD_KIND];
-            if (!ts || !groupId || !kind) {
-                logMalformed(senderUserId, audience, message, "Mandatory field missing");
-                return;
-            }
-
-            var lastRead = rxStatus[key] || 0;
-            if (message.ts <= lastRead) {
-                return;
-            }
-
-            allData[groupId] = allData[groupId] || new GroupData(groupId);
-            var groupData = allData[groupId];
-
-            if (kind == KIND_TITLE_CHANGE) {
-                var newTitle = message[FIELD_GROUP_TITLE];
-                groupData.pushTitleChange(ts, senderUserId, newTitle);
-            } else {
-                var channelName = message[FIELD_CHANNEL_NAME];
-                if (!channelName) {
-                    logMalformed(senderUserId, audience, message, "Channel missing");
-                    return;
-                }
-
-                groupData.channels[channelName] = groupData.channels[channelName] || new ChannelData();
-                var channelData = groupData.channels[channelName];
-
-                if (kind == KIND_AUDIENCE_CHANGE) {
-                    var newAudience = message[FIELD_MEMBER_LIST];
-                    channelData.pushAudienceChange(ts, senderUserId, newAudience);
-                } else if (kind == KIND_MESSAGE) {
-                    var text = message[FIELD_MESSAGE];
-                    channelData.pushMessage(ts, senderUserId, audience, text);
-                    if (!suppressAudio && (senderUserId != blockslack.authentication.getUsername())) {
-                        blockslack.sound.beep();
-                    }
-                } else {
-                    logMalformed(senderUserId, audience, message, "Unknown message type: " + kind);
-                }
-
-                groupData.refresh();
-            }
-
-            rxStatus[key] = ts;
-            blockslack.chatui.updateUi();
-            saveState();
+        updateFeed: function(userId, filename, keyId, suppressAudio) {
+            return updateFeed(userId, filename, keyId, suppressAudio);
         },
 
     };

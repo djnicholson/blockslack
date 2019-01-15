@@ -102,9 +102,7 @@ blockslack.pubsub = (function(){
             var hostUserId = feedDetails.hostUserId;
             var filename = feedDetails.filename;
             var keyId = feedDetails.keyId;
-            blockslack.feedpub.read(hostUserId, filename, keyId).then(function(feedRoot) {
-                blockslack.polling.consumeFeed(hostUserId, filename, feedRoot);
-            });
+            blockslack.aggregation.updateFeed(hostUserId, filename, keyId);
         }
     };
 

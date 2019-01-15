@@ -13,25 +13,6 @@ blockslack.polling = (function(){
 
     var activeIntervals = [];
     var activeTimeout = undefined;
-    
-    var consumeFeed = function(userId, filename, feedContents, suppressAudio) {
-        var key = userId + "_" + filename;
-        for (var i = 0; i < feedContents.messages.length; i++) {
-            var item = feedContents.messages[i];
-            blockslack.aggregation.newMessage(key, userId, feedContents.audience, item, suppressAudio);
-        }
-    };
-
-    var updateFeed = function(userId, filename, keyId, suppressAudio) {
-        return blockslack.feedpub.read(userId, filename, keyId).then(function(feedContents) {
-            feedContents.pubsubUrl &&
-                blockslack.pubsub.ensureMonitored(userId, filename, keyId, feedContents.pubsubUrl);
-            
-            consumeFeed(userId, filename, feedContents, suppressAudio);
-            
-            return Promise.resolve();
-        });
-    };
 
     var updateNextFeed = function() {
         var allFeeds = [];
@@ -40,7 +21,7 @@ blockslack.polling = (function(){
 
             var key = userId + "_" + filename + "_" + keyId;
             if (!renderedAtLeastOnce[key]) {
-                updateFeed(userId, filename, keyId, /*suppressAudio*/ true);
+                blockslack.aggregation.updateFeed(userId, filename, keyId, /*suppressAudio*/ true);
                 renderedAtLeastOnce[key] = true;
             }
         });
@@ -48,7 +29,7 @@ blockslack.polling = (function(){
         if (allFeeds.length > 0) {
             feedIndex = (feedIndex + 1) >= allFeeds.length ? 0 : feedIndex + 1;
             var selected = allFeeds[feedIndex];
-            updateFeed(selected[0], selected[1], selected[2]);
+            blockslack.aggregation.updateFeed(selected[0], selected[1], selected[2]);
         }
 
         if (currentFeedUpdateInterval < FEED_UPDATE_INTERVAL_MAX) {
@@ -79,10 +60,6 @@ blockslack.polling = (function(){
     };
 
     return {
-        
-        consumeFeed: function(userId, filename, feedContents) {
-            consumeFeed(userId, filename, feedContents);
-        },
 
         onload: function() {
             $(document).mousemove(function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });

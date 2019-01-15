@@ -98,7 +98,7 @@ blockslack.feedpub = (function(){
                     //       after a set of users have exchanged a lot of messages.
                     return publishWithoutRotation(keyId, rootFilename, newFeedRootCipherText).then(function() {
                         var username = blockslack.authentication.getUsername();
-                        blockslack.polling.consumeFeed(username, rootFilename, feedRoot);
+                        blockslack.aggregation.updateFeed(username, rootFilename, keyId);
                         blockslack.pubsub.notifyPublish(rootFilename, keyId, feedRoot.pubsubUrl);
                         return Promise.resolve();
                     });
@@ -115,6 +115,11 @@ blockslack.feedpub = (function(){
                 var getFileOptions = { decrypt: false, username: userId };
                 return getFeed(filename, getFileOptions).then(function(cipherText) {
                     var feedRoot = parseExistingFeedRootOrCreateNew([], cipherText, key);
+
+                    if (feedRoot.pubsubUrl) {
+                        blockslack.pubsub.ensureMonitored(userId, filename, keyId, feedRoot.pubsubUrl);
+                    }
+
                     return Promise.resolve(feedRoot);
                 });
             });
