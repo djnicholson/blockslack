@@ -216,6 +216,10 @@ blockslack.aggregation = (function(){
             var item = feedContents.messages[i];
             newMessage(rootFeedId, userId, feedContents.audience, item, suppressAudio);
         }
+
+        // TODO: Follow pagination pointers in feedContents if needed
+
+        return Promise.resolve();
     };
 
     var copyProperties = function(from, to) {
@@ -373,8 +377,7 @@ blockslack.aggregation = (function(){
         updateFeed: function(userId, rootFilename, keyId, suppressAudio) {
             var rootFeedId = userId + "_" + rootFilename;
             return blockslack.feedpub.read(userId, rootFilename, keyId).then(function(feedContents) {            
-                consumeFeed(rootFeedId, userId, feedContents, suppressAudio);
-                return Promise.resolve();
+                return consumeFeed(rootFeedId, userId, feedContents, suppressAudio);
             });
         },
 
