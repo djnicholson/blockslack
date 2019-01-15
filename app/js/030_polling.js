@@ -4,6 +4,7 @@ blockslack.polling = (function(){
     var READ_STATUS_UPDATE_INTERVAL = 15000;
     var FEED_UPDATE_INTERVAL_MIN = 15000;
     var FEED_UPDATE_INTERVAL_MAX = 120000;
+    var WEBSOCKET_MAINTENANCE_INTERVAL = 5000;
 
     var currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN;
 
@@ -42,10 +43,12 @@ blockslack.polling = (function(){
     var resumePolling = function() {
         blockslack.discovery.updateWatchLists();
         blockslack.readstatus.sync();
+        blockslack.pubsub.maintainConnections();
         updateNextFeed();
         
         activeIntervals.push(setInterval(blockslack.discovery.updateWatchLists, WATCHLIST_UPDATE_INTERVAL));
         activeIntervals.push(setInterval(blockslack.readstatus.sync, READ_STATUS_UPDATE_INTERVAL));
+        activeIntervals.push(setInterval(blockslack.pubsub.maintainConnections, WEBSOCKET_MAINTENANCE_INTERVAL));
     };
 
     var suspendPolling = function() {

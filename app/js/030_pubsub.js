@@ -9,12 +9,13 @@ blockslack.pubsub = (function(){
     var Connection = function(serverUrl) {
         this.serverUrl = serverUrl;
         this.connection = undefined;
-        this.subscribed = undefined;
+        this.subscribed = { };
 
-        //
-        // TODO: Periodically poll and check the connection is healthy;
-        //       if it is not then reconnect and resubscribe to all feeds.
-        //
+        // readyStates:
+        // 0   CONNECTING  Socket has been created. The connection is not yet open.
+        // 1   OPEN    The connection is open and ready to communicate.
+        // 2   CLOSING The connection is in the process of closing.
+        // 3   CLOSED  The connection is closed or couldn't be opened.
         
         (this.ensureConnected = function() {
             if (!this.connection || this.connection.readyState > 1) {
@@ -25,7 +26,11 @@ blockslack.pubsub = (function(){
                     console.warn("Websocket connection to " + this.serverUrl + " not possible (" + e + ")");
                 }
 
+                var previousSubscriptions = this.subscribed;
                 this.subscribed = { };
+                for (var feedId in previousSubscriptions) {
+                    this.subscribe(feedId, function() { handleUpdate(feedId); });
+                }
             }
         })();
 
@@ -68,12 +73,12 @@ blockslack.pubsub = (function(){
             action();
         };
         
-        this.subscribe = function(feedId) {
+        this.subscribe = function(feedId, then) {
             if (!this.subscribed || !this.subscribed[feedId]) {
                 var that = this;
                 this.send(
                     { t: "s", f: feedId },
-                    function() { that.subscribed[feedId] = true; });
+                    function() { that.subscribed[feedId] = true; then && then(); });
             }
         };
     };
@@ -127,6 +132,13 @@ blockslack.pubsub = (function(){
             // TODO: Allow users to choose their own URL
             //
             return DEFAULT_SERVER;
+        },
+
+        maintainConnections: function() {
+            for (var serverUrl in connections) {
+                var connection = connections[serverUrl];
+                connection.ensureConnected();
+            }
         },
 
         notifyPublish: function(filename, keyId, serverUrl) {
