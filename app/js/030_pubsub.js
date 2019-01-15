@@ -10,6 +10,11 @@ blockslack.pubsub = (function(){
         this.serverUrl = serverUrl;
         this.connection = undefined;
         this.subscribed = undefined;
+
+        //
+        // TODO: Periodically poll and check the connection is healthy;
+        //       if it is not then reconnect and resubscribe to all feeds.
+        //
         
         (this.ensureConnected = function() {
             if (!this.connection || this.connection.readyState > 1) {
