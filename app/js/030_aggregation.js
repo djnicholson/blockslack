@@ -211,15 +211,33 @@ blockslack.aggregation = (function(){
         };
     };
 
-    var consumeFeed = function(rootFeedId, userId, feedContents, suppressAudio) {
-        for (var i = 0; i < feedContents.messages.length; i++) {
-            var item = feedContents.messages[i];
-            newMessage(rootFeedId, userId, feedContents.audience, item, suppressAudio);
+    var consumeFeed = function(rootFeedId, keyId, userId, feedContents, suppressAudio, continuations) {
+        continuations = continuations || [];
+        continuations.push(feedContents); // accumulate all feed fragments in order latest -> oldest
+
+        var rxStatus = getState().rxStatus;
+        var lastRead = rxStatus[rootFeedId] || 0;
+        if (feedContents.next && 
+            feedContents.messages.length && 
+            feedContents.messages[0].ts &&
+            (feedContents.messages[0].ts > lastRead)) {
+
+            // there may be older messages still to process in a continuation file:
+            return blockslack.feedpub.read(userId, feedContents.next, keyId).then(function(feedContents) {            
+                return consumeFeed(rootFeedId, keyId, userId, feedContents, suppressAudio, continuations);
+            });
+
+        } else {
+
+            for (var i = continuations.length - 1; i >= 0; i--) {
+                for (var j = 0; j < continuations[i].messages.length; j++) {
+                    var item = continuations[i].messages[j];
+                    newMessage(rootFeedId, userId, continuations[i].audience, item, suppressAudio);
+                }                
+            }
+
+            return Promise.resolve();
         }
-
-        // TODO: Follow pagination pointers in feedContents if needed
-
-        return Promise.resolve();
     };
 
     var copyProperties = function(from, to) {
@@ -377,7 +395,7 @@ blockslack.aggregation = (function(){
         updateFeed: function(userId, rootFilename, keyId, suppressAudio) {
             var rootFeedId = userId + "_" + rootFilename;
             return blockslack.feedpub.read(userId, rootFilename, keyId).then(function(feedContents) {            
-                return consumeFeed(rootFeedId, userId, feedContents, suppressAudio);
+                return consumeFeed(rootFeedId, keyId, userId, feedContents, suppressAudio);
             });
         },
 

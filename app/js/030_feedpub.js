@@ -5,6 +5,8 @@ blockslack.feedpub = (function(){
 
     var FEED_FILE_FORMAT = "feeds_v2/feed_%1_%2.json";
 
+    var MAX_MESSAGES_PER_CHUNK = 50;
+
     var cacheBust = function(filename) {
         return filename + "?" + Math.random();
     };
@@ -86,20 +88,28 @@ blockslack.feedpub = (function(){
                 blockslack.discovery.registerFeed(audience, keyId, rootFilename);
                 return getFeed(rootFilename, DONT_DECRYPT).then(function(existingFeedCipherText) {
                     var feedRoot = parseExistingFeedRootOrCreateNew(audience, existingFeedCipherText, key);
-                    feedRoot.messages.push(messageObject);
-                    feedRoot.pubsubUrl = blockslack.pubsub.getServerUrl();
-                    var newFeedRootText = JSON.stringify(feedRoot);
-                    var newFeedRootCipherText = sjcl.encrypt(key, newFeedRootText);
 
-                    // TODO: Only have most recent messages in the "root" feed file, then link to
-                    //       other files that contain older messages (and intelligently follow these
-                    //       links when older chat history needs to be reconstructed).
-                    //       For now, everything goes in one file, but performance will begin to degrade
-                    //       after a set of users have exchanged a lot of messages.
-                    return publishWithoutRotation(keyId, rootFilename, newFeedRootCipherText).then(function() {
-                        var username = blockslack.authentication.getUsername();
-                        blockslack.pubsub.notifyPublish(rootFilename, keyId, feedRoot.pubsubUrl);
-                        return blockslack.aggregation.updateFeed(username, rootFilename, keyId);
+                    var continuationFile = undefined;
+                    var publishContinuationFile = Promise.resolve();
+                    if (feedRoot.messages.length >= MAX_MESSAGES_PER_CHUNK) {
+                        continuationFile = feedFilename(audience, keyId, feedRoot.messages[0].ts);
+                        feedRoot.pubsubUrl = undefined; // never expected to be updated, so shouldn't be monitored
+                        var newFeedContinuationText = JSON.stringify(feedRoot);
+                        var newFeedContinuationCipherText = sjcl.encrypt(key, newFeedContinuationText);
+                        publishContinuationFile = publishWithoutRotation(keyId, continuationFile, newFeedContinuationCipherText);
+                        feedRoot = newFeedObject(audience, continuationFile);
+                    }
+
+                    return publishContinuationFile.then(function() {
+                        feedRoot.messages.push(messageObject);
+                        feedRoot.pubsubUrl = blockslack.pubsub.getServerUrl();
+                        var newFeedRootText = JSON.stringify(feedRoot);
+                        var newFeedRootCipherText = sjcl.encrypt(key, newFeedRootText);
+                        return publishWithoutRotation(keyId, rootFilename, newFeedRootCipherText).then(function() {
+                            var username = blockslack.authentication.getUsername();
+                            blockslack.pubsub.notifyPublish(rootFilename, keyId, feedRoot.pubsubUrl);
+                            return blockslack.aggregation.updateFeed(username, rootFilename, keyId);
+                        });
                     });
                 });
             }).catch(function(e) {
