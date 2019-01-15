@@ -98,9 +98,8 @@ blockslack.feedpub = (function(){
                     //       after a set of users have exchanged a lot of messages.
                     return publishWithoutRotation(keyId, rootFilename, newFeedRootCipherText).then(function() {
                         var username = blockslack.authentication.getUsername();
-                        blockslack.aggregation.updateFeed(username, rootFilename, keyId);
                         blockslack.pubsub.notifyPublish(rootFilename, keyId, feedRoot.pubsubUrl);
-                        return Promise.resolve();
+                        return blockslack.aggregation.updateFeed(username, rootFilename, keyId);
                     });
                 });
             }).catch(function(e) {

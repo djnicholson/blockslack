@@ -211,11 +211,10 @@ blockslack.aggregation = (function(){
         };
     };
 
-    var consumeFeed = function(userId, filename, feedContents, suppressAudio) {
-        var key = userId + "_" + filename;
+    var consumeFeed = function(rootFeedId, userId, feedContents, suppressAudio) {
         for (var i = 0; i < feedContents.messages.length; i++) {
             var item = feedContents.messages[i];
-            newMessage(key, userId, feedContents.audience, item, suppressAudio);
+            newMessage(rootFeedId, userId, feedContents.audience, item, suppressAudio);
         }
     };
 
@@ -235,7 +234,7 @@ blockslack.aggregation = (function(){
         console.log(message);
     };
 
-    var newMessage = function(key, senderUserId, audience, message, suppressAudio) {
+    var newMessage = function(rootFeedId, senderUserId, audience, message, suppressAudio) {
         var allData = getState().allData;
         var rxStatus = getState().rxStatus;
 
@@ -247,7 +246,7 @@ blockslack.aggregation = (function(){
             return;
         }
 
-        var lastRead = rxStatus[key] || 0;
+        var lastRead = rxStatus[rootFeedId] || 0;
         if (message.ts <= lastRead) {
             return;
         }
@@ -284,7 +283,7 @@ blockslack.aggregation = (function(){
             groupData.refresh();
         }
 
-        rxStatus[key] = ts;
+        rxStatus[rootFeedId] = ts;
         blockslack.chatui.updateUi();
         saveState();
     };
@@ -300,13 +299,6 @@ blockslack.aggregation = (function(){
             blockstack.putFile(MASTER_AGGREGATION_FILE, compressedPayload);
             lastSave = currentTime;
         }
-    };
-
-    var updateFeed = function(userId, filename, keyId, suppressAudio) {
-        return blockslack.feedpub.read(userId, filename, keyId).then(function(feedContents) {            
-            consumeFeed(userId, filename, feedContents, suppressAudio);
-            return Promise.resolve();
-        });
     };
 
     return {
@@ -378,8 +370,12 @@ blockslack.aggregation = (function(){
             });
         },
 
-        updateFeed: function(userId, filename, keyId, suppressAudio) {
-            return updateFeed(userId, filename, keyId, suppressAudio);
+        updateFeed: function(userId, rootFilename, keyId, suppressAudio) {
+            var rootFeedId = userId + "_" + rootFilename;
+            return blockslack.feedpub.read(userId, rootFilename, keyId).then(function(feedContents) {            
+                consumeFeed(rootFeedId, userId, feedContents, suppressAudio);
+                return Promise.resolve();
+            });
         },
 
     };
