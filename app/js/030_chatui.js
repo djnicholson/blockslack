@@ -490,6 +490,9 @@ blockslack.chatui = (function(){
                 mobileChannelListContentsElement.is(":visible") &&
                     blockslack.chatui.toggleChannels(/*forceState*/ false); 
             });
+            if (blockslack.localsettings.get("footerMinimized") == 1) {
+                blockslack.chatui.toggleFooter();
+            }
         },
 
         renameGroup: function() {
@@ -510,8 +513,10 @@ blockslack.chatui = (function(){
         toggleFooter: function() {
             footerContentsElement.toggle();
             if (footerContentsElement.is(":visible")) {
+                blockslack.localsettings.set("footerMinimized", 0);
                 footerElement.find(".oi").addClass("oi-chevron-bottom").removeClass("oi-chevron-top");
             } else {
+                blockslack.localsettings.set("footerMinimized", 1);
                 footerElement.find(".oi").addClass("oi-chevron-top").removeClass("oi-chevron-bottom");
             }
 
