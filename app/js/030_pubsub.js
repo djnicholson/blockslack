@@ -87,13 +87,13 @@ blockslack.pubsub = (function(){
 
     var decodeFeedId = function(feedId) {
         var lookupTable = getLookupTable();
-        return lookupTable[feedId];
+        return lookupTable && lookupTable[feedId];
     };
 
     var encodeFeedId = function(hostUserId, filename, keyId) {
         var lookupTable = getLookupTable();
         var key = sha256(hostUserId + "_" + filename + "_" + keyId);
-        lookupTable[key] = { hostUserId: hostUserId, filename: filename, keyId: keyId };
+        lookupTable && lookupTable[key] = { hostUserId: hostUserId, filename: filename, keyId: keyId };
         return key;
     };
 
