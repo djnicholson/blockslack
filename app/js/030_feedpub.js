@@ -21,12 +21,18 @@ blockslack.feedpub = (function(){
         return blockstack.getFile(cacheBust(filename), options).then(function(result) {
             var resultUncompressed = result;
             if (result) {
+                var wasCompressed = false;
                 if (result.startsWith("LZ_")) {
+                    wasCompressed = true;
                     resultUncompressed = LZString.decompressFromUTF16(result.substring(3));
+                    if (!resultUncompressed) {
+                        return Promise.reject(Error("Malformed compressed feed: " + filename));
+                    }
                 }
 
                 console.log("Retrieved " + filename + ": " + Math.round(resultUncompressed.length / 1024.0) + 
-                    " KB compressed to " + Math.round(result.length / 1024.0) + " KB");
+                    " KB compressed to " + Math.round(result.length / 1024.0) + " KB " + 
+                    (wasCompressed ? "(was compressed)" : "(was not compressed"));
             } else {
                 console.log("Could not retrieve " + filename);
             }
