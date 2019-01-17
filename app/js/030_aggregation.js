@@ -216,6 +216,10 @@ blockslack.aggregation = (function(){
         continuations.push(feedContents); // accumulate all feed fragments in order latest -> oldest
 
         var rxStatus = getState().rxStatus;
+        if (!rxStatus) {
+            return Promise.resolve();
+        }
+
         var lastRead = rxStatus[rootFeedId] || 0;
         if (feedContents.next && 
             feedContents.messages.length && 
