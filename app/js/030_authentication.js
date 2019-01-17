@@ -4,6 +4,13 @@ blockslack.authentication = (function(blockstack){
 
     var currentUserState = { };
 
+    var withinApp = false; // remember that we are within the app, even if the fragment gets lost
+
+    var isWithinMobileApp = function() {
+        withinApp = withinApp || window.location.hash.startsWith("#app");
+        return withinApp;
+    };
+
     var postHandlePendingSignIn = function (newUserData) {
         history.replaceState({}, document.title, "?");
         updateUiAccordingToAuthState();
@@ -43,6 +50,7 @@ blockslack.authentication = (function(blockstack){
         },
         
         initialize: function() {
+            isWithinMobileApp();
             currentUserState = { };
             if (blockstack.isSignInPending()) {
                 blockstack.handlePendingSignIn().then(postHandlePendingSignIn);
@@ -59,15 +67,19 @@ blockslack.authentication = (function(blockstack){
             currentUserState = { };
             var origin = window.location.origin;
             blockstack.redirectToSignIn(
-                origin,
+                origin + (isWithinMobileApp() ? "/appredirect.html" : ""),
                 origin + "/manifest.json",
                 REQUIRED_PERMISSIONS);
         },
 
         signOut: function() {
+            var inApp = isWithinMobileApp();
             blockstack.signUserOut();
             updateUiAccordingToAuthState();
             currentUserState = { };
+            if (inApp) {
+                window.location.hash = "#app";
+            }
         },
 
         state: function(key, value) {
