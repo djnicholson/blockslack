@@ -20,7 +20,10 @@
         "plugins": {
             "cordova-plugin-whitelist": {},
             "cordova-plugin-dialogs": {},
-            "cordova-plugin-network-information": {}
+            "cordova-plugin-network-information": {},
+            "cordova-plugin-urlhandler": {
+                "URL_SCHEME": "blockslack"
+            }
         },
         "platforms": [
             "android",
