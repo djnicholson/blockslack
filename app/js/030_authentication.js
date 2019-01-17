@@ -67,7 +67,7 @@ blockslack.authentication = (function(blockstack){
             currentUserState = { };
             var origin = window.location.origin;
             blockstack.redirectToSignIn(
-                origin + (isWithinMobileApp() ? "/appredirect.html" : ""),
+                origin /*.(TODO: Out-of-app browser for auth) + (isWithinMobileApp() ? "/appredirect.html" : "")*/,
                 origin + "/manifest.json",
                 REQUIRED_PERMISSIONS);
         },
