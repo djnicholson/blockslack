@@ -38,7 +38,7 @@ blockslack.feedpub = (function(){
 
                 console.log("Retrieved " + filename + ": " + Math.round(resultUncompressed.length / 1024.0) + 
                     " KB compressed to " + Math.round(result.length / 1024.0) + " KB " + 
-                    (wasCompressed ? "(was compressed)" : "(was not compressed"));
+                    (wasCompressed ? "(was compressed)" : "(was not compressed)"));
             } else {
                 console.log("Could not retrieve " + filename);
             }
