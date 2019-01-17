@@ -3,7 +3,7 @@ blockslack.feedpub = (function(){
     var DONT_ENCRYPT = { encrypt: false };
     var DONT_DECRYPT = { decrypt: false };
 
-    var FEED_FILE_FORMAT = "feeds_v2/feed_%1_%2.json";
+    var FEED_FILE_FORMAT = "feeds_v2/feed_%1_%2.json.lz.b64";
 
     var MAX_MESSAGES_PER_CHUNK = 50;
 
@@ -27,6 +27,12 @@ blockslack.feedpub = (function(){
                     resultUncompressed = LZString.decompressFromUTF16(result.substring(3));
                     if (!resultUncompressed) {
                         return Promise.reject(Error("Malformed compressed feed: " + filename));
+                    }
+                } else if (result.startsWith("LB_")) {
+                    wasCompressed = true;
+                    resultUncompressed = LZString.decompressFromBase64(result.substring(3));
+                    if (!resultUncompressed) {
+                        return Promise.reject(Error("Malformed compressed feed (b64): " + filename));
                     }
                 }
 
@@ -73,10 +79,10 @@ blockslack.feedpub = (function(){
     };
 
     var putFeed = function(filename, feedCipherText, options) {
-        var feedCipherTextCompressed = LZString.compressToUTF16(feedCipherText);
+        var feedCipherTextCompressed = LZString.compressToBase64(feedCipherText);
         console.log("Publishing " + filename + ": " + Math.round(feedCipherText.length / 1024.0) + 
             " KB compressed to " + Math.round(feedCipherTextCompressed.length / 1024.0) + " KB");
-        return blockstack.putFile(filename, "LZ_" + feedCipherTextCompressed, options);
+        return blockstack.putFile(filename, "LB_" + feedCipherTextCompressed, options);
     };
 
     var sha256 = function(input) {
