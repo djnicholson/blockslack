@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "JSPN299V87.io.blockslack.app",
+        "paths": [
+          "*",
+          "/"
+        ]
+      }
+    ]
+  }
+}
