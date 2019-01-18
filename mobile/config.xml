@@ -30,6 +30,7 @@
         <ios-team-id value="JSPN299V87" />
     </universal-links>
     <plugin name="cordova-universal-links-plugin-fixed" spec="1.2.1" />
+    <plugin name="cordova-plugin-device" spec="2.0.2" />
     <engine name="android" spec="7.1.4" />
     <engine name="ios" spec="4.5.5" />
     <engine name="osx" spec="4.0.2" />

@@ -13,13 +13,15 @@
         "cordova-android": "7.1.4",
         "cordova-ios": "4.5.5",
         "cordova-osx": "4.0.2",
+        "cordova-plugin-device": "2.0.2",
         "cordova-plugin-whitelist": "git+https://github.com/apache/cordova-plugin-whitelist.git",
         "cordova-universal-links-plugin-fixed": "1.2.1"
     },
     "cordova": {
         "plugins": {
             "cordova-plugin-whitelist": {},
-            "cordova-universal-links-plugin-fixed": {}
+            "cordova-universal-links-plugin-fixed": {},
+            "cordova-plugin-device": {}
         },
         "platforms": [
             "android",

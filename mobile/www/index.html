@@ -46,10 +46,14 @@
                 });
 
                 window.addEventListener("message", function(event) {
-                    console.log("Received message: " + event.data);
+                    console.log("Received message: " + event.data + " on platform " + device.platform);
                     var message = JSON.parse(event.data);
                     if (message.navigate) {
-                        window.open(message.navigate);
+                        if (device.platform.indexOf("Mac OS") != -1) {
+                            window.location = message.navigate;
+                        } else {
+                            window.open(message.navigate);
+                        }
                     }
                 });
 
@@ -58,7 +62,7 @@
                 frame.onload = function() {
                     frame.contentWindow.isBlockslackApp = true;
                 };
-                
+
             }
 
             document.addEventListener("deviceready", onDeviceReady, false);
