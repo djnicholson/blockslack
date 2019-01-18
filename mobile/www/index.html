@@ -38,14 +38,31 @@
         <script>
             function onDeviceReady() {
                 if (navigator.connection.type == Connection.NONE) {
+                    
                     navigator.notification.alert('An internet connection is required to continue');
+
                 } else {
+                    
+                    var frame = document.getElementById("frame");
+
                     universalLinks.subscribe(null, function (eventData) {
-                        console.log('Did launch application from the link: ' + eventData.url);
-                        document.getElementById("frame").src = eventData.url;
+                        console.log("Handling deep link: " + eventData.url);
+                        frame.src = eventData.url;
                     });
 
-                    document.getElementById("frame").src = "https://blockslack.io/#app";
+                    window.addEventListener("message", function(event) {
+                        console.log("Received message: " + event.data);
+                        var message = JSON.parse(event.data);
+                        if (message.navigate) {
+                            window.open(message.navigate);
+                        }
+                    });
+
+                    frame.src = "https://blockslack.io/";
+
+                    frame.onload = function() {
+                        frame.contentWindow.isBlockslackApp = true;
+                    };
                 }
             }
 

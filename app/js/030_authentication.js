@@ -4,11 +4,8 @@ blockslack.authentication = (function(blockstack){
 
     var currentUserState = { };
 
-    var withinApp = false; // remember that we are within the app, even if the fragment gets lost
-
     var isWithinMobileApp = function() {
-        withinApp = withinApp || window.location.hash.startsWith("#app");
-        return withinApp;
+        return window.isBlockslackApp;
     };
 
     var postHandlePendingSignIn = function (newUserData) {
@@ -50,7 +47,6 @@ blockslack.authentication = (function(blockstack){
         },
         
         initialize: function() {
-            isWithinMobileApp();
             currentUserState = { };
             if (blockstack.isSignInPending()) {
                 blockstack.handlePendingSignIn().then(postHandlePendingSignIn);
@@ -66,20 +62,27 @@ blockslack.authentication = (function(blockstack){
         signIn: function() {
             currentUserState = { };
             var origin = window.location.origin;
-            blockstack.redirectToSignIn(
-                origin /*.(TODO: Out-of-app browser for auth) + (isWithinMobileApp() ? "/appredirect.html" : "")*/,
-                origin + "/manifest.json",
-                REQUIRED_PERMISSIONS);
+            var manifest = origin + "/manifest.json";
+
+            if (isWithinMobileApp()) {
+                var authRequest = blockstack.makeAuthRequest(
+                    blockstack.generateAndStoreTransitKey(),
+                    origin, 
+                    manifest, 
+                    REQUIRED_PERMISSIONS);
+                var message = { 
+                    navigate: "https://browser.blockstack.org/auth?authRequest=" + encodeURIComponent(authRequest),
+                };
+                parent.postMessage(JSON.stringify(message), "*");
+            } else {
+                blockstack.redirectToSignIn(origin, manifest, REQUIRED_PERMISSIONS);
+            }
         },
 
         signOut: function() {
-            var inApp = isWithinMobileApp();
             blockstack.signUserOut();
             updateUiAccordingToAuthState();
             currentUserState = { };
-            if (inApp) {
-                window.location.hash = "#app";
-            }
         },
 
         state: function(key, value) {
