@@ -10,23 +10,53 @@
             * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
                 * Enable inline JS: add 'unsafe-inline' to default-src
         -->
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:; frame-src 'self' https://blockslack.io ;">
         <meta name="format-detection" content="telephone=no">
         <meta name="msapplication-tap-highlight" content="no">
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
         <title>Loading...</title>
+        <style type="text/css">
+            body, html {
+                margin: 0px; 
+                padding: 0px; 
+                height: 100%; 
+                overflow: hidden;
+                background-color: #321325;
+            }
+
+            #content {
+                position: absolute; 
+                left: 0px; 
+                right: 0px; 
+                bottom: 0px; 
+                top: 0px; 
+            }
+        </style>
     </head>
-    <body style="background-color: #321325">
+    <body>
         <script type="text/javascript" src="cordova.js"></script>
         <script>
-          function onDeviceReady() {
-            if (navigator.connection.type == Connection.NONE) {
-              navigator.notification.alert('An internet connection is required to continue');
-            } else {
-              window.location = "https://blockslack.io/#app";
+            function onDeviceReady() {
+                if (navigator.connection.type == Connection.NONE) {
+                    navigator.notification.alert('An internet connection is required to continue');
+                } else {
+                    universalLinks.subscribe(null, function (eventData) {
+                        console.log('Did launch application from the link: ' + eventData.url);
+                        document.getElementById("frame").src = eventData.url;
+                    });
+
+                    document.getElementById("frame").src = "https://blockslack.io/#app";
+                }
             }
-          }
-          document.addEventListener("deviceready", onDeviceReady, false);
+
+            document.addEventListener("deviceready", onDeviceReady, false);
         </script>
+        <div id="content">
+            <iframe 
+                id="frame" 
+                width="100%"
+                height="100%" 
+                frameborder="0"></iframe>
+        </div>
     </body>
 </html>

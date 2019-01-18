@@ -14,16 +14,15 @@
         "cordova-ios": "4.5.5",
         "cordova-plugin-dialogs": "^2.0.1",
         "cordova-plugin-network-information": "^2.0.1",
-        "cordova-plugin-whitelist": "git+https://github.com/apache/cordova-plugin-whitelist.git"
+        "cordova-plugin-whitelist": "git+https://github.com/apache/cordova-plugin-whitelist.git",
+        "cordova-universal-links-plugin-fixed": "1.2.1"
     },
     "cordova": {
         "plugins": {
             "cordova-plugin-whitelist": {},
             "cordova-plugin-dialogs": {},
             "cordova-plugin-network-information": {},
-            "cordova-plugin-urlhandler": {
-                "URL_SCHEME": "blockslack"
-            }
+            "cordova-universal-links-plugin-fixed": {}
         },
         "platforms": [
             "android",
