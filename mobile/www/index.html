@@ -37,33 +37,28 @@
         <script type="text/javascript" src="cordova.js"></script>
         <script>
             function onDeviceReady() {
-                if (navigator.connection.type == Connection.NONE) {
-                    
-                    navigator.notification.alert('An internet connection is required to continue');
+                
+                var frame = document.getElementById("frame");
 
-                } else {
-                    
-                    var frame = document.getElementById("frame");
+                universalLinks.subscribe(null, function (eventData) {
+                    console.log("Handling deep link: " + eventData.url);
+                    frame.src = eventData.url;
+                });
 
-                    universalLinks.subscribe(null, function (eventData) {
-                        console.log("Handling deep link: " + eventData.url);
-                        frame.src = eventData.url;
-                    });
+                window.addEventListener("message", function(event) {
+                    console.log("Received message: " + event.data);
+                    var message = JSON.parse(event.data);
+                    if (message.navigate) {
+                        window.open(message.navigate);
+                    }
+                });
 
-                    window.addEventListener("message", function(event) {
-                        console.log("Received message: " + event.data);
-                        var message = JSON.parse(event.data);
-                        if (message.navigate) {
-                            window.open(message.navigate);
-                        }
-                    });
+                frame.src = "https://blockslack.io/";
 
-                    frame.src = "https://blockslack.io/";
-
-                    frame.onload = function() {
-                        frame.contentWindow.isBlockslackApp = true;
-                    };
-                }
+                frame.onload = function() {
+                    frame.contentWindow.isBlockslackApp = true;
+                };
+                
             }
 
             document.addEventListener("deviceready", onDeviceReady, false);

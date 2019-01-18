@@ -12,21 +12,19 @@
     "dependencies": {
         "cordova-android": "7.1.4",
         "cordova-ios": "4.5.5",
-        "cordova-plugin-dialogs": "^2.0.1",
-        "cordova-plugin-network-information": "^2.0.1",
+        "cordova-osx": "4.0.2",
         "cordova-plugin-whitelist": "git+https://github.com/apache/cordova-plugin-whitelist.git",
         "cordova-universal-links-plugin-fixed": "1.2.1"
     },
     "cordova": {
         "plugins": {
             "cordova-plugin-whitelist": {},
-            "cordova-plugin-dialogs": {},
-            "cordova-plugin-network-information": {},
             "cordova-universal-links-plugin-fixed": {}
         },
         "platforms": [
             "android",
-            "ios"
+            "ios",
+            "osx"
         ]
     }
 }

@@ -23,8 +23,6 @@
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
     </platform>
-    <plugin name="cordova-plugin-dialogs" spec="^2.0.1" />
-    <plugin name="cordova-plugin-network-information" spec="^2.0.1" />
     <plugin name="cordova-plugin-whitelist" spec="https://github.com/apache/cordova-plugin-whitelist.git" />
     <preference name="AndroidLaunchMode" value="singleInstance" />
     <universal-links>
@@ -34,4 +32,5 @@
     <plugin name="cordova-universal-links-plugin-fixed" spec="1.2.1" />
     <engine name="android" spec="7.1.4" />
     <engine name="ios" spec="4.5.5" />
+    <engine name="osx" spec="4.0.2" />
 </widget>
