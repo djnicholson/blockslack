@@ -10,6 +10,7 @@
     <content src="index.html" />
     <access origin="*" />
     <allow-navigation href="https://blockslack.io/*" />
+    <allow-navigation href="about:*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-intent href="tel:*" />
@@ -31,6 +32,7 @@
     </universal-links>
     <plugin name="cordova-universal-links-plugin-fixed" spec="1.2.1" />
     <plugin name="cordova-plugin-device" spec="2.0.2" />
+    <preference name="BackupWebStorage" value="none" />
     <engine name="android" spec="7.1.4" />
     <engine name="ios" spec="4.5.5" />
     <engine name="osx" spec="4.0.2" />
