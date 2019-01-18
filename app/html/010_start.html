@@ -35,7 +35,7 @@
                 try {
                     eval(str);
                 } catch(e) {
-                    console.warning("Falling back to non-ES6 JavaScript source");
+                    console.warn("Falling back to non-ES6 JavaScript source");
                     es6support = false;
                 }
 
