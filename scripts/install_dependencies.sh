@@ -8,5 +8,6 @@ npm install -g http-server
 npm install -g cordova
 npm install -g cordova-icon
 npm install -g cordova-splash
+npm install -g traceur
 
 brew install imagemagick

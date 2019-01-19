@@ -36,7 +36,7 @@
                     eval(str);
                 } catch(e) {
                     console.warn("Falling back to non-ES6 JavaScript source");
-                    es6support = false;
+                    // TODO: Fix ES6>ES5 compilation then uncomment this line.   es6support = false;
                 }
 
                 var scriptElement = document.createElement('script');
