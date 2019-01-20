@@ -14,6 +14,7 @@
         "cordova-ios": "4.5.5",
         "cordova-osx": "4.0.2",
         "cordova-plugin-device": "2.0.2",
+        "cordova-plugin-inappbrowser": "3.0.0",
         "cordova-plugin-whitelist": "git+https://github.com/apache/cordova-plugin-whitelist.git",
         "cordova-universal-links-plugin-fixed": "1.2.1"
     },
@@ -21,7 +22,8 @@
         "plugins": {
             "cordova-plugin-whitelist": {},
             "cordova-universal-links-plugin-fixed": {},
-            "cordova-plugin-device": {}
+            "cordova-plugin-device": {},
+            "cordova-plugin-inappbrowser": {}
         },
         "platforms": [
             "android",

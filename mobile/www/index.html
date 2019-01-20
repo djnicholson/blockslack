@@ -50,9 +50,18 @@
                     var message = JSON.parse(event.data);
                     if (message.navigate) {
                         if (device.platform.indexOf("Mac OS") != -1) {
-                            window.location = message.navigate;
+                            frame.src = message.navigate;
                         } else {
-                            window.open(message.navigate);
+                            var browser = cordova.InAppBrowser.open(
+                                message.navigate, 
+                                "_blank", 
+                                "location=yes,hidenavigationbuttons=yes,zoom=no,toolbar=yes,toolbarposition=top");
+                            browser.addEventListener("loadstart", function(params) {
+                                if (params.url.startsWith("https://blockslack.io/")) {
+                                    browser.close();
+                                    frame.src = params.url;
+                                }
+                            });
                         }
                     }
                 });
