@@ -23,31 +23,8 @@
         <meta property="og:type" content="product" />
         <meta property="product:price:amount" content="0.00" />
         <meta property="product:price:currency" content="USD" />
-        <script>
-            function runApp() {
-                // credit: https://gist.github.com/DaBs/89ccc2ffd1d435efdacff05248514f38
-                var es6support = true;
-                var str = 'class ಠ_ಠ extends Array {constructor(j = "a", ...c) {const q = (({u: e}) => {return { [`s${c}`]: Symbol(j) };})({});super(j, q, ...c);}}' + 
-                          'new Promise((f) => {const a = function* (){return "\u{20BB7}".match(/./u)[0].length === 2 || true;};for (let vre of a()) {' +
-                          'const [uw, as, he, re] = [new Set(), new WeakSet(), new Map(), new WeakMap()];break;}f(new Proxy({}, {get: (han, h) => h in han ? han[h] ' + 
-                          ': "42".repeat(0o10)}));}).then(bi => new ಠ_ಠ(bi.rd));';
-
-                try {
-                    eval(str);
-                } catch(e) {
-                    console.warn("Falling back to non-ES6 JavaScript source");
-                    // TODO: Fix ES6>ES5 compilation then uncomment this line.   es6support = false;
-                }
-
-                var scriptElement = document.createElement('script');
-                scriptElement.setAttribute('src', es6support ? "all.js" : "all.no-es6.js");
-                scriptElement.onload = function() {
-                    blockslack.onload.go();
-                };
-
-                document.body.appendChild(scriptElement);
-            }
-        </script>
+        <script>function runApp(){var d=document;var e=d.createElement('script');e.setAttribute('src', "all.js");
+e.onload=function(){blockslack.onload.go();};d.body.appendChild(e);}</script>
     </head>
     <body onload="runApp()" style="height: 100%">
 
