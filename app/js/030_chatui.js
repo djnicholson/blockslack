@@ -318,7 +318,7 @@ blockslack.chatui = (function(){
         var bodyHeight = $(document.body).height();
         shortScreen = (bodyHeight < 700);
         if ((isPageLoad === true) && shortScreen) {
-            blockslack.chatui.toggleFooter();
+            blockslack.chatui.toggleFooter(false);
         }
 
         var footerHeight = footerElement.height();
@@ -491,7 +491,7 @@ blockslack.chatui = (function(){
                     blockslack.chatui.toggleChannels(/*forceState*/ false); 
             });
             if (blockslack.localsettings.get("footerMinimized") == 1) {
-                blockslack.chatui.toggleFooter();
+                blockslack.chatui.toggleFooter(false);
             }
         },
 
@@ -510,9 +510,17 @@ blockslack.chatui = (function(){
             }
         },
 
-        toggleFooter: function() {
-            footerContentsElement.toggle();
-            if (footerContentsElement.is(":visible")) {
+        toggleFooter: function(forceState) {
+            var initialVisibility = footerContentsElement.is(":visible");
+            var targetVisibility = !initialVisibility;
+            if (forceState === true) {
+                targetVisibility = true;
+            } else if (forceState === false) {
+                targetVisibility = false;
+            }
+
+            footerContentsElement.toggle(targetVisibility);
+            if (targetVisibility) {
                 blockslack.localsettings.set("footerMinimized", 0);
                 footerElement.find(".oi").addClass("oi-chevron-bottom").removeClass("oi-chevron-top");
             } else {
