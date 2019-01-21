@@ -79,10 +79,8 @@ blockslack.feedpub = (function(){
     };
 
     var putFeed = function(filename, feedCipherText, options) {
-        var feedCipherTextCompressed = LZString.compressToBase64(feedCipherText);
-        console.log("Publishing " + filename + ": " + Math.round(feedCipherText.length / 1024.0) + 
-            " KB compressed to " + Math.round(feedCipherTextCompressed.length / 1024.0) + " KB");
-        return blockstack.putFile(filename, "LB_" + feedCipherTextCompressed, options);
+        console.log("Publishing " + filename + ": " + Math.round(feedCipherText.length / 1024.0) + " KB");
+        return blockstack.putFile(filename, feedCipherText, options);
     };
 
     var sha256 = function(input) {
