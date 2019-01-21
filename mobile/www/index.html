@@ -50,7 +50,12 @@
                     var message = JSON.parse(event.data);
                     if (message.navigate) {
                         if (device.platform.indexOf("Mac OS") != -1) {
-                            frame.src = message.navigate;
+                            // Neither
+                            //  frame.src = ...
+                            // nor
+                            //  cordova.InAppBrowser.open(...
+                            // work on osx.
+                            window.location.href = message.navigate;
                         } else {
                             var browser = cordova.InAppBrowser.open(
                                 message.navigate, 
