@@ -24,16 +24,17 @@
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
     </platform>
-    <plugin name="cordova-plugin-whitelist" spec="https://github.com/apache/cordova-plugin-whitelist.git" />
-    <preference name="AndroidLaunchMode" value="singleInstance" />
     <universal-links>
         <host name="blockslack.io" scheme="https" />
         <ios-team-id value="JSPN299V87" />
     </universal-links>
+    <plugin name="cordova-plugin-whitelist" spec="https://github.com/apache/cordova-plugin-whitelist.git" />
     <plugin name="cordova-universal-links-plugin-fixed" spec="1.2.1" />
     <plugin name="cordova-plugin-device" spec="2.0.2" />
-    <preference name="BackupWebStorage" value="none" />
     <plugin name="cordova-plugin-inappbrowser" spec="3.0.0" />
+    <preference name="AndroidLaunchMode" value="singleInstance" />
+    <preference name="BackupWebStorage" value="none" />
+    <preference name="WindowSize" value="1350x950" />
     <engine name="android" spec="7.1.4" />
     <engine name="ios" spec="4.5.5" />
     <engine name="osx" spec="4.0.2" />
