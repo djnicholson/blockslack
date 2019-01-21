@@ -419,10 +419,19 @@ blockslack.aggregation = (function(){
         },
 
         saveState: function() {
+            //
+            // TODO: Control file size by pushing older messages into continuation files and only 
+            //       re-downloading when the user scrolls far enough in the UI, or does a search.
+            //
+
             var payload = JSON.stringify(getPersistedState());
             var payloadHash = sha256(payload);
             if (lastSave != payloadHash) {
                 lastSave = payloadHash;
+                //
+                // TODO: Potential vulnerability due to compressing then encrypting partially
+                //       attacker controlled content? (see CRIME, BREACH)
+                //
                 var compressedPayload = LZString.compressToBase64(payload);
                 console.log(
                     "Persisting aggregation state: " + Math.round(payload.length / 1024.0) + " KB (compressed to " +
