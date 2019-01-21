@@ -164,7 +164,7 @@ blockslack.chatui = (function(){
         var hasUnread = blockslack.readstatus.hasUnread(currentGroupId, channelName);
         buttonElement.find(".-name").text("#" + channelDisplayName(channelName));
         buttonElement.find(".-unread-indicator").toggle(hasUnread);
-        buttonElement.click(function(){ switchChannel(channelName); });
+        blockslack.on.click(buttonElement, function(){ switchChannel(channelName); });
         channelListElement.append(buttonElement);
     };
 
@@ -284,13 +284,13 @@ blockslack.chatui = (function(){
         var buttonElement = $($("#template-groupButton").html());
         groupData[3] && buttonElement.addClass("-unread");
         buttonElement.text(groupData[1].charAt(0).toUpperCase());
-        buttonElement.click(function(){ switchGroup(groupData[0]); });
+        blockslack.on.click(buttonElement, function(){ switchGroup(groupData[0]); });
         buttonElement.attr("title", groupData[1]);
         groupButtonListElement.append(buttonElement);
 
         var linkElement = $("<a href='#'>");
         linkElement.text(groupData[1]);
-        linkElement.click(function(){ switchGroup(groupData[0]); });
+        blockslack.on.click(linkElement, function(){ switchGroup(groupData[0]); });
         welcomeGroupsList.append(linkElement);
     };
 
@@ -486,10 +486,11 @@ blockslack.chatui = (function(){
             newMessageElement.blur(sizeElements);
             setInterval(animateOnUnread, FLASH_SPEED);
             sizeElements(/*isPageLoad*/ true);
-            workAreaElement.click(function(e) { 
+            blockslack.on.click(workAreaElement, function(e) { 
                 mobileChannelListContentsElement.is(":visible") &&
                     blockslack.chatui.toggleChannels(/*forceState*/ false); 
             });
+            
             if (blockslack.localsettings.get("footerMinimized") == 1) {
                 blockslack.chatui.toggleFooter(false);
             }

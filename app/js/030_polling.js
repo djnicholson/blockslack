@@ -80,7 +80,7 @@ blockslack.polling = (function(){
         onload: function() {
             $(document).mousemove(function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });
             $(document).keypress(function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });
-            $(document).click(function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });
+            blockslack.on.click($(document), function() { currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN });
         },
 
         onsignin: function() {

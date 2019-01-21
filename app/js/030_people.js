@@ -66,7 +66,7 @@ blockslack.people = (function(){
             });
 
             if (removeMember) {
-                removeLink.click(function() { removeMember($(this).parent().attr("data-username")); });
+                blockslack.on.click(removeLink, function() { removeMember($(this).parent().attr("data-username")); });
             } else {
                 removeLink.hide();
             }
