@@ -1,8 +1,9 @@
 blockslack.aggregation = (function(){
     
-    var MASTER_AGGREGATION_FILE = "aggregation/index.json.lz.b64";
+    var MASTER_AGGREGATION_FILE = "aggregation/root_v1.json.lz.b64";
 
-    var STATE_KEY = "aggregation";
+    var STATE_KEY_PERSISTED = "aggregation";
+    var STATE_KEY_NON_PERSISTED = "aggregationNonPersisted";
 
     var MINIMUM_DELAY_BETWEEN_SAVES = 60 * 1000; // don't save more than once per minute
 
@@ -28,21 +29,23 @@ blockslack.aggregation = (function(){
 
         this.messagesChecksum = 0;
         this.lastActivity = 0;
-        this.messages = [];
-        this.audiences = [];
+        this.messagesPtr = makeId();
+        this.audiencesPtr = makeId();
         
         this.currentAudience = function() {
-            if (this.audiences.length) {
-                return this.audiences[this.audiences.length - 1][1];
+            var audiences = this.getNonPersistedField(this.audiencesPtr, []);
+            if (audiences.length) {
+                return audiences[audiences.length - 1][1];
             } else {
                 return [];
             }
         };
 
         this.generateAudienceChangeMessage = function(ts, senderUserId, oldAudience, newAudience) {
-            
+            var messages = this.getNonPersistedField(this.messagesPtr, []);
+
             if (oldAudience.length == 0) {
-                this.messages.push({
+                messages.push({
                     ts: ts,
                     from: senderUserId,
                     text: blockslack.strings.MEMBER_ADDED.replace("%1", blockslack.authentication.getUsername()),
@@ -53,7 +56,7 @@ blockslack.aggregation = (function(){
 
             for (var i = 0; i < oldAudience.length; i++) {
                 if (newAudience.indexOf(oldAudience[i]) == -1) {
-                    this.messages.push({
+                    messages.push({
                         ts: ts,
                         from: senderUserId,
                         text: blockslack.strings.MEMBER_REMOVED.replace("%1", oldAudience[i]),
@@ -64,7 +67,7 @@ blockslack.aggregation = (function(){
 
             for (var i = 0; i < newAudience.length; i++) {
                 if (oldAudience.indexOf(newAudience[i]) == -1) {
-                    this.messages.push({
+                    messages.push({
                         ts: ts,
                         from: senderUserId,
                         text: blockslack.strings.MEMBER_ADDED.replace("%1", newAudience[i]),
@@ -74,13 +77,29 @@ blockslack.aggregation = (function(){
             }
         };
 
+        this.getMessages = function() {
+            return this.getNonPersistedField(this.messagesPtr, []);
+        };
+
+        this.getNonPersistedField = function(ptr, defaultValue) {
+            var nonPersistedState = getNonPersistedState();
+            var result = nonPersistedState[ptr];
+            if (!result) {
+                nonPersistedState[ptr] = defaultValue;
+                return defaultValue;
+            }
+
+            return result;
+        };
+
         this.isMember = function(ts, username) {
-            var i = this.audiences.length - 1;
-            while ((i >= 0) && (this.audiences[i][0] > ts)) {
+            var audiences = this.getNonPersistedField(this.audiencesPtr, []);
+            var i = audiences.length - 1;
+            while ((i >= 0) && (audiences[i][0] > ts)) {
                 i--;
             }
 
-            var audience = (i < 0) ? [] : this.audiences[i][1];
+            var audience = (i < 0) ? [] : audiences[i][1];
             return audience.indexOf(username) != -1;
         };
 
@@ -99,8 +118,11 @@ blockslack.aggregation = (function(){
 
             this.messagesChecksum = 0;
             this.lastActivity = 0;
-            this.messages = [];
-            this.audiences = [];
+
+            var messages = this.getNonPersistedField(this.messagesPtr, []);
+            var audiences = this.getNonPersistedField(this.audiencesPtr, []);
+            messages.length = 0;
+            audiences.length = 0;
 
             for (var i = 0; i < this.channelHistory.length; i++) {
                 var historyEntry = this.channelHistory[i];
@@ -110,21 +132,21 @@ blockslack.aggregation = (function(){
                 var audience = historyEntry[3];
                 var text = historyEntry[4];
 
-                if ((this.audiences.length == 0) || 
+                if ((audiences.length == 0) || 
                     ((historyType == HISTORY_TYPE_AUDIENCE) && this.isMember(ts, senderUserId))) {
                     
                     var oldAudience = [];
-                    if (this.audiences.length > 0) {
-                        oldAudience = this.audiences[this.audiences.length - 1][1];
+                    if (audiences.length > 0) {
+                        oldAudience = audiences[audiences.length - 1][1];
                     }
 
                     this.generateAudienceChangeMessage(ts, senderUserId, oldAudience, audience);
 
-                    this.audiences.push([ ts, audience ]);
+                    audiences.push([ ts, audience ]);
                 }
 
                 if ((historyType == HISTORY_TYPE_MSG) && this.isMember(ts, senderUserId)) {
-                    this.messages.push({
+                    messages.push({
                         ts: ts,
                         from: senderUserId,
                         text: text,
@@ -215,7 +237,7 @@ blockslack.aggregation = (function(){
         continuations = continuations || [];
         continuations.push(feedContents); // accumulate all feed fragments in order latest -> oldest
 
-        var rxStatus = getState().rxStatus;
+        var rxStatus = getPersistedState().rxStatus;
         if (!rxStatus) {
             return Promise.resolve();
         }
@@ -250,8 +272,12 @@ blockslack.aggregation = (function(){
         }
     };
 
-    var getState = function() {
-        return blockslack.authentication.state(STATE_KEY);
+    var getPersistedState = function() {
+        return blockslack.authentication.state(STATE_KEY_PERSISTED);
+    };
+
+    var getNonPersistedState = function() {
+        return blockslack.authentication.state(STATE_KEY_NON_PERSISTED);
     };
 
     var logMalformed = function(senderUserId, audience, message, reason) {
@@ -260,9 +286,13 @@ blockslack.aggregation = (function(){
         console.log(message);
     };
 
+    var makeId = function() {
+        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    };
+
     var newMessage = function(rootFeedId, senderUserId, audience, message, suppressAudio) {
-        var allData = getState().allData;
-        var rxStatus = getState().rxStatus;
+        var allData = getPersistedState().allData;
+        var rxStatus = getPersistedState().rxStatus;
 
         var ts = message[FIELD_TIMESTAMP];
         var groupId = message[FIELD_GROUP_ID];
@@ -317,7 +347,7 @@ blockslack.aggregation = (function(){
     var saveState = function() {
         var currentTime = (new Date).getTime();
         if ((currentTime - lastSave) > MINIMUM_DELAY_BETWEEN_SAVES) {
-            var payload = JSON.stringify(getState());
+            var payload = JSON.stringify(getPersistedState());
             var compressedPayload = LZString.compressToBase64(payload);
             console.log(
                 "Persisting aggregation state: " + Math.round(payload.length / 1024.0) + " KB (compressed to " +
@@ -356,17 +386,18 @@ blockslack.aggregation = (function(){
         },
         
         getAllData: function() {
-            var state = getState();
+            var state = getPersistedState();
             return (state && state.allData) || {};
         },
 
         getAllState: function() {
-            return getState();
+            return getPersistedState();
         },
 
         initialize: function() {
             var hydrated = { rxStatus: { }, allData: { } };
-            blockslack.authentication.state(STATE_KEY, hydrated);
+            blockslack.authentication.state(STATE_KEY_PERSISTED, hydrated);
+            blockslack.authentication.state(STATE_KEY_NON_PERSISTED, { });
             return blockstack.getFile(MASTER_AGGREGATION_FILE).then(function (compressedSerializedState) {
                 if (compressedSerializedState) {
                     var serializedState = LZString.decompressFromBase64(compressedSerializedState);
@@ -382,8 +413,11 @@ blockslack.aggregation = (function(){
                             for (var channelId in dataOnly.allData[groupId].channels) {
                                 var channelObject = new ChannelData();
                                 copyProperties(dataOnly.allData[groupId].channels[channelId], channelObject);
+                                channelObject.refresh();
                                 hydrated.allData[groupId].channels[channelId] = channelObject;
                             }
+
+                            groupObject.refresh();
                         }
                     } else {
                         console.warn("Serialized aggregation state was corrupted (could not decompress)");

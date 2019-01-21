@@ -179,7 +179,7 @@ blockslack.chatui = (function(){
         if (groupData && groupData.channels) {
             var channelData = groupData.channels[currentChannelName];
             if (channelData) {
-                var messages = channelData.messages;
+                var messages = channelData.getMessages();
                 var audience = channelData.currentAudience();
                 var lastPerson = undefined;
                 var lastDate = undefined;
