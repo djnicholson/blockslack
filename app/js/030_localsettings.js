@@ -5,11 +5,16 @@ blockslack.localsettings = (function(){
     return {
 
         get: function(key) {
-            return localStorage.getItem(PREFIX + key);
+            var scopedKey = PREFIX + key;
+            var value = localStorage.getItem(scopedKey);
+            console.log("Read " + scopedKey + "=" + value);
+            return value;
         },
 
         set: function(key, value) {
-            localStorage.setItem(PREFIX + key, value);
+            var scopedKey = PREFIX + key;
+            localStorage.setItem(scopedKey, value);
+            console.log("Wrote " + scopedKey + "=" + value);
             return value;
         },
 
