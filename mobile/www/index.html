@@ -77,6 +77,15 @@
                     frame.contentWindow.isBlockslackApp = true;
                 };
 
+                //
+                // TODO: Better detection of and handling of offline status. 3 scenarios:
+                //       i)   Online
+                //       ii)  Offline, but blockslack.io is cached (can render using app code, but 
+                //            all GAIA, etc. calls will fail)
+                //       iii) Offline, don't even have blockslack.io cached. Need to render a suitable
+                //            error within cordova app.
+                //
+
             }
 
             document.addEventListener("deviceready", onDeviceReady, false);
