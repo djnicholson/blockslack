@@ -5,8 +5,6 @@ blockslack.aggregation = (function(){
     var STATE_KEY_PERSISTED = "aggregation";
     var STATE_KEY_NON_PERSISTED = "aggregationNonPersisted";
 
-    var MINIMUM_DELAY_BETWEEN_SAVES = 60 * 1000; // don't save more than once per minute
-
     var FIELD_CHANNEL_NAME = "c";
     var FIELD_TIMESTAMP = "ts";
     var FIELD_GROUP_ID = "g";
@@ -19,7 +17,7 @@ blockslack.aggregation = (function(){
     var KIND_AUDIENCE_CHANGE = "a";
     var KIND_MESSAGE = "m";
 
-    var lastSave = 0;
+    var lastSave = "";
 
     var ChannelData = function() {
         var HISTORY_TYPE_MSG = "m";
@@ -341,20 +339,10 @@ blockslack.aggregation = (function(){
 
         rxStatus[rootFeedId] = ts;
         blockslack.chatui.updateUi();
-        saveState();
     };
 
-    var saveState = function() {
-        var currentTime = (new Date).getTime();
-        if ((currentTime - lastSave) > MINIMUM_DELAY_BETWEEN_SAVES) {
-            var payload = JSON.stringify(getPersistedState());
-            var compressedPayload = LZString.compressToBase64(payload);
-            console.log(
-                "Persisting aggregation state: " + Math.round(payload.length / 1024.0) + " KB (compressed to " +
-                Math.round(compressedPayload.length / 1024.0) + " KB)");
-            blockstack.putFile(MASTER_AGGREGATION_FILE, compressedPayload);
-            lastSave = currentTime;
-        }
+    var sha256 = function(input) {
+        return sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(input));
     };
 
     return {
@@ -428,6 +416,21 @@ blockslack.aggregation = (function(){
 
                 return Promise.resolve();
             });
+        },
+
+        saveState: function() {
+            var payload = JSON.stringify(getPersistedState());
+            var payloadHash = sha256(payload);
+            if (lastSave != payloadHash) {
+                lastSave = payloadHash;
+                var compressedPayload = LZString.compressToBase64(payload);
+                console.log(
+                    "Persisting aggregation state: " + Math.round(payload.length / 1024.0) + " KB (compressed to " +
+                    Math.round(compressedPayload.length / 1024.0) + " KB)");
+                return blockstack.putFile(MASTER_AGGREGATION_FILE, compressedPayload);
+            } else {
+                return Promise.resolve();
+            }
         },
 
         updateFeed: function(userId, rootFilename, keyId, suppressAudio) {

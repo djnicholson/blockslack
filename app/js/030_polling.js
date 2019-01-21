@@ -5,6 +5,7 @@ blockslack.polling = (function(){
     var FEED_UPDATE_INTERVAL_MIN = 15000;
     var FEED_UPDATE_INTERVAL_MAX = 120000;
     var WEBSOCKET_MAINTENANCE_INTERVAL = 5000;
+    var SAVE_AGGREGATION_INTERVAL = 60000 * 5; // Wait 5 minutes inbetween each aggregated state upload
 
     var currentFeedUpdateInterval = FEED_UPDATE_INTERVAL_MIN;
 
@@ -13,7 +14,8 @@ blockslack.polling = (function(){
     var feedIndex = 0;
 
     var activeIntervals = [];
-    var activeTimeout = undefined;
+    var activeFeedUpdateTimeout = undefined;
+    var activeSaveAggregationTimeout = undefined;
 
     var updateNextFeed = function() {
         var allFeeds = [];
@@ -37,18 +39,27 @@ blockslack.polling = (function(){
             currentFeedUpdateInterval += 1000;
         }
 
-        activeTimeout = setTimeout(updateNextFeed, currentFeedUpdateInterval);
+        activeFeedUpdateTimeout = setTimeout(updateNextFeed, currentFeedUpdateInterval);
     };
 
     var resumePolling = function() {
         blockslack.discovery.updateWatchLists();
         blockslack.readstatus.sync();
         blockslack.pubsub.maintainConnections();
+        
         updateNextFeed();
+        
+        activeSaveAggregationTimeout = setTimeout(saveAggregation, SAVE_AGGREGATION_INTERVAL);
         
         activeIntervals.push(setInterval(blockslack.discovery.updateWatchLists, WATCHLIST_UPDATE_INTERVAL));
         activeIntervals.push(setInterval(blockslack.readstatus.sync, READ_STATUS_UPDATE_INTERVAL));
         activeIntervals.push(setInterval(blockslack.pubsub.maintainConnections, WEBSOCKET_MAINTENANCE_INTERVAL));
+    };
+
+    var saveAggregation = function() {
+        blockslack.aggregation.saveState().then(function() {
+            activeSaveAggregationTimeout = setTimeout(saveAggregation, SAVE_AGGREGATION_INTERVAL);
+        });
     };
 
     var suspendPolling = function() {
@@ -56,10 +67,12 @@ blockslack.polling = (function(){
             clearInterval(activeIntervals[i]);
         }
 
-        activeTimeout && clearTimeout(activeTimeout);
+        activeFeedUpdateTimeout && clearTimeout(activeFeedUpdateTimeout);
+        activeSaveAggregationTimeout && clearTimeout(activeSaveAggregationTimeout);
 
         activeIntervals = [];
-        activeTimeout = undefined;
+        activeFeedUpdateTimeout = undefined;
+        activeSaveAggregationTimeout = undefined;
     };
 
     return {
