@@ -4,10 +4,6 @@ blockslack.authentication = (function(blockstack){
 
     var currentUserState = { };
 
-    var isWithinMobileApp = function() {
-        return window.isBlockslackApp;
-    };
-
     var postHandlePendingSignIn = function (newUserData) {
         history.replaceState({}, document.title, "?");
         updateUiAccordingToAuthState();
@@ -64,7 +60,7 @@ blockslack.authentication = (function(blockstack){
             var origin = window.location.origin;
             var manifest = origin + "/manifest.json";
 
-            if (isWithinMobileApp()) {
+            if (blockslack.mobile.isWithinMobileApp()) {
                 var authRequest = blockstack.makeAuthRequest(
                     blockstack.generateAndStoreTransitKey(),
                     origin, 

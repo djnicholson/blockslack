@@ -31,6 +31,7 @@ blockslack.chatui = (function(){
     var mobileChannelListElement = $(".-channel-list-mobile");
     var mobileChannelListContentsElement = $(".-channel-list-mobile-contents");
     var faviconDescriptorElement = $("#favicon");
+    var downloadLinksElement = $(".-download-links");
     
     var animateOnUnread = function() {
         if (!hasUnread) {
@@ -375,8 +376,8 @@ blockslack.chatui = (function(){
         renderCurrentChannel(allData);
         renderWelcomeArea(allData);
         updateGlobalUnreadStatus(allData);
+        downloadLinksElement.toggle(!blockslack.mobile.isWithinMobileApp());
         sizeElements();
-
         $('[data-toggle="tooltip"]').tooltip({ boundary: 'window' });
     };
 

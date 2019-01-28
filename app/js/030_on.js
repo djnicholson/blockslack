@@ -1,11 +1,14 @@
 blockslack.on = (function(){
     
     var clickEvent = "click";
-    if ("onpointerdown" in window) {
-        clickEvent = "pointerdown";
-    } else if ("ontouchstart" in window) {
-        clickEvent = "touchstart";
-    }
+    //
+    // TODO: Investigate ghost clicks due to scrolling when this is enabled.
+    //
+    // if ("onpointerdown" in window) {
+    //     clickEvent = "pointerdown";
+    // } else if ("ontouchstart" in window) {
+    //     clickEvent = "touchstart";
+    // }
 
     return {
 
