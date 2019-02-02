@@ -2,3 +2,9 @@
     @extend .-white;
     overflow-y: scroll;
 }
+
+.-logo {
+    // padding larger than the height of the mobile group list (so that the logo is visible 
+    // when we autoscroll it to the top of the document)
+    padding-top: 120px; 
+}
