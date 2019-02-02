@@ -8,37 +8,46 @@
         </div>
         <div class="p-5">
             <div class="h4">
-                <div class="p-2">
-                    <em>blockslack</em> is built on Blockstack and powered by the Bitcoin Blockchain.
+                <div class="p-2 -download-links">
+                     Sign in here, or download the blockslack app&hellip;
                 </div>
                 <div class="p-2">
-                    <button 
-                        type="button" 
-                        class="btn p-3 text-white -red" 
-                        onclick="blockslack.authentication.signIn()">
-                        Sign in with Blockstack
-                    </button>
+                    <span class="m-3">
+                        <button 
+                            type="button" 
+                            class="btn p-3 m-2 text-white shadow -dark-purple" 
+                            onclick="blockslack.authentication.signIn()">
+                            <span class="oi oi-account-login -download-links"></span> &nbsp; Sign in &nbsp;
+                        </button>
+                    </span>
+                    <a class="m-3 -download-links" 
+                        href="https://play.google.com/store/apps/details?id=io.blockslack.app" 
+                        target="_blank"><img 
+                            class="p-2"
+                            src="store-google.png" alt="Google Play logo" 
+                            title="Get it on Google Play" /></a>
+                    <a class="m-3 -download-links" 
+                        href="https://itunes.apple.com/us/app/blockslack-io/id1449588942" 
+                        target="_blank"><img 
+                            class="p-2"
+                            src="store-apple.png" alt="App Store logo" 
+                            title="Download on the App Store" /></a>
+                    <a class="m-3 -download-links" 
+                        href="blockslack.dmg"><img 
+                            class="p-2" 
+                            src="mac-logo.png" alt="OS X logo" 
+                            title="Download for OS X" /></a>
                 </div>
             </div>
             <div class="h5 p-3">
                 <div class="p-0">
-                    Don't have a Blockstack account yet? No problem! 
+                    <em>blockslack</em> is built on Blockstack. Don't have a Blockstack account yet? No problem! 
                 </div>
                 <div class="p-0">
                     <a onclick="blockslack.authentication.signIn()" href="#">Create one here</a>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- see also: welcome.html -->
-    <div class="col-12 text-center p-5 -download-links">
-        <a href="https://play.google.com/store/apps/details?id=io.blockslack.app" target="_blank"><img 
-            class="p-4" src="store-google.png" alt="Google Play logo" title="Get it on Google Play" /></a>
-        <a href="https://itunes.apple.com/us/app/blockslack-io/id1449588942" target="_blank"><img 
-            class="p-4" src="store-apple.png" alt="App Store logo" title="Download on the App Store" /></a>
-        <a href="blockslack.dmg"><img 
-            class="p-4" src="mac-logo.png" alt="OS X logo" title="Download for OS X" /></a>
     </div>
 
     <div class="col-12 p-0 m-0 -footer-goes-here"></div>
