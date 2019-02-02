@@ -6,8 +6,8 @@ APPROOT=$ROOT/app
 BUILDROOT=$ROOT/build
 DEPLOYROOT=$ROOT/deploy
 
-$DIR/html.sh
 $DIR/css.sh
 $DIR/static.sh
 $DIR/mobile.sh
 $DIR/javascript.sh
+$DIR/html.sh

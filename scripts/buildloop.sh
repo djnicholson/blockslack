@@ -19,9 +19,9 @@ do
     jschsum2=`find $APPROOT/js -type f -exec md5 {} \;`
 
     if [[ $chsum1 != $chsum2 ]] ; then      
-        $DIR/build/html.sh
         $DIR/build/css.sh
         $DIR/build/static.sh
+        $DIR/build/html.sh
         chsum1=$chsum2
     fi
 
