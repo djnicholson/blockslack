@@ -331,7 +331,11 @@ blockslack.chatui = (function(){
         mainPageElement.height(bodyHeight);
         messageListElement.css("margin-top", bodyHeight + "px");
         welcomeAreaElement.css("margin-top", bodyHeight + "px");
-        workAreaElement.prop("scrollTop", workAreaElement.prop("scrollHeight") - workAreaElement.height() );
+        if ($(".-logo:visible")[0]) {
+            $(".-logo:visible")[0].scrollIntoView();
+        } else {
+            workAreaElement.prop("scrollTop", workAreaElement.prop("scrollHeight") - workAreaElement.height() );
+        }
     };
 
     var sortChannelNames = function(channelData) {
