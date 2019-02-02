@@ -21,6 +21,7 @@ blockslack.chatui = (function(){
     var footerPlaceholderElements = $(".-footer-goes-here");
     var mainPageElement = $(".-main-page");
     var workAreaElement = $(".-work-area");
+    var inputAreaElement = $(".-input-area");
     var renameGroupLinkElement = $(".-rename-group");
     var newGroupNameInputElement = $("#newGroupName");
     var newContactUsernameInputElement = $("#newContactUsername");
@@ -297,6 +298,14 @@ blockslack.chatui = (function(){
         welcomeGroupsContainerElement.toggle(Object.keys(allData).length ? true : false);
     };
 
+    var scrollPage = function() {
+        if ($(".-logo:visible")[0]) {
+            $(".-logo:visible")[0].scrollIntoView();
+        } else if (inputAreaElement[0]) {
+            inputAreaElement[0].scrollIntoView();
+        }
+    };
+
     var sendCurrentMessage = function() {
         var message = blockslack.aggregation.generateTextMessage(
             currentGroupId, 
@@ -331,11 +340,7 @@ blockslack.chatui = (function(){
         mainPageElement.height(bodyHeight);
         messageListElement.css("margin-top", bodyHeight + "px");
         welcomeAreaElement.css("margin-top", bodyHeight + "px");
-        if ($(".-logo:visible")[0]) {
-            $(".-logo:visible")[0].scrollIntoView();
-        } else {
-            workAreaElement.prop("scrollTop", workAreaElement.prop("scrollHeight") - workAreaElement.height() );
-        }
+        scrollPage();
     };
 
     var sortChannelNames = function(channelData) {
