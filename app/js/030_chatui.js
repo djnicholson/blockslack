@@ -32,6 +32,7 @@ blockslack.chatui = (function(){
     var mobileChannelListContentsElement = $(".-channel-list-mobile-contents");
     var faviconDescriptorElement = $("#favicon");
     var downloadLinksElement = $(".-download-links");
+    var sendButtonElement = $(".-send-button");
     
     var animateOnUnread = function() {
         if (!hasUnread) {
@@ -55,6 +56,10 @@ blockslack.chatui = (function(){
         return channelName;
     };
 
+    var enableDisableSendButton = function() {
+        sendButtonElement.prop("disabled", newMessageElement.val().length ? false : true);
+    };
+
     var formatDate = function(ts) {
         return (new Date(ts)).toLocaleDateString();
     };
@@ -76,29 +81,7 @@ blockslack.chatui = (function(){
         e = e || window.event;
         var keyCode = e.keyCode || e.which;
         if (keyCode == '13' && currentGroupId && currentChannelName) {
-            var message = blockslack.aggregation.generateTextMessage(
-                currentGroupId, 
-                currentChannelName, 
-                newMessageElement.val());
-            var allData = blockslack.aggregation.getAllData();
-            var groupData = allData[currentGroupId];
-            if (groupData && groupData.channels) {
-                var channelData = groupData.channels[currentChannelName];
-                if (channelData) {
-                    var audience = channelData.currentAudience();
-                    newMessageElement.prop("disabled", true);
-                    blockslack.feedpub.publish(audience, message).then(function() {
-                        newMessageElement.prop("disabled", false);
-                        newMessageElement.val("");
-                        newMessageElement.focus();
-                        blockslack.sound.pop();
-                    }).catch(function(e) {
-                        alert(blockslack.strings.COULD_NOT_SEND);
-                        newMessageElement.prop("disabled", false);
-                        newMessageElement.focus();
-                    });
-                }
-            }
+            sendCurrentMessage();
         }
     };
 
@@ -315,6 +298,35 @@ blockslack.chatui = (function(){
         welcomeGroupsContainerElement.toggle(Object.keys(allData).length ? true : false);
     };
 
+    var sendCurrentMessage = function() {
+        var message = blockslack.aggregation.generateTextMessage(
+            currentGroupId, 
+            currentChannelName, 
+            newMessageElement.val());
+        var allData = blockslack.aggregation.getAllData();
+        var groupData = allData[currentGroupId];
+        if (groupData && groupData.channels) {
+            var channelData = groupData.channels[currentChannelName];
+            if (channelData) {
+                var audience = channelData.currentAudience();
+                newMessageElement.prop("disabled", true);
+                sendButtonElement.prop("disabled", true);
+                blockslack.feedpub.publish(audience, message).then(function() {
+                    newMessageElement.prop("disabled", false);
+                    sendButtonElement.prop("disabled", true);
+                    newMessageElement.val("");
+                    newMessageElement.focus();
+                    blockslack.sound.pop();
+                }).catch(function(e) {
+                    alert(blockslack.strings.COULD_NOT_SEND);
+                    newMessageElement.prop("disabled", false);
+                    sendButtonElement.prop("disabled", false);
+                    newMessageElement.focus();
+                });
+            }
+        }
+    };
+
     var sizeElements = function(isPageLoad) {
         var bodyHeight = $(document.body).height();
         shortScreen = (bodyHeight < 700);
@@ -379,6 +391,7 @@ blockslack.chatui = (function(){
         downloadLinksElement.toggle(!blockslack.mobile.isWithinMobileApp());
         sizeElements();
         $('[data-toggle="tooltip"]').tooltip({ boundary: 'window' });
+        enableDisableSendButton();
     };
 
     var windowHasFocus = true;
@@ -482,6 +495,7 @@ blockslack.chatui = (function(){
 
         onload: function() {
             newMessageElement.keypress(newMessageKeyPress);
+            newMessageElement.keyup(enableDisableSendButton);
             $(window).on('resize', sizeElements);
             newMessageElement.focus(sizeElements);
             newMessageElement.blur(sizeElements);
@@ -510,6 +524,10 @@ blockslack.chatui = (function(){
                     }        
                 }
             }
+        },
+
+        send: function() {
+            sendCurrentMessage();
         },
 
         toggleFooter: function(forceState) {

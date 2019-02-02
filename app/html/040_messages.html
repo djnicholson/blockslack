@@ -28,14 +28,23 @@
         </div>
         <div class="p-2 -message-list-content">
         </div>
-        <div class="p-2 pl-5 -input-area">
+        <div class="p-2 pl-4 -input-area">
             <div class="-show-if-member">
                 Send a message to <span class="-current-channel-name"></span>:
             </div>
             <div class="-show-if-not-member">
                 You're no longer a member of <span class="-current-channel-name"></span>.
             </div>
-            <input type="text" class="mt-0 -new-message -show-if-member" data-lpignore="true" />
+            <div class="row no-gutters mt-0">
+                <input type="text" class="col-10 -new-message -show-if-member" data-lpignore="true" />
+                <div class="col-2">
+                    <input 
+                        type="button" 
+                        class="btn ml-1 -send-button -yellow -text-yellow-sub" 
+                        value="Send" 
+                        onclick="blockslack.chatui.send()" />
+                </div>
+            </div>
             <div class="mt-1 -channel-member-list-section -show-if-any-members">
                 <div class="-text-purple">People in this channel:</div>
                 <span class="-channel-member-list"></span>
