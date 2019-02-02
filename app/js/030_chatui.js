@@ -18,7 +18,7 @@ blockslack.chatui = (function(){
     var newMessageElement = $(".-new-message");
     var channelMemberListElement = $(".-channel-member-list");
     var welcomeAreaElement = $(".-welcome");
-    var footerElement = $(".-footer");
+    var footerPlaceholderElements = $(".-footer-goes-here");
     var mainPageElement = $(".-main-page");
     var workAreaElement = $(".-work-area");
     var renameGroupLinkElement = $(".-rename-group");
@@ -27,7 +27,6 @@ blockslack.chatui = (function(){
     var welcomeGroupsContainerElement = $(".-welcome-groups");
     var welcomeGroupsList = $(".-welcome-groups-list");
     var noMembersElement = $(".-no-members");
-    var footerContentsElement = $(".-footer .-contents");
     var mobileChannelListElement = $(".-channel-list-mobile");
     var mobileChannelListContentsElement = $(".-channel-list-mobile-contents");
     var faviconDescriptorElement = $("#favicon");
@@ -327,19 +326,12 @@ blockslack.chatui = (function(){
         }
     };
 
-    var sizeElements = function(isPageLoad) {
+    var sizeElements = function(isPageLoad) {       
         var bodyHeight = $(document.body).height();
-        shortScreen = (bodyHeight < 700);
-        if ((isPageLoad === true) && shortScreen) {
-            blockslack.chatui.toggleFooter(false);
-        }
-
-        var footerHeight = footerElement.height();
-        var mainPageHeight = Math.max(footerHeight * 2, bodyHeight - footerHeight - 35);
-        mainPageElement.height(mainPageHeight);
+        mainPageElement.height(bodyHeight);
+        messageListElement.css("margin-top", bodyHeight + "px");
+        welcomeAreaElement.css("margin-top", bodyHeight + "px");
         workAreaElement.prop("scrollTop", workAreaElement.prop("scrollHeight") - workAreaElement.height() );
-        messageListElement.css("margin-top", mainPageHeight + "px");
-        welcomeAreaElement.css("margin-top", mainPageHeight + "px");
     };
 
     var sortChannelNames = function(channelData) {
@@ -494,6 +486,8 @@ blockslack.chatui = (function(){
         },
 
         onload: function() {
+            var footerElement = $($("#template-footer").html());
+            footerPlaceholderElements.append(footerElement);
             newMessageElement.keypress(newMessageKeyPress);
             newMessageElement.keyup(enableDisableSendButton);
             $(window).on('resize', sizeElements);
@@ -505,10 +499,6 @@ blockslack.chatui = (function(){
                 mobileChannelListContentsElement.is(":visible") &&
                     blockslack.chatui.toggleChannels(/*forceState*/ false); 
             });
-            
-            if (blockslack.localsettings.get("footerMinimized") == 1) {
-                blockslack.chatui.toggleFooter(false);
-            }
         },
 
         renameGroup: function() {
@@ -528,27 +518,6 @@ blockslack.chatui = (function(){
 
         send: function() {
             sendCurrentMessage();
-        },
-
-        toggleFooter: function(forceState) {
-            var initialVisibility = footerContentsElement.is(":visible");
-            var targetVisibility = !initialVisibility;
-            if (forceState === true) {
-                targetVisibility = true;
-            } else if (forceState === false) {
-                targetVisibility = false;
-            }
-
-            footerContentsElement.toggle(targetVisibility);
-            if (targetVisibility) {
-                blockslack.localsettings.set("footerMinimized", 0);
-                footerElement.find(".oi").addClass("oi-chevron-bottom").removeClass("oi-chevron-top");
-            } else {
-                blockslack.localsettings.set("footerMinimized", 1);
-                footerElement.find(".oi").addClass("oi-chevron-top").removeClass("oi-chevron-bottom");
-            }
-
-            updateUi();
         },
 
         toggleChannels: function(forceState) {
