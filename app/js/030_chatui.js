@@ -17,6 +17,7 @@ blockslack.chatui = (function(){
     var newMessageElement = $(".-new-message");
     var channelMemberListElement = $(".-channel-member-list");
     var welcomeAreaElement = $(".-welcome");
+    var aboutAreaElement = $(".-about");
     var footerPlaceholderElements = $(".-footer-goes-here");
     var mainPageElement = $(".-main-page");
     var workAreaElement = $(".-work-area");
@@ -342,6 +343,7 @@ blockslack.chatui = (function(){
         mainPageElement.height(bodyHeight);
         messageListElement.css("margin-top", bodyHeight + "px");
         welcomeAreaElement.css("margin-top", bodyHeight + "px");
+        aboutAreaElement.css("margin-top", bodyHeight + "px");
         scrollPage();
     };
 
