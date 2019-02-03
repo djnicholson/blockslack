@@ -546,11 +546,11 @@ blockslack.chatui = (function(){
             mobileChannelListContentsElement.toggle(targetVisibility);
             if (targetVisibility) {
                 mobileChannelListElement.addClass("-expanded");
-                mobileChannelListElement.find(".oi").addClass("oi-chevron-left").removeClass("oi-chevron-right");
+                mobileChannelListElement.find(".-toggle-button").hide();
                 newMessageElement.blur();
             } else {
                 mobileChannelListElement.removeClass("-expanded");
-                mobileChannelListElement.find(".oi").addClass("oi-chevron-right").removeClass("oi-chevron-left");
+                mobileChannelListElement.find(".-toggle-button").show();
                 !isTouch && newMessageElement.focus();
             }
         },
