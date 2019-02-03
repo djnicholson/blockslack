@@ -36,6 +36,7 @@
     <preference name="BackupWebStorage" value="none" />
     <preference name="WindowSize" value="1350x950" />
     <plugin name="cordova-plugin-badge" spec="0.8.8" />
+    <plugin name="cordova-plugin-local-notification" spec="0.9.0-beta.2" />
     <engine name="android" spec="7.1.4" />
     <engine name="ios" spec="4.5.5" />
     <engine name="osx" spec="4.0.2" />

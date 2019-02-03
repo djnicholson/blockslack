@@ -38,6 +38,8 @@
         <script>
             function onDeviceReady() {
 
+                var FIXED_ID = (new Date).getTime();
+
                 var frame = document.getElementById("frame");
 
                 universalLinks.subscribe(null, function (eventData) {
@@ -47,7 +49,6 @@
 
                 window.addEventListener("message", function(event) {
                     
-                    console.log("Received message: " + event.data + " on platform " + device.platform);
                     var message = JSON.parse(event.data);
                     
                     if (message.navigate) {
@@ -73,9 +74,32 @@
                     }
 
                     if (message.badgeNumber !== undefined) {
-                        cordova.plugins.notification && 
+                        if (cordova.plugins.notification) {
+
                             cordova.plugins.notification.badge &&
-                            cordova.plugins.notification.badge.set(message.badgeNumber);
+                                cordova.plugins.notification.badge.set(message.badgeNumber);
+
+                            if (cordova.plugins.notification.local) {
+                                if (message.badgeNumber > 0) {
+                                    cordova.plugins.notification.local.isPresent(FIXED_ID, function(isPresent) {
+                                        if (!isPresent) {
+                                            cordova.plugins.notification.local.schedule({
+                                                id: FIXED_ID,
+                                                autoClear: false,
+                                                color: '#321325',
+                                                title: 'New messages',
+                                                text: 'Open blockstack to read your messages',
+                                                foreground: true,
+                                                sound: false,
+                                                sticky: true,
+                                            });
+                                        }
+                                    });
+                                } else {
+                                    cordova.plugins.notification.local.clearAll();
+                                }
+                            }
+                        }
                     }
 
                 });

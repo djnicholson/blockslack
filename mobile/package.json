@@ -16,6 +16,7 @@
         "cordova-plugin-badge": "0.8.8",
         "cordova-plugin-device": "2.0.2",
         "cordova-plugin-inappbrowser": "3.0.0",
+        "cordova-plugin-local-notification": "0.9.0-beta.2",
         "cordova-plugin-whitelist": "git+https://github.com/apache/cordova-plugin-whitelist.git",
         "cordova-universal-links-plugin-fixed": "1.2.1"
     },
@@ -25,7 +26,8 @@
             "cordova-universal-links-plugin-fixed": {},
             "cordova-plugin-device": {},
             "cordova-plugin-inappbrowser": {},
-            "cordova-plugin-badge": {}
+            "cordova-plugin-badge": {},
+            "cordova-plugin-local-notification": {}
         },
         "platforms": [
             "android",
