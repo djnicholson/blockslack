@@ -37,7 +37,7 @@
         <script type="text/javascript" src="cordova.js"></script>
         <script>
             function onDeviceReady() {
-                
+
                 var frame = document.getElementById("frame");
 
                 universalLinks.subscribe(null, function (eventData) {
@@ -46,8 +46,10 @@
                 });
 
                 window.addEventListener("message", function(event) {
+                    
                     console.log("Received message: " + event.data + " on platform " + device.platform);
                     var message = JSON.parse(event.data);
+                    
                     if (message.navigate) {
                         if (device.platform.indexOf("Mac OS") != -1) {
                             // Neither
@@ -69,6 +71,13 @@
                             });
                         }
                     }
+
+                    if (message.badgeNumber !== undefined) {
+                        cordova.plugins.notification && 
+                            cordova.plugins.notification.badge &&
+                            cordova.plugins.notification.badge.set(message.badgeNumber);
+                    }
+
                 });
 
                 frame.src = "https://blockslack.io/";

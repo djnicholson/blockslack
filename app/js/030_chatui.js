@@ -37,7 +37,9 @@ blockslack.chatui = (function(){
     var animateOnUnread = function() {
         if (!hasUnread) {
             faviconDescriptorElement.attr("href", "favicon.png");
+            blockslack.mobile.setBadgeNumber(0);
         } else {
+            blockslack.mobile.setBadgeNumber(1);
             var current = faviconDescriptorElement.attr("href");
             if (current == "favicon.png") {
                 faviconDescriptorElement.attr("href", "favicon-new.png");
