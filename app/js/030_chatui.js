@@ -5,7 +5,6 @@ blockslack.chatui = (function(){
     var currentGroupId = undefined;
     var currentChannelName = undefined;
     var hasUnread = false;
-    var shortScreen = false;
 
     var currentChannelElement = $(".-current-channel-name");
     var currentGroupElement = $(".-current-group-name");
@@ -205,11 +204,12 @@ blockslack.chatui = (function(){
                     channelMemberListElement.append(blockslack.people.getBadge(username, removeMember));
                 }
 
-                isMember && !shortScreen && newMessageElement.focus();
-                noMembersElement.toggle(isMember && audience.length < 2);
                 $(".-show-if-member").toggle(isMember);
                 $(".-show-if-not-member").toggle(!isMember);
                 $(".-show-if-any-members").toggle(audience.length > 0);
+
+                isMember && !isTouch && newMessageElement.focus();
+                noMembersElement.toggle(isMember && audience.length < 2);
             }
         }
     };
@@ -405,6 +405,9 @@ blockslack.chatui = (function(){
         windowHasFocus = false;
     });
 
+    var isTouch = false;
+    window.addEventListener('touchstart', function() { isTouch = true; });
+
     return {
 
         addChannel: function() {
@@ -548,7 +551,7 @@ blockslack.chatui = (function(){
             } else {
                 mobileChannelListElement.removeClass("-expanded");
                 mobileChannelListElement.find(".oi").addClass("oi-chevron-right").removeClass("oi-chevron-left");
-                !shortScreen && newMessageElement.focus();
+                !isTouch && newMessageElement.focus();
             }
         },
 
