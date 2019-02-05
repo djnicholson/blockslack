@@ -9,10 +9,11 @@
   },
   "osx": {
     "debug": {
-      "developmentTeam": "JSPN299V87"
+      "developmentTeam": "66Q39QGSGA"
     },
     "release": {
-      "developmentTeam": "JSPN299V87"
+      "developmentTeam": "66Q39QGSGA",
+      "codeSignIdentity": "Mac Developer"
     }
   }
 }
