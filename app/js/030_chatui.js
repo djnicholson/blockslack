@@ -33,6 +33,8 @@ blockslack.chatui = (function(){
     var faviconDescriptorElement = $("#favicon");
     var downloadLinksElement = $(".-download-links");
     var sendButtonElement = $(".-send-button");
+    var groupPaneElement = $(".-group-list");
+    var channelPaneElement = $(".-channel-list");
     
     var animateOnUnread = function() {
         if (!hasUnread) {
@@ -343,6 +345,7 @@ blockslack.chatui = (function(){
     var sizeElements = function(isPageLoad) {       
         var bodyHeight = $(document.body).height();
         mainPageElement.height(bodyHeight);
+        workAreaElement.height(bodyHeight);
         messageListElement.css("margin-top", bodyHeight + "px");
         welcomeAreaElement.css("margin-top", bodyHeight + "px");
         aboutAreaElement.css("margin-top", bodyHeight + "px");
