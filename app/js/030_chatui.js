@@ -310,30 +310,32 @@ blockslack.chatui = (function(){
     };
 
     var sendCurrentMessage = function() {
-        var message = blockslack.aggregation.generateTextMessage(
-            currentGroupId, 
-            currentChannelName, 
-            newMessageElement.val());
-        var allData = blockslack.aggregation.getAllData();
-        var groupData = allData[currentGroupId];
-        if (groupData && groupData.channels) {
-            var channelData = groupData.channels[currentChannelName];
-            if (channelData) {
-                var audience = channelData.currentAudience();
-                newMessageElement.prop("disabled", true);
-                sendButtonElement.prop("disabled", true);
-                blockslack.feedpub.publish(audience, message).then(function() {
-                    newMessageElement.prop("disabled", false);
+        if (newMessageElement.val().length) {
+            var message = blockslack.aggregation.generateTextMessage(
+                currentGroupId, 
+                currentChannelName, 
+                newMessageElement.val());
+            var allData = blockslack.aggregation.getAllData();
+            var groupData = allData[currentGroupId];
+            if (groupData && groupData.channels) {
+                var channelData = groupData.channels[currentChannelName];
+                if (channelData) {
+                    var audience = channelData.currentAudience();
+                    newMessageElement.prop("disabled", true);
                     sendButtonElement.prop("disabled", true);
-                    newMessageElement.val("");
-                    newMessageElement.focus();
-                    blockslack.sound.pop();
-                }).catch(function(e) {
-                    alert(blockslack.strings.COULD_NOT_SEND);
-                    newMessageElement.prop("disabled", false);
-                    sendButtonElement.prop("disabled", false);
-                    newMessageElement.focus();
-                });
+                    blockslack.feedpub.publish(audience, message).then(function() {
+                        newMessageElement.prop("disabled", false);
+                        sendButtonElement.prop("disabled", true);
+                        newMessageElement.val("");
+                        newMessageElement.focus();
+                        blockslack.sound.pop();
+                    }).catch(function(e) {
+                        alert(blockslack.strings.COULD_NOT_SEND);
+                        newMessageElement.prop("disabled", false);
+                        sendButtonElement.prop("disabled", false);
+                        newMessageElement.focus();
+                    });
+                }
             }
         }
     };
